@@ -1,0 +1,129 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+#
+# Invoke each target with `./debian/rules <target>'.  All targets should be
+# invoked with the package root as the current directory.
+#
+# The `binary' target must be run as root, as it needs to install files with
+# specific ownerships.
+
+package=fweb
+
+# be paranoid...
+export LC_ALL=C
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+
+topdir = $(shell pwd)
+tmpdir = ${topdir}/debian/tmp
+texdir = ${tmpdir}/usr/share/texmf/tex/latex/litprog
+docdir = ${tmpdir}/usr/share/doc/${package}
+mandir = ${tmpdir}/usr/share/man
+htmldocdir= ${docdir}/html-info
+
+INSTALLFLAGS =
+CFLAGS = -g
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+CFLAGS += -O0
+else
+CFLAGS += -O2
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+INSTALLFLAGS += -s
+endif
+
+installdoc=install -m 644
+installbin=install -m 755 ${INSTALLFLAGS}
+
+build: build-stamp
+build-stamp: configure-stamp
+	dh_testdir
+	${MAKE} -C Web CFLAGS="${CFLAGS}" \
+		tch_src both idxmerge ../Manual/fweb.info
+	cd Manual && makeinfo --html fweb.texi
+	touch build-stamp
+
+configure-stamp:
+	dh_testdir
+	cd Web; ./configure --prefix=/usr
+	touch configure-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	-${MAKE} -C Web -i distclean || ${MAKE} -C Web -f Makefile.in distclean
+	-rm -f Web/idxmerge Web/idxmerge.c Web/custom.h Web/config.h \
+		Manual/fweb.info* Manual/fweb*.html
+	rm -rf Manual/fweb/
+	dh_clean
+
+install: DH_OPTIONS=
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+
+	mkdir ${tmpdir}
+	cd ${tmpdir} && mkdir -p usr/bin usr/share/man/man1 \
+		usr/share/info usr/share/doc-base
+
+	install -d ${texdir} ${htmldocdir}
+
+# upstream binaries
+	${MAKE} -C Web CFLAGS=-O2 LDFLAGS=-s \
+		INSTALL_PROGRAM='install -c ${INSTALLFLAGS}' \
+		prefix=${tmpdir}/usr texdir=${texdir} \
+		infodir=${tmpdir}/usr/share/info \
+		mandir=${mandir}/man1 \
+		install
+# documentation
+	${installdoc} Manual/fweb/* ${htmldocdir}/
+	${installdoc} Manual/fweb.texi ${docdir}/
+	${installdoc} debian/idxmerge.1 ${mandir}/man1/
+	ln -s fweb.1.gz ${mandir}/man1/fweave.1.gz
+	ln -s fweb.1.gz ${mandir}/man1/ftangle.1.gz
+
+	dh_movefiles
+	test -z `find ${tmpdir} -type f`
+
+binary-indep: DH_OPTIONS=-i
+binary-indep: install
+	dh_testdir
+	dh_testroot
+	dh_installdocs
+	dh_buildinfo
+	dh_installexamples
+	dh_installinfo ${topdir}/Manual/fweb.info
+	dh_installchangelogs
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary-arch: DH_OPTIONS=-a
+binary-arch: install
+	dh_testdir
+	dh_testroot
+	dh_installdocs
+	dh_buildinfo
+
+	dh_installchangelogs
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+# Below here is fairly generic really
+
+binary:		binary-indep binary-arch
+
+.PHONY: binary binary-arch binary-indep clean

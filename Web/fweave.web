@@ -3250,6 +3250,8 @@ WHILE()
 
 		   case @'@@':
 			loc += 2;
+		   default:
+			loc++;
 			}
 	else 
 		loc++;

@@ -1,0 +1,34 @@
+Source: fweb
+Section: devel
+Priority: optional
+Maintainer: Yann Dirson <dirson@debian.org>
+Standards-Version: 3.5.10
+Build-depends: debhelper (>= 3.4.4), texinfo, libncurses5-dev, dh-buildinfo
+
+Package: fweb
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: tetex-base | c-compiler | fortran77-compiler | ratfor77
+Suggests: tetex-base, c-compiler, fortran77-compiler, ratfor77, fweb-doc
+Description: A literate-programming tool for C/C++/Fortran/Ratfor
+ Literate-programming allows the programmer to write a program's
+ code and its code's documentation, with equal importance accorded
+ to both. This helps producing a well-documented code.
+ .
+ FWEB has grown out of Knuth and Levy's CWEB; it is far more
+ configurable and customizable than the original, uses LaTeX to
+ typeset documented code, provides a very powerful macro processor...
+ .
+ Ratfor programmers may appreciate the builtin Ratfor-to-Fortran
+ translator if they don't have the right compiler.
+ .
+ Other languages than those cited may be used, but without code
+ pretty-printing.
+
+Package: fweb-doc
+Architecture: all
+Suggests: doc-base, fweb
+Replaces: fweb (<= 1.62-8)
+Description: Documentation for Fweb
+ This is the documentation for the fweb litterate-programming tool, in
+ HTML, info, and texinfo formats.

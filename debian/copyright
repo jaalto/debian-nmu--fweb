@@ -1,0 +1,54 @@
+This is Debian GNU/Linux's prepackaged version of the John A. Krommes'
+FWEB program. 
+
+This package was put together by me, Yann Dirson <dirson@debian.org>,
+from the John A. Krommes' sources, which I obtained from
+ftp://ftp.pppl.gov/pub/fweb/fweb-1.60-beta.tar.gz.
+
+Please note that for now (1998/03/13), the source of this beta release
+has been removed from this server and its mirrors, in anticipation of
+the final 1.60 release.
+
+The changes were very minimal - merely adding support for the Debian
+package maintenance scheme, by adding various debian/* files.
+
+
+Program Copyright (C) 1993-1995 John A. Krommes.
+Modifications for Debian Copyright (C) 1997 Yann Dirson.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License with
+your Debian GNU/Linux system, in /usr/share/common-licenses/GPL.  If not,
+write to the Free Software Foundation, Inc., 59 Temple Place - Suite
+330, Boston, MA 02111-1307, USA.
+
+
+Manual (fweb.info) Copyright (C) 1993-1995 John A. Krommes.
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Foundation.

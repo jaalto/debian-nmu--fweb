@@ -1,0 +1,14 @@
+Document: fweb
+Section: Apps/Programming
+Title: The FWEB literate programming system
+Author: John Krommes <krommes@princeton.edu>
+Abstract: FWEB is a system for `literate programming'.  It enables one to
+ maintain both documentation and source code in a single document, and
+ to explain the code in terms of a `web' of very small fragments.
+ Because it is intimately integrated with TeX, one gains many
+ advantages such as book-quality typesetting and extensive
+ cross-referencing facilities.
+
+Format: HTML
+Index: /usr/share/doc/fweb/html-info/index.html
+Files: /usr/share/doc/fweb/html-info/*.html 

@@ -1630,9 +1630,6 @@ SET_COLOR(info);
 printf("%s style-file parameters%s%s%s%s:\n",
 see_all?"Default":"Modified",
 *pa?" beginning with \"":"",(char*)pa,*pa?"\"":"",
-#if 0
-see_all
-#endif
 0?"\n (null or empty values for \
 @ command codes are misleading)":"");
 

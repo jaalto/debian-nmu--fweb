@@ -38,7 +38,7 @@ two component programs, if no confusion can arise.
 
 @ Here is the overall appearance of this file:
 
-@d VERSION "1.61" // For development, use |$REVISION| here.
+@d VERSION "1.62" // For development, use |$REVISION| here.
 @d RELEASE_DATE "September 23, 1998"
 
 @A

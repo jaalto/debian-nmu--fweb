@@ -1703,7 +1703,9 @@ means output all comments.
 @B
 static outer_char brkset[3] = "*?"; /* Prototype list of possible characters to
 			be searched for in the command-line list. */
+#ifndef strpbrk
 char *strpbrk();
+#endif
 boolean found_abbrev;
 
 @b
