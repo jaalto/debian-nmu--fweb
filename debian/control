@@ -2,14 +2,15 @@ Source: fweb
 Section: devel
 Priority: optional
 Maintainer: Yann Dirson <dirson@debian.org>
-Standards-Version: 3.5.10
-Build-depends: debhelper (>= 3.4.4), texinfo, libncurses5-dev, dh-buildinfo
+Standards-Version: 3.9.2
+Build-depends: debhelper (>= 8), texinfo, libncurses5-dev, dh-buildinfo
+Homepage: http://freshmeat.net/projects/fweb
 
 Package: fweb
 Architecture: any
-Depends: ${shlibs:Depends}
-Recommends: tetex-base | c-compiler | fortran77-compiler | ratfor77
-Suggests: tetex-base, c-compiler, fortran77-compiler, ratfor77, fweb-doc
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Recommends: texlive | c-compiler | fortran77-compiler | ratfor77
+Suggests: c-compiler, fortran77-compiler, ratfor77, fweb-doc
 Description: A literate-programming tool for C/C++/Fortran/Ratfor
  Literate-programming allows the programmer to write a program's
  code and its code's documentation, with equal importance accorded
