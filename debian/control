@@ -8,10 +8,10 @@ Homepage: http://freshmeat.net/projects/fweb
 
 Package: fweb
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, dpkg (>= 1.15.4) | install-info
 Recommends: texlive | c-compiler | fortran77-compiler | ratfor77
 Suggests: c-compiler, fortran77-compiler, ratfor77, fweb-doc
-Description: A literate-programming tool for C/C++/Fortran/Ratfor
+Description: literate-programming tool for C/C++/Fortran/Ratfor
  Literate-programming allows the programmer to write a program's
  code and its code's documentation, with equal importance accorded
  to both. This helps producing a well-documented code.
@@ -27,7 +27,9 @@ Description: A literate-programming tool for C/C++/Fortran/Ratfor
  pretty-printing.
 
 Package: fweb-doc
+Section: doc
 Architecture: all
+Depends: ${misc:Depends}
 Suggests: doc-base, fweb
 Replaces: fweb (<= 1.62-8)
 Description: Documentation for Fweb
