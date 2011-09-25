@@ -1,0 +1,58 @@
+			     --- The VOID ---
+			       Version 1.30
+			       May 15, 1993
+
+   This subdirectory contains vanilla-flavored bootstrap files for bringing
+FWEB up on an unknown machine that is specifically NOT fully ANSI-compatible.
+
+   See READ_ME.FWEB for a description of the files and for instructions on
+using the make facility. 
+
+   To bootstrap, please see the instructions in READ_ME.FWEB.
+
+   When bringing FWEB up on a new machine, you should have a minimum of
+difficulties if your compiler is fully ANSI. If it is, you should NOT be
+using the code here; try the ./configure procedure described in
+READ_ME.FWEB, or use the code in boot/unix/ansi/. However, if it is
+not, try beginning with this code.  You may encounter one or more of the
+following difficulties:
+
+* DIFFICULTIES WITH FUNCTION PROTOTYPING. New with the ANSI standard is the
+concept of function prototyping; the ``old-style'' of declarations is
+allegedly obsolete. The FWEB source code is macroed up in such a way that
+bootstrap code with or without function prototyping can be generated. The
+MISC code uses no function prototypes and old-style declarations, so you're
+probably safe here.
+
+* MISSING HEADER FILES. One of the great services the ANSI standard
+provided was to standarize the headers and library routines. You may have
+to scrounge around to find your system's versions of the proper header
+files, or in some cases declare certain library routines yourself.  The
+custom.h template that is provided uses ANSI includes as a start.
+
+* MISSING LIBRARY ROUTINES. See the above remark. You might have to write a
+few replacement routines.  If so, please let me know what they were.
+
+* PROBLEMS WITH SIGNED VS. UNSIGNED, or LONG VS. INT.  Considerable effort
+has been made to get a consistent and portable set of data types. Working
+with 16-bit arithmetic on the Mac and IBM-PC exposed a variety of
+difficulties, many inherited from previous authors. These may not all be
+fixed. It's best to work with 32-bit ints if you can. Otherwise, watch out
+for the arithmetic.  If you're working with 16 bit arithmetic, definitely
+start with boot/ibm/pc/custom.h rather than boot/misc/custom.h.
+
+* PROBLEMS WITH MEMORY ALLOCATION. In some cases, very long arrays must be
+allocated. Be sure calloc (see the get_mem0 function in common.web) can
+handle the arguments it's being given.
+
+* PROBLEMS WITH THE IMPLEMENTATION OF THE TIMING ROUTINES. Again, ANSI
+standardized all this, but not everybody's caught up.
+
+   The machine-specific code is localized in the C header file os.h, which
+#includes custom.h, then does a few more things.  In a pinch, you could edit
+os.h as well as custom.h.  However, if you do, please let me know.
+
+                *       *       *
+
+   Please keep a careful list of all bugs and fixes, and report them.
+Thanks. 

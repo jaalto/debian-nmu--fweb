@@ -1,0 +1,2035 @@
+%  FTANGLE v1.60,
+%% created with UNIX on "Thursday, September 10, 1998 at 22:59." 
+%%  COMMAND LINE: "/u/krommes/Fweb/Web/ftangle -# fwebmac"
+%%  RUN TIME:     "Friday, September 11, 1998 at 18:55."
+%%  WEB FILE:     "fwebmac.web"
+%%  CHANGE FILE:  (none)
+
+
+
+
+
+
+\ifx\FWEBisloaded\relax\endinput\else\let\FWEBisloaded\relax\fi
+
+
+\newif\ifFWEBstandalone
+\FWEBstandalonetrue
+
+
+\catcode`\@=11
+
+
+\chardef\other=12
+
+
+\long\def\comment#1\endcomment{}
+
+
+\def\FWEBversion{$REVISION}
+\def\FWEBdate{September 23, 1995}
+
+
+\newcount\W@count
+\newcount\W@counta
+\newtoks\W@tk
+
+\ifx\DeclareRobustCommand\undefined
+
+	\def\DeclareRobustCommand#1{\@ifnextchar[%
+{\W@argdef#1}{\W@argdef#1[0]}}
+
+	\def\W@argdef#1[#2]{\W@tk={}%
+	\W@count=0
+	\loop
+	\ifnum\W@count<#2
+		\advance\W@count by1
+		\edef\next{\W@tk={\the\W@tk########\the\W@count}}\next
+	\repeat
+	\edef\next{\def\noexpand#1\the\W@tk}\next}
+
+\fi
+
+\ifx\@ifnextchar\undefined
+
+	\def\@ifnextchar#1#2#3{\let\@tempe#1
+	\def\@tempa{#2}%
+	\def\@tempb{#3}%
+	\futurelet\@tempc\@ifnch}
+
+	\def\@ifnch{\ifx\@tempc\@sptoken
+		\let\@tempd\@xifnch
+	\else
+		\ifx\@tempc\@tempe
+			\let\@tempd\@tempa
+		\else
+			\let\@tempd\@tempb
+		\fi
+	\fi
+	\@tempd
+	}
+
+	{\def\:{\global\let\@sptoken= } \: }
+
+	\def\@xifnch{\futurelet\@tempc\@ifnch}
+
+\fi
+
+
+\let\DRC\DeclareRobustCommand
+
+
+\def\TeX{T\kern-0.1667em\lower0.5ex\hbox{E}\kern-0.125emX\W@t}
+
+\ifx\LaTeX\undefined
+	\def\LaTeX{L\kern-0.36em\raise0.3ex\hbox{\Csc a}\kern-0.15em\TeX}
+\fi
+
+\newif\ifnoLaTeXe% By default, we have \LaTeXe.
+
+\ifx\LaTeXe\undefined
+	\noLaTeXetrue
+	\def\LaTeXe{\LaTeX 2$_\varepsilon$}
+\fi
+
+
+\newif\ifLaTeXisloaded
+
+\ifx\pageno\undefined
+	\LaTeXisloadedtrue
+\fi
+
+\ifLaTeXisloaded
+ \def\W@stop{}
+\else
+ \def\W@stop{
+  \message{Please use LaTeX.  Plain TeX is no longer supported.  ABORTING!}
+  \end
+  }
+\fi
+
+\W@stop
+
+
+\newif\ifuseREVTeX
+
+\newif\ifusedocumentstyle
+
+\ifnoLaTeXe
+	\usedocumentstyletrue
+\fi
+
+\ifuseREVTeX
+	\usedocumentstyletrue
+\fi
+
+
+
+\DRC\WEB{\Wtypewriter{WEB}}
+\DRC\FWEB{\Wtypewriter{FWEB}}
+\DRC\CWEB{\Wtypewriter{CWEB}}
+\DRC\TANGLE{\Wtypewriter{TANGLE}}	\let\Tangle\TANGLE
+\DRC\WEAVE{\Wtypewriter{WEAVE}}		\let\Weave\WEAVE
+\DRC\FTANGLE{\Wtypewriter{FTANGLE}}
+\DRC\FWEAVE{\Wtypewriter{FWEAVE}}
+
+
+\DRC\C{C\W@t}
+\DRC\Cpp{\C{\tt ++}}
+\DRC\FORTRAN{{\Csc Fortran}}	\let\Fortran\FORTRAN
+\DRC\MAKE{{\tt MAKE}}		\let\Make\MAKE
+\DRC\RATFOR{{\Csc Ratfor}}	\let\Ratfor\RATFOR
+\DRC\UNIX{{\SC UNIX}}		\let\Unix\UNIX
+
+
+
+\ifLaTeXisloaded
+\else
+	\let\@\relax
+	\let\\\relax
+	\let\protect\relax
+\fi
+
+\let\amp\&
+\let\at\@
+\let\bslash\\
+\let\caret\^
+\let\dollar\$
+\let\dstar\*
+\let\equals\=
+\let\period\.
+\let\textcolon:
+\let\leftbrace\{
+\let\rightbrace\}
+\let\vertbar|
+\let\PM\#
+\let\PC\%
+
+
+\let\W@t\@
+\let\W@S\S
+
+
+\dimen0=\normalbaselineskip
+\parskip=\dimen0 plus 1pt minus 6pt
+
+\newskip\pardimen
+\pardimen=\parskip
+
+
+\newdimen\TeXindent
+\TeXindent 1em% For paragraphs in the \TeX\ part.
+
+
+\ifLaTeXisloaded
+	\let\pageno\c@page% \WEB\ has its own name for the page number.
+\fi
+
+
+\ifnoLaTeXe
+	\ifx\tenrm\undefined
+		\font\tenrm=cmr10
+	\fi
+	\ifx\itfam\undefined
+		\chardef\itfam4
+	\fi
+	\ifx\small\undefined
+		\let\small\relax
+	\fi
+	\let\mainfont\tenrm \let\cmntfont\tenrm
+	\font\eightrm=cmr8 \let\SC\eightrm
+
+	\font\titlefont=cmssbx10 scaled \magstep2% Sans serif
+	\font\ttitlefont=cmtt10 scaled\magstep2% Typewriter type
+
+	\font\tentex=cmtex10 % \TeX\ \.{extended char.\ set} (used in strings)
+	\let\extendedtex\tentex
+	\font\Csc=cmcsc10 % Caps/small caps.
+	\font\tenbfit=cmbxti10 % \&{Intrinsic functions}
+	\let\bfit\tenbfit % Doesn't work right in titles.
+
+	\font\seventi=cmti7
+	\font\sevenrm=cmr7
+	\font\sevenbf=cmbx7
+
+	\font\sevenit=cmti7
+	\scriptfont\itfam=\sevenit
+
+	\scriptscriptfont\itfam=\sevenit
+
+	\def\mathrm#1{{\rm #1}}
+	\def\mathit#1{{\it #1}}
+
+\else % \LaTeXe
+	\def\mainfont{\normalsize\usefont{OT1}{\rmdefault}{m}{n}}
+	\let\cmntfont\mainfont
+
+	\def\eightrm{\footnotesize\usefont{OT1}{\rmdefault}{m}{n}}
+	\let\SC\eightrm
+
+	\def\titlefont{\Large\usefont{OT1}{\sfdefault}{\bfdefault}{n}}
+	\def\ttitlefont{\Large\usefont{OT1}{\ttdefault}{m}{n}}
+
+	\def\extendedtex{\usefont{OT1}{\ttdefault}{m}{n}}
+	\def\tentex{\normalsize\extendedtex}
+
+	\def\Csc{\usefont{OT1}{\rmdefault}{m}{\scdefault}}
+
+	\def\bfit{\usefont{OT1}{\rmdefault}{\bfdefault}{\itdefault}}
+	\def\tenbfit{\normalsize\bfit}
+
+	\def\seventi{\scriptsize\usefont{OT1}{\rmdefault}{m}{\itdefault}}
+	\def\sevenrm{\scriptsize\usefont{OT1}{\rmdefault}{m}{n}}
+	\def\sevenbf{\scriptsize\usefont{OT1}{\rmdefault}{\bfdefault}{n}}
+
+	\def\fiveti{\tiny\usefont{OT1}{\rmdefault}{m}{\itdefault}}
+	\def\fiverm{\tiny\usefont{OT1}{\rmdefault}{m}{n}}
+	\def\fivebf{\tiny\usefont{OT1}{\rmdefault}{\bfdefault}{n}}
+
+	\def\tensy{\normalsize\usefont{OT1}{cmsy}{m}{n}}
+
+\fi
+
+
+\DRC\Wshort[1]{\leavevmode\hbox{$#1$}}% One-letter identifiers such
+	% as~\Wshort{x} look better this way.
+
+\DRC\Wid[1]{\leavevmode\hbox{\it#1\/\kern.05em}}% Italic type for ordinary
+	% identifiers such as \Wid{test}.
+
+\DRC\WID[1]{\leavevmode\hbox{\small\it#1\/\kern.05em}}% For all %
+%\WID{UPPERCASE}.
+
+\let\WidD\Wid % Outer macro
+\let\WIDD\WID % Upper-case outer macro
+
+\let\WidM\Wid % FWEB macro
+\let\WIDM\WID % Upper-case FWEB macro
+
+\DRC\Wreserved[1]{\leavevmode\hbox{\def\\{\tt\WBS}\bf#1\/}}% Boldface type
+	% for reserved words such as \Wreserved{int}.
+
+\DRC\WRESERVED[1]{\leavevmode\hbox{\def\\{\tt\WBS}\small\bf#1\/}}% Boldface 
+%type
+	% for upper-case reserved words such as \WRESERVED{INTEGER}.
+
+
+\DRC\Wintrinsic[1]{\leavevmode\hbox{\def\\{\tt\WBS}\bfit#1\/\kern.05em}}%
+	% Library/intrinsic function name such as \@{sin}.
+
+
+\def\W@twodef#1#2#3#4{\gdef#1{#3}\gdef#2{#4}}
+
+\def\Wequate#1#2#3#4#5#6#7#8#9{%
+	\W@twodef#1\Wreserved\WRESERVED% |\&| by default.
+	\gdef#2{\Wshort}% |\|| by default.
+	\W@twodef#5\WidM\WIDM% |\\| by default.
+	\W@twodef#4\WidD\WIDD% |\\| by default.
+	\W@twodef#3\Wid\WID% |\\| by default.
+	\gdef#6{\Wintrinsic}% |\@| by default.
+	\W@twodef#7\Wkeyword\WKEYWORD% |\.| by default.
+	\gdef#8{\Wtypewriter}% |\.| by default.
+	% \#9 is for future use.
+	}
+
+
+\def\W@zero{0}% For the comparison in |\WIN| below.
+
+\DRC\WIN[2]{\ifmmode\def\ZZ{}\else\def\ZZ{\null$\null}\fi
+	\ZZ_{\def\W@rg{#2}\ifx\W@rg\W@zero{\bullet}\else\W@IN{#1}{#2}\fi}\ZZ}
+
+
+\gdef\W@IN#1#2{%
+	\ifcase#1
+	 \underline{\hbox{\sevenrm\Wmodtrans{#2}}}% Generic name (\.{@[}). [0]
+	\or\hbox{\sevenrm\Wmodtrans{#2}}% Function name. [1]
+	\or\underline{\hbox{\seventi\Wmodtrans{#2}}}% WEB macro. [2]
+	\or\hbox{\seventi\Wmodtrans{#2}}% Outer macro. [3]
+	\or\underline{\hbox{\sevenbf\Wmodtrans{#2}}}% \.{@`}. [4]
+	\or\hbox{\sevenbf\Wmodtrans{#2}}% \&{typedef}. [5]
+	\else{\Wmodtrans{#2}}% Error trap.
+	\fi
+	}
+
+
+
+\DRC\Wtypewriter[1]{\relax\ifmmode\gdef\YY{\null$\null}\else\gdef\YY{}\fi
+	\YY{\leavevmode\W@INITSTR#1}\YY}
+
+\let\Wkeyword\Wtypewriter
+\let\WKEYWORD\Wtypewriter
+
+\let\.\Wtypewriter
+
+
+\def\W@INITSTR{%
+	\extendedtex % Typewriter type for strings.  (We don't say
+	\let\\=\WBS % Backslash in a string: '\.\\'.
+	\let\'=\WRQ % Right quote in a string: '\.\''.
+	\let\`=\WLQ % Left quote in a string: '\.\`'.
+	\let\{=\WLB % Left brace in a string: '\.\WLB'.
+	\let\}=\WRB % Right brace in a string: '\.\WRB'.
+	\let\~=\WTL % Tilde in a string: '\.\~'.
+	\let\ =\WSP % Space in a string: '\.\ '.
+	\let\_=\WUL % Underline in a string: '\.\_'.
+	\let\&=\WAM % Ampersand in a string: '\.\&'.
+	\def\0{\discretionary{\WBS}{}{}}% \FWEB\ inserts this automatically every
+	  % so often so very long strings will break. Broken strings will
+	  % be marked by a backslash.
+	\def\1{,\0}% \FWEB\ replaces commas in strings by this, so strings
+		% tend to break after commas.
+	\let\2\space % Ordinary space after control sequences in \TeX.
+	\def\3{\space\space}% Translation of a tab in \TeX.
+	}
+
+
+\DRC\#{\hbox{\tt\char35}}% Parameter sign: '\#'.
+\DRC\${\hbox{\tt\char36}}% Dollar sign: '\$'.
+\DRC\%{\hbox{\tt\char37}}% Percent sign: '\%'.
+\DRC\^{\ifmmode\raise0.45ex\hbox{$\,\scriptstyle\mathchar"25E\,$}%
+	\else\char`^ \fi}% Pointer or
+	% hat: '\^'.
+	% Circumflex accents can be obtained from |\^^D| instead of |\^|.
+\let\Caret\^% For proper indexing of |@c++ operator ^|.
+\def\AT!{@}% Knuth's abbreviation for the at sign for control text: '\AT!'
+
+
+\chardef\asterisk=`\*
+
+
+\chardef\WAM=`\&% Ampersand character in a string: '\.\&'.
+\chardef\WBS=`\\% Backslash in a string: '\.\\'.
+\DRC\WttBS{{\tt\WBS}}% Literal backslash: '\WttBS'.
+\chardef\WLB=`\{% Left brace in a string: '\.\WLB'.
+\DRC\WLQ{{\tt\char'22}}% Left quote in a string: '\.\`'.
+\chardef\WRB=`\}% Right brace in a string: '\.\WRB'.
+\DRC\WRQ{{\tt\char'23}}% Right quote in a string: '\.\''.
+\DRC\WSP{{\tt\char`\ }}% (Visible) space in a string: '\.\ '.
+\chardef\WTL=`\~% Tilde in a string: '\.\~'.
+\chardef\WUL=`\_% Underline character in a string: '\.\_'.
+
+
+\DRC\WLQx{\hbox{\WLQ}}
+
+
+\newbox\rulebox
+\newcount\ruleno
+
+\def\rules#1{\leavevmode
+	\ruleno=0
+	\rlap{\vtop to 0pt{\null
+		\def\R{\setbox0=\hbox{\the\ruleno}%
+			\rlap{\vrule height0pt depth#1}%
+			\kern-0.5\wd0\copy0\kern-0.5\wd0
+			\advance\ruleno by1
+			\hskip1em}
+		\rlap{\R\R\R\R\R\R\R}
+		\vss}}}
+
+
+\newdimen\notch
+
+
+\newcount\W@globalindent
+\W@globalindent=3 % Global indentation in notches.
+
+
+\newcount\W@ind % Current indentation in notches.
+\newcount\W@lastind % Used for preprocessor commands.
+\def\W@saveind{\global\W@lastind=\W@ind}
+
+
+\newbox\b@k
+\newbox\b@kk
+
+\def\W@setboxes#1{\notch=#1
+	\setbox\b@k=\hbox to -\notch{}% Backspace one notch.
+	\setbox\b@kk=\hbox to -2\notch{}% Backspace two notches.
+	}
+
+
+\newif\ifW@firstbreak
+
+\newcount\W@nBK
+
+\def\WBKo{}% NOT FINISHED YET!
+
+\def\WBK{\WBK@{0}}
+
+\def\WBK@#1{\hfil\break
+\ifW@firstbreak
+	\W@nBK=\W@ind
+	\advance\W@nBK by -#1 % Compensate for glob's outdented by 1 from body.
+	\W@firstbreakfalse % Reset by |\6|.
+\fi
+\hangindent\W@nBK\notch
+\ignorespaces}
+
+
+\def\1{\global\advance\W@ind by1\hangindent\W@ind\notch}% Indent one more notch
+
+
+\def\2{\global\advance\W@ind by-1{}}% Indent one less notch
+
+
+\def\3#1{\hfil\penalty#10\hfilneg}% Optional break within a statement.
+
+
+\def\4{\copy\b@k \ignorespaces}% Backspace one notch
+
+
+\def\5{\hfil\penalty-1\hfilneg \kern2.5\notch\copy\b@kk
+	\yskipfalse\ignorespaces}
+
+
+\def\6{\ifmmode\else\par
+	\hangindent\W@ind\notch \noindent \kern\W@ind\notch \copy\b@kk \ignorespaces%
+\fi}
+
+
+\def\7{\WY\6}% Forced break and a little extra space.
+
+
+\def\8{\hskip-\W@ind\notch \hskip 2\notch}
+
+
+\newif\ifyskip
+\def\yskip{\medskip}
+
+
+\def\W@Hspace{\hbox{ }}
+
+
+\DRC\WPR[1]{\copy\b@kk \W@saveind%	|\global\advance\W@ind by 2|
+	\1\Wreserved{@#1}\W@Hspace}
+
+\DRC\WPs{\global\W@ind=\W@lastind}
+
+
+\def\W@point{!}
+
+\def\W@defin#1#2{\4\W@saveind
+	\1\Wreserved{#1}%
+	\def\W@temp{#2}%
+	\ifx\W@temp\ast \ast
+	\else\ifx\W@temp\W@point \W@point
+	\else\hbox{$^{\mathrm{#2}}$}%
+	\fi\fi
+	\W@Hspace}% Begin @d, @m, or @f.
+
+
+\def\note#1#2.{\WY\noindent{\hangindent2em\baselineskip10pt\footnotesize
+#1 #2.\par}}
+
+
+\def\W@lapstar{\rlap{*}}
+
+\newif\ifW@modchanged
+
+\def\W@checkstar{\edef\W@temp{\noexpand\W@isstar\modstar\noexpand\*\relax}%
+\W@temp}
+
+\def\W@isstar#1\*#2\relax{\ifx#2\*\W@modchangedtrue\else\W@modchangedfalse\fi}
+
+
+\def\W@includefile{}
+
+\def\WIF#1{\gdef\W@includefile{#1}}
+
+\def\WIF@name{\ifx\W@includefile\empty
+	\else
+		\W@prninclude
+	\fi}
+
+\def\W@prninclude{\ifLaTeXisloaded\else\ \fi
+		\WIFfmt{\W@includefile} }
+
+\def\WIFfmt#1{[{\tt#1}]}
+
+\def\W@startsection{\WQ
+	\W@checkstar
+	{\let\*=\W@lapstar
+	\ifLaTeXisloaded
+		\leavevmode
+	\else
+		\noindent
+		\bf\modstar.%
+	\fi
+	\WIF@name% Print name of current include file, if there is one.
+	\ifLaTeXisloaded\else\quad\fi
+	}}
+
+
+\def\W@skipbrace#1{\catcode`\{=1 }
+
+\DRC\WC{\W@cmnt{/\ast}{\W@finishcomment}}% Long comment.
+\DRC\Wc{\W@cmnt{//}{\XX}}% Short comment.
+\DRC\Wci{\W@cmnt{}{\XX}}% No comment symbol at all; for special effects.
+
+\def\W@cmnt#1#2{\ifmmode\gdef\XX{\null$\null}\else\gdef\XX{}\fi% C-style cmnt
+	\XX\hfil\penalty-1\hfilneg
+	\ifyskip\else\quad\fi$#1\,$%
+	\bgroup\cmntfont % The user can redefine the comment font |\cmntfont|.
+		\aftergroup#2%
+		\catcode`\{=\other\W@skipbrace}
+
+\def\W@finishcomment{$\,\ast/$\XX}
+
+\def\Wx#1{\kern-0.5\notch\hbox{\tt\%}}
+
+
+\def\WCDIR#1{\WPR?\Wtypewriter{#1}\WPs}
+
+
+\DRC\WCD[1]{\ifmmode\hbox\fi{\ignorespaces#1}}
+
+
+\def\WD#1{\W@defin{@D}{#1}}% Outer macro definition: `\.{@D}'
+\def\Wd#1{\W@defin{@d}{#1}}% Outer macro definition: `\.{@d}'
+\def\WUd#1{\W@defin{@u}{#1}}% Undef outer macro: `\.{@u}'.
+\def\WMD{\W@defin{@M}}% WEB macro definition: `\.{@M}'.  Second argument
+			% supplied by \FWEAVE.
+\def\WMd{\W@defin{@m}}% WEB macro definition: `\.{@m}'.  As above.
+\def\WE#1{\WPR{\##1}}% WEB preprocessor command: `\.{@\#if\dots}'.
+
+\def\Wf#1{\W@defin{@f}{#1}}% Format definition: `\.{@f}'.
+\def\WF#1{\W@defin{@F}{#1}}% Format definition: `\.{@F}'.
+
+\def\Wl#1{\W@defin{@l}{#1}}% Limbo text definition: `\.{@l}'.
+\def\Wv#1{\W@defin{@v}{#1}}% Operator overloading: `\.{@v}'.
+\def\WWW#1{\W@defin{@W}{#1}}% Identifier overloading:  `\.{@W}'.
+\def\Ww#1{\W@defin{@w}{#1}}% Identifier overloading:  `\.{@w}'.
+
+
+\newif\ifpagerefs% Page references or module-number references?
+\pagerefsfalse
+
+\newif\ifnumberTeX% Do we start the \TeX\ part of unnamed sections with
+\numberTeXfalse
+
+\newif\ifnumberdefs% As above, but for the definition part.
+\numberdefstrue
+
+\newif\ifnumbercode% As above, but for the code part.
+\numbercodetrue
+
+\newif\ifnumberunnamed% Number unnamed section?
+\numberunnamedfalse
+
+\newskip\Wuparindent
+\let\Wrefstepcounter\refstepcounter
+
+\newif\ifstripzeros
+
+\ifuseREVTeX
+	\stripzerosfalse
+\else
+	\stripzerostrue % By default, we're bold.
+\fi
+
+\def\W@modequate#1{\def\W@temp{#1}%
+\ifx\W@temp\empty\else
+	\gdef#1{\Wmodtrans}%
+\fi}
+
+
+\newcount\W@ssmax% Maximum depth of the \.{@*}$n$ commands.
+\newcount\W@lsmax% Max. local (per section) depth of the \.{@*}$n$ commands.
+
+\def\W@maxdepth#1{{\count0=#1
+	\advance\count0 by\W@ssmin%
+	\xdef\W@depth{\the\count0}}%
+	\ifFWEBstandalone\else
+		\immediate\write\@auxout{\string\@writefile{toc}%
+			{\string\setcounter{tocdepth}{\W@depth}}}%
+	\fi
+	}
+
+\def\Wunnamed#1#2{\csname ifnumber#1\endcsname
+	\gdef\Wnewoutname{#2}%
+	\ifx\Woutname\Wnewoutname\else
+		\8\Wtypewriter{"#2"} \Wscrap ${}\equiv{}$\6%
+		\global\let\Woutname\Wnewoutname
+	\fi\fi}
+
+
+\newcount\secpenalty
+\secpenalty=-500 % Strongly encourage breaks at sections.
+
+\def\W@Lvmode#1{%
+\if@minipage\else
+\if@nobreak\else
+\ifdim\lastskip=\z@
+	\vfil
+	\penalty#1\relax
+	\vfilneg
+\else
+	\@tempskipb\lastskip
+	\vskip-\lastskip
+	\vfil
+	\penalty#1
+	\vfilneg
+	\vskip\@tempskipb
+\fi\fi\fi}
+
+\ifLaTeXisloaded
+
+	\def\W@raggedbottom{\def\@textbottom{\vskip\z@ \vfil}%
+		\let\@texttop\relax
+		\@secpenalty=\secpenalty
+		\ifnum\secpenalty<0
+			\def\addpenalty##1{%
+				\ifvmode
+					\W@Lvmode{##1}%
+				\else
+					\@noitemerr
+				\fi}
+		\fi
+		}
+
+
+	\newcounter{subsubsubsection}
+
+	\gdef\thesubsubsubsection{\thesubsubsection.\arabic{subsubsubsection}}
+
+	\gdef\cl@subsubsubsection{\@elt{paragraph}}
+	\gdef\l@subsubsubsection{\@dottedtocline{4}{3.8em}{3.2em}}
+	\gdef\subsubsubsectionmark#1{}
+
+ \ifnoLaTeXe
+	\gdef\paragraph{\@startsection{paragraph}{5}{\z@}{3.25ex plus1ex
+minus.2ex}{-1em}{\reset@font\normalsize\bf}}
+ \fi
+
+	\gdef\W@setsecdepth{%
+		\@ifundefined{W@depth}{\gdef\W@depth{1}}{}%
+		\setcounter{secnumdepth}{\W@depth}%
+		\setcounter{tocdepth}{\W@depth}%
+		\ifnumberunnamed
+			\Wuparindent0pt
+			\addtocounter{secnumdepth}{1}%
+			\gdef\WRefstepcounter##1{}%
+		\else
+			\Wuparindent-\TeXindent
+			\global\let\WRefstepcounter\Wrefstepcounter
+		\fi
+		\ifcase\W@depth % Level 0; should never happen.
+		\or % Level 1
+			\def\subsection{\WRefstepcounter{subsection}%
+\@startsection{subsection}{2}{\z@}{-3.25ex plus-1ex minus-.2ex}{\Wuparindent}
+{\reset@font \normalsize \bf}}%
+			\let\Wunnamedsect\subsection
+			\def\W@subsect{subsection}%
+		\or % Level 2
+			\def\subsubsection{\WRefstepcounter{subsubsection}%
+\@startsection{subsubsection}{3}{\z@}{-3.25ex plus-1ex minus-.2ex}
+{\Wuparindent}{\reset@font \normalsize \bf}}%
+			\let\Wunnamedsect\subsubsection
+			\def\W@subsect{subsubsection}%
+		\or % Level 3
+			\def\subsubsubsection{%
+\WRefstepcounter{subsubsubsection}%
+\@startsection{subsubsubsection}{4}{\z@}{-3.25ex plus-1ex minus-.2ex}
+{\Wuparindent}{\reset@font \normalsize \bf}}%
+			\let\Wunnamedsect\subsubsubsection
+			\def\W@subsect{subsubsubsection}%
+		\else
+			\let\Wunnamedsect\paragraph
+			\def\W@subsect{}%
+		\fi
+		}
+
+
+	\gdef\Wmodtrans#1{\@ifundefined{r@#1}
+		{\W@split{\##1}{\##1}{0}{0}}
+		{\expandafter\expandafter\expandafter
+			\W@split\csname r@#1\endcsname{#1}}%
+		}
+
+
+	\gdef\W@split#1#2#3#4{%
+		\ifpagerefs
+			#2% Just extract the page number.
+			% Add a letter subscript if more than 1 sec. per page.
+			\@ifundefined{W@#3}%
+				{\setcounter{W@tempcounter}{#4}%
+				\addtocounter{W@tempcounter}{-#3}%
+\ifnum\value{W@tempcounter}>25 \setcounter{W@tempcounter}{25}\fi
+				\hbox{\alph{W@tempcounter}}}
+				{}%
+		\else % Section-number references (the default).
+			\ifstripzeros
+				\W@strip#1.,%
+			\else
+				#1% If we gave up and said |\stripzerosfalse|.
+			\fi
+		\fi
+		}
+
+
+
+	\def\W@strip#1.#2,{\W@first#1\relax \W@tempc{#1}{#2}}
+
+	\def\W@first#1#2\relax{%
+		\ifx#1\#%
+			\def\W@tempc##1##2{##1}%
+		\else
+			\def\W@tempc##1##2{%
+				\W@Strip{##1.##2}%
+				{
+				\@ifundefined{l@##1}%
+					{0}%
+					{\csname l@##1\endcsname}%
+				}%
+				}%
+		\fi
+		}
+
+
+	\def\W@Strip#1#2{\W@STRIP#1\relax{#2}}
+
+
+	\def\W@STRIP#1.\relax#2{{%
+\W@tk={}\W@count=0
+\W@counta=\W@depth
+\advance\W@counta by-#2 % How many zeros to strip.
+\loop
+\ifnum\W@count<\W@counta
+	\advance\W@count by1
+	\edef\next{\W@tk={\the\W@tk.0}}\next % Build template `\.{.0.0\dots}'.
+\repeat
+\let\eat\let
+\edef\next{\def\noexpand\reduce####1\the\W@tk####2\eat####3\eat
+{\noexpand\W@preface{####1}####2}}%
+\next
+\edef\next{\noexpand\reduce#1\eat\the\W@tk\eat\eat\relax}%
+\def\eat##1{}%
+\next}}
+
+	\global\let\modno\empty
+	\global\let\W@name\empty
+
+	\def\W@preface#1{#1}% Redefined to |\W@getsection| in fwebinsert.sty.
+
+	\def\W@getsection#1{%
+		\let\W@Preface\empty% Just in case.
+		\ifcase\W@ssmin\relax
+			\W@xsection#1.\relax
+			\def\W@Preface{\thesection}% Level 0
+		\or
+			\def\W@Preface{\thesection.#1}% Level 1
+		\or
+			\def\W@Preface{\thesubsection.#1}% Level 2
+		\or
+			\def\W@Preface{\thesubsubsection.#1}% Level 3
+		\fi
+		\W@Preface
+		}
+
+	\def\W@xsection#1.#2\relax{\c@section=\Wb@se
+		\advance\c@section by#1}
+
+
+
+	\def\WM#1.{\WMN#1.%
+		\W@mark{{\oldmodno}{\oldWname}}{{\modno}{\W@name}}%
+		\ifon
+			\advance\W@ss by10 %
+			\W@start{\ifnumberTeX\Wmodtrans{\modno}\fi}% ????
+			\advance\W@ss by-10 %
+			\ignorespaces}
+\else % No \LaTeX; for \TeX, one just gets module numbers.
+	\def\Wmodtrans#1{#1}
+
+	\outer\def\WM#1.{\WMN#1.\W@mark\ifon\Wskip\W@startsection\ignorespaces}
+\fi % End of no \LaTeX.
+
+
+\newcount\W@ss % Counter for the dots.
+\newcount\W@lastsect % Level number of section immediately above.
+
+\newif\ifW@dotsafter % Do subsection dots come after or before the section 
+%name?
+\W@dotsafterfalse
+
+\ifW@dotsafter % ``@* NAME...''
+	\def\W@before/#1.{\W@defname{#1}\W@dot}%
+	\def\W@fter{\W@Nss}%
+\else % ``@*.. NAME.'' or ``@*2 NAME.''
+	\def\W@before/ {\futurelet\next\W@check}%
+	\def\W@fter#1.{\W@defname{#1}\W@Nss}% Done after figuring out level.
+	\def\W@fter@#1#2.{\W@defname{#2}\W@Nss}% |#1| eats the sectionnum.
+\fi
+
+\def\W@check{\ifx\next.\def\next{\W@dot.}% Count arbitrary dots.
+	\else\ifx\next0\W@sectionnum{0}%
+	\else\ifx\next1\W@sectionnum{1}%
+	\else\ifx\next2\W@sectionnum{2}% Highest numerical level (subsubsect.)
+	\else\ifx\next3\W@badlevel{3}%
+	\else\ifx\next4\W@badlevel{4}%
+	\else\ifx\next5\W@badlevel{5}%
+	\else\ifx\next6\W@badlevel{6}%
+	\else\ifx\next7\W@badlevel{7}%
+	\else\ifx\next8\W@badlevel{8}%
+	\else\ifx\next9\W@badlevel{9}%
+	\else\let\next\W@fter
+	\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi
+	\next}%
+
+\def\W@badlevel#1{\errhelp=\b@dlevelhelp
+\errmessage{FWEBMAC WARNING: @*#1 changed to @*2}%
+\W@sectionnum{2}}
+
+\newhelp\b@dlevelhelp{Only the major-section (table-of-contents)
+commands @* (section), @*1 (subsection), and @*2 (subsubsection) are
+allowed.}
+
+\def\W@sectionnum#1{\W@ss#1%
+	\advance\W@ss by\W@ssmin
+	\let\next\W@fter@}
+
+
+\def\W@defname#1{\@ifnextchar[{\W@getname}{\W@getname[#1]}#1.}
+
+\def\W@getname[#1]#2.{\gdef\W@name{#1}% Running headline (short name).
+	\gdef\W@longname{#2}}% Remember name of section (used in |\W@start|).
+
+\def\W@ssmin{0}% The lowest (top) level.
+
+\def\WN#1.{\WMN#1.\W@ss=\W@ssmin \W@before/}% Begin a starred section.
+
+
+\def\W@outlsmax#1{\if@filesw
+	{%
+	\ifLaTeXisloaded
+		\expandafter\W@major\c@section.\relax
+	\else
+		\expandafter\W@major\@currentlabel.\relax
+	\fi
+	\advance\W@count by#1
+	\advance\W@count by-1
+	\advance\W@lsmax by1
+	\edef\@tempa{\ifFWEBstandalone
+		\write\@auxout{\string\Lastdepth{\the\W@count}%
+		{\the\W@lsmax}}%
+		\fi}%
+	\expandafter}\@tempa
+	\fi
+	\W@lsmax=0
+	}
+
+\ifLaTeXisloaded
+
+	\def\W@major#1.#2\relax{\W@count=#1}% Get the major section.
+
+	\def\Lastdepth#1#2{%
+		\edef\@tempc{\gdef\expandafter\noexpand
+			\csname l@#1\endcsname{#2}}%
+		\@tempc% Define something like |\l@1| to be last max depth.
+		}
+
+\else
+	\def\W@outlsmax#1{}
+\fi
+
+
+\def\W@dot{\futurelet\next\W@Ns}
+
+\def\W@Ns{\ifx\next.%
+	\advance\W@ss by 1
+	\let\next\W@next
+\else
+	\let\next\W@fter
+\fi
+\next}
+
+\def\W@next#1{\W@dot}
+
+
+\ifLaTeXisloaded
+	\let\Wsectionbreak\relax
+\else
+	\def\Wsectionbreak{\ifcase\W@ss\vfil\eject\fi}
+\fi
+
+\def\rhead{\ifcase\W@ss
+		\uppercase{\ignorespaces\W@name}%
+	\else
+		\ignorespaces\W@name%
+	\fi}% Define running headline.
+
+\let\WZ\let % Now one can |\send| the control sequence |\WZ|
+\let\WIM\let % This macro is made temporarily unexpandable; see |\WZ|.
+
+\def\W@Llabel#1{\@bsphack
+	\if@filesw
+		{\let\thepage\relax
+		\let\W@botmodno\relax
+		\def\protect{\noexpand\noexpand\noexpand}%
+		\edef\@tempa{\ifFWEBstandalone
+			\write\@auxout{\string\Newlabel{#1}%
+			{{\@currentlabel}{\thepage}}{\W@botmodno}}%
+			\fi}%
+		\expandafter}\@tempa
+		\if@nobreak
+			\ifvmode
+				\nobreak
+			\fi
+		\fi
+	\fi
+	\@esphack}
+
+\ifLaTeXisloaded
+	\gdef\NoIndex{NoIndex}% Written as arg to |\Wbegin| by \.{-xi}.
+
+	\gdef\W@Nss{%
+		{\let\protect\noexpand \xdef\Wupn@me{\W@name}}%
+		\ifx\Wupn@me\INDEX
+			\ifx\INDEX\NoIndex
+				\onfalse% Don't print section heading.
+			\else
+		      \W@mark{{\oldmodno}{\oldWname}}{{\oldmodno}{\oldWname}}%
+			\fi
+		\else% Emit mark before section break.
+			\W@mark{{\oldmodno}{\oldWname}}{{\modno}{\W@name}}%
+		\fi
+		\message{*\modno}% Progress report to the terminal.
+		\ifon% Start output of named section; explicit |\fi|
+			\ifnum\W@ss>\W@ssmax
+				\global\W@ssmax=\W@ss% Track max depth.
+			\fi
+			\ifnum\W@ss>\W@lsmax
+				\global\W@lsmax=\W@ss% Maximum local depth.
+			\fi
+			\W@start{\W@longname}%
+			\ignorespaces
+		}
+
+	\def\steppagemodule{\noexpand\expandafter\expandafter\expandafter
+{\addtocounter{pagemodule}{1}}\thepagemodule}
+
+	\let\Wlabel\W@Llabel
+
+
+	\gdef\beforeindex{%
+		\ifx\multicols\undefined
+			\twocolumn
+		\else
+			\ifFWEBstandalone
+				\newpage
+			\fi
+		\fi
+		}
+
+	\gdef\W@start#1{%
+		{\let\protect\noexpand \xdef\Wupn@me{\W@name}}%
+		\ifx\Wupn@me\INDEX\beforeindex\fi
+		\ifcase\W@ss
+			\let\Wsect\section % Level 0
+			\W@lastsect\W@ss
+		\or
+			\let\Wsect\subsection % Level 1
+			\W@lastsect\W@ss
+		\or
+			\let\Wsect\subsubsection % Level 2
+			\W@lastsect\W@ss
+		\else
+			\let\Wsect\Wunnamedsect
+		\fi
+		\ifnum\W@lastsect>2
+			\W@setU
+		\fi
+		\Wsect{#1}% Execute LaTeX section heading.
+		\ifnum\W@ss=0 % Check if major section.
+			\W@outlsmax{0}% If so, write out |\Lastdepth| command.
+		\fi
+		\W@mark{{\modno}{\W@name}}{{\modno}{\W@name}}%
+		\Wlabel{\modno}% Section number to aux file.
+		\@ifundefined{r@\modno}
+			{\expandafter\xdef\csname r@\modno\endcsname
+				{{\@currentlabel}{\thepage}{-1}}}
+			{}% For present run.
+		\W@startsection
+		}
+\else % No \LaTeX
+
+\def\W@Nss{%
+	\let\protect\noexpand
+	\W@mark%Can't put this in |\WMN| since |\rhead| must be defined first.
+	\Wsectionbreak % Typeset the break between sections.
+	\message{*\modno}% Progress report to the terminal.
+	\ifon
+		\ifcase\W@ss\else\Wskip\fi
+		\W@startsection{\bf\ignorespaces\W@name.\quad}%
+		{\def\WIN{\WIM}%
+		\edef\next{\write\W@cont{\WZ{\the\W@ss}{\W@name}%
+		{\modno}{\noexpand\the\pageno}}}\next}%
+			% To contents file |CONTENTS.tex|.
+		\ignorespaces}
+\fi
+
+
+\ifuseREVTeX
+
+  \def\W@setu#1{\expandafter\def\csname p@\W@subsect\endcsname{#1}
+	\expandafter\def\csname the\W@subsect\endcsname{\arabic{\W@subsect}}}
+
+  \def\W@setU{
+	\ifcase\lastsect
+		\W@setu{\thesection.}%
+	\or
+		\W@setu{\thesection\,\thesubsection.}%
+	\or
+		\W@setu{\thesection\,\thesubsection\,\thesubsubsection.}%
+	\fi
+	}
+\else
+	\def\W@setU{}
+\fi
+
+
+\def\W@markN{\def\W@mark{{\def\WIN{\WIM}%
+		\mark{\modno\noexpand\else\rhead}}}}
+
+\ifx\selectfont\undefined
+	\W@markN
+\else
+	\def\W@mark{{\def\WIN{\WIM}\let\protect\noexpand
+		\mark{\modno\noexpand\else\rhead}}}
+\fi
+
+\def\Wmodno{\iftrue\topmark\fi}% Extracts the left-hand part of the mark.
+
+\def\Whead{{\let\WIM\WIN
+	\expandafter\iffalse\topmark\fi}}% Extracts the right-hand part.
+
+
+\def\WMN#1.{\par
+	\parskip=\pardimen % Reset to \TeX\ spacing
+	\parindent=\TeXindent
+	{\ifLaTeXisloaded
+		\global\let\oldmodno\modno
+		\global\let\oldWname\W@name
+		\xdef\@currentlabel{\modno}%
+		\global\let\Woutname\empty
+		\addtocounter{pagemodule}{1}%
+	\fi
+	\xdef\modstar{#1}%
+	\let\*=\empty
+	\xdef\modno{#1}%
+	}%
+	\ifx\modno\modstar
+		\global\onmaybe% For conditional listing of changed secs.
+	\else
+		\global\ontrue% Print this section.
+	\fi
+	}
+
+
+
+\def\Wscrap{{\footnotesize\Wmodtrans{\modno}%
+	\ifW@modchanged*\fi}}
+
+{\gdef\@verbatim{\if@minipage \else \vskip \parskip \fi
+\leftskip
+ \@totalleftmargin \rightskip \z@ \parindent \z@ \parfillskip \@flushglue
+\parskip \z@ \@@par \@tempswafalse \def \par {\if@tempswa \hbox {}\fi
+\@tempswatrue
+\@@par \penalty \interlinepenalty }\obeylines \tt \catcode ``=13
+\@noligs \let \do \@makeother \dospecials}}
+
+{\catcode`/=0 /catcode`/\=12 /catcode`/^^I=13
+/gdef/WBM{%/8/kern/notch
+/begingroup
+/parindent/W@globalindent/notch /advance/parindent by-1/notch
+/def/par{/endgraf/leavevmode}%
+/catcode`^^I=13 /def^^I{/leavevmode/penalty10000/ / / / / / / / }%
+/catcode``=13 /@noligs /tt
+/let/do/@makeother /dospecials
+/@vobeyspaces/frenchspacing/obeylines
+/W@M}
+/gdef/W@M#1\WEM{#1/endgroup}}
+
+
+\def\WDP#1{\ifx E#1\else{\tt#1}\fi}% Used in the exponent macro below.
+
+\DRC\WO[1]{%
+	{% Make the next definitions local.
+	\let\-\_%
+	\let\d\$%
+	\def\\{\let\_\-\let\$\d}%
+	\def\?{\kern.2em}%
+	\let\{\bgroup% Braces are inserted in \Fortran-90 by kind parameter.
+	\let\}\egroup
+	\def\###1{\kern0.1em{\tt \ifcase##1F\or L\or U\or UL\else?\fi}}%C~constant.
+	\def\^##1{\cdot 10^{\aftergroup}\aftergroup\WDP\aftergroup##1}% Power of ten
+	\def\_{_{\\\rm\aftergroup}}% Fortran-90 kind parameter.
+	\def\%{{\rm H}\hbox{\aftergroup}\Wtypewriter{\aftergroup}}% Hollerith constant
+	\def\&{0{\tt b}}% Binary constant.
+	\def\~{\hbox{\rm\char'23\kern-.2em\it\aftergroup\?\aftergroup}}% Octal
+	\def\`{\hbox{\rm\char"7D\tt\aftergroup}}% Double quotes for hex constant
+	#1}}
+
+
+\def\WKINDCHAR#1\.#2{%
+	\hbox{\Wtypewriter{#2}}_{\Wkindids \rm #1}}
+
+\DRC\Wkindids{\def\Wshort##1{##1}%
+	\def\Wid##1{##1}%
+	\def\WID##1{##1}}
+
+
+\def\WPr{\global\W@ind=\W@globalindent \1}
+
+
+\def\WP{\parskip=0pt \parindent=\notch
+	\rightskip=0pt plus 100pt minus 10pt
+	\sfcode`;=3000
+	\pretolerance 10000
+	\WPr
+	\W@firstbreaktrue % Reset to true by |\6|.
+	\leavevmode\kern\notch}
+
+
+\def\WQ{\rightskip=0pt
+	\sfcode`;=1500 \pretolerance 200 \hyphenpenalty 50 \exhyphenpenalty 50 }
+
+\def\Wendd{\par}% End of definition part.
+\def\Wendc{\par}% End of code part.
+
+
+\def\WA{\note{See also}}% Cross-reference for multiply defined section names.
+	% English!
+
+\def\Wauto[#1]{\Wtypewriter{[#1]}\ }
+
+\DRC\WB{\mathopen{\Wtypewriter{@/\ast}}}% Begin controlled comment.
+
+\let\WG\ge % Greater than or equal sign: '$\WG$'.
+
+\DRC\WI{\neq}% Unequal sign: '$\WI$'.  (Better reserve |\ne| for the
+		% electron density~$n_e$.)
+
+\DRC\WJ{\Wtypewriter{@\&}}% TANGLE's join operation: '\WJ'.
+
+\let\WK\gets % Left arrow: '$\WK$'.
+
+\let\Wlbl\llap
+
+
+
+
+\let\WL\le % Less than or equal sign: '$\WL$'.
+
+\let\WLA\langle % Opening of template:  '$\WLA$'.
+\let\WRA\rangle % Closing of template:  '$\WRA$'.
+
+\DRC\WTLD{\Wtypewriter{@\~}}
+
+\def\Wskip{\vfil\penalty-100\vfilneg \vskip12ptminus3pt}% See |\WM|, etc.
+
+\def\Wskipped#1{\8\mathhexbox278.\quad\Wtypewriter{@I "#1"}\ \ {\it Section(s)
+skipped}\dots\WP}
+
+\let\WPtr\Rightarrow % Fortran's stupid pointer assignment statement:
+		% '$\WPtr$'.
+
+\let\WR=\lnot % Logical not: '$\WR$'.
+
+\let\WS=\equiv % Equivalence sign: '$\WS$'.
+\let\WSQ=\equiv % This symbol is used when defining a section name.
+
+\DRC\WSl{\ifmmode\mathbin{/}\else/\fi}% Division
+
+\DRC\WT{\mathclose{\Wtypewriter{@\ast/}}}% Terminate controlled comment.
+
+\def\WU{\note{This code is used in}}% Cross-reference for uses of sections.
+	% English!
+
+\let\WV\lor % Logical or: '$\WV$'.
+
+\let\WW=\land % Logical and: '$\WW$'.
+
+
+\ifLaTeXisloaded
+\else
+	\let\footnotesize\eightrm
+\fi
+
+\def\WX#1#2\X#3\X{\ifmmode\gdef\XX{\null$\null}\else\gdef\XX{}\fi
+	\XX$\langle\,$#2{\footnotesize\kern.5em#1}%
+$\,\rangle^{\mathrm{#3}}$\XX}
+
+
+\def\WY{\par
+	\yskip
+	\parskip=0pt}
+
+
+\DRC\?{\mathrel?}
+
+
+\DRC\Colon{\ifmmode\colon\else\textcolon\fi}
+
+\DRC\WCC{\mathord{::}}% For C:  '$x\WCC y$'.
+\DRC\WCF{{}\mathbin{::}{}}% For \Fortran:  '$x\WCF y$'.
+
+
+
+\DRC\=[1]{\kern2pt\hbox{\vrule\vtop{\vbox{\hrule
+	\hbox{\strut\kern2pt\Wtypewriter{#1}\kern2pt}}
+	\hrule}\vrule}\kern2pt}
+
+\let\Wequals\=
+
+
+\let\~=\ignorespaces
+\let\*=*
+
+
+\def\WPQ{\mathrel{+\mathord\equiv}}% '$\WPQ$'.
+
+
+\def\W@LP{(}% Must be |\def|, not |\let|.
+\def\W@ISL#1#2]{\def\next{#1}}
+\DRC\WEE[1]{\W@ISL#1]\ifx\next\W@LP\WEXP[#1]\else\WEXP[(#1)]\fi}
+\def\WEXP[(#1)]{^{#1}}
+
+
+
+\DRC\WCMN[2]{\Wtypewriter{/#2/}}
+
+\let\WSlSl\parallel% Concatenation: '$\WSlSl$'.
+
+\DRC\WEQV{\mathrel{?{=}}}% `$x\WEQV y$'.
+\DRC\WNEQV{\not\equiv}% `$x\WNEQV y$'.
+
+
+\DRC\WLS{\mathopen{({/}\,}}
+\DRC\WSR{\mathclose{\,{/})}}
+
+
+\DRC\WFALSE{{\cal F}}% '$\WFALSE$'.
+\DRC\WTRUE{{\cal T}}% '$\WTRUE$'.
+
+
+\def\Wblock#1{\Wc\bgroup\ Block #1\egroup}% `\Wblock{99}'
+
+
+\def\WNN{\hbox{\#\#}}% '\WNN'.
+\def\WNP{\hbox{\#!}}% '\WNP'.
+\def\WNC{\hbox{\#:}}% '\WNC'.
+\def\WND{\hbox{\#.}}% '\WND'.
+\def\WNq{\hbox{\#\tt'}}% '\WNq'.
+\def\WNQ{\hbox{\#\tt"}}% '\WNQ'.
+
+
+\mathchardef\TLD="0218 % '$\TLD$'.
+
+\DRC\WPP{\mathord{++}}% '$\WPP$'.
+\DRC\WMM{\mathord{--}}% '$\WMM$'.
+
+\DRC\WMG{\mathord{\to}}% '$\WMG$'.
+
+\DRC\Wcp{\mathrel{+{=}}} \let\PE\Wcp % `$x\PE y$'.
+\DRC\Wcm{\mathrel{-{=}}} \let\ME\Wcm % `$x\ME y$'.
+\DRC\Wcs{\mathrel{\ast{=}}} \let\TE\Wcs % `$x\Wcs y$'.
+\DRC\Wcv{\mathrel{/{=}}} \let\FE\Wcv % `$x\FE y$'.
+\DRC\Wcd{\mathrel{\%{=}}} \let\CE\Wcd % `$x\Wcd y$'.
+\DRC\Wcx{\mathrel{\^\!{=}}}% `$x\Wcx y$'.
+\DRC\Wca{\mathrel{\amp{=}}}% `$x\Wca y$'.
+\DRC\Wco{\mathrel{\WOR{=}}}% `$x\Wco y$'.
+\DRC\Wcg{\mathrel{\WGG\!{=}}}% `$x\Wcg y$'.
+\DRC\Wcl{\mathrel{\WLL\!{=}}}% `$x\Wcl y$'.
+
+
+\DRC\WMOD{\mathrel{\%}}% `$x\WMOD y$'.
+\DRC\WOR{{\,|\,}}% `$x\WOR y$'.
+\DRC\WAND{{\,\amp\,}}% `$x\WAND y$.
+
+\DRC\WGG{\mathrel{>\!>}}% `$x\WGG y$'.
+\DRC\WLL{\mathrel{<\!<}}% `$x\WLL y$'.
+
+\DRC\WHE{\mathrel{\uparrow=}}% `$x\WHE y$'.
+
+\DRC\Woperator[1]{\Wreserved{operator}~\hbox{$#1$}\ignorespaces}
+\DRC\Woperatoro{\Wreserved{operator}~\ignorespaces}
+
+
+\let\openbraces=\{
+\let\closebraces=\}
+\def\{{\ifmmode\openbraces\else$\openbraces$\fi}
+\def\}{\ifmmode\closebraces\else$\closebraces$\fi}
+
+
+
+
+
+\newif\ifop
+\newbox\dotbox
+
+\def\Wunknown#1{\={??#1??}}% For unknown dot constant.
+
+{\catcode`\_=11
+
+\gdef\newop#1#2#3{%
+	\edef\next{\def\expandafter\noexpand\csname _#1_#2\endcsname}%
+	\next{#3}}
+
+\gdef\newbinop#1#2#3{%
+	\edef\next{\def\expandafter\noexpand\csname _#1_#2\endcsname}%
+	\next{\mathrel{#3}}}
+
+\gdef\newunop#1#2#3{%
+	\edef\next{\def\expandafter\noexpand\csname _#1_#2\endcsname}%
+	\next{\mathbin{#3}}}
+
+\gdef\Wop#1#2{\setbox\dotbox\hbox{\tt .#1.}%
+	\edef\nxt{\expandafter\noexpand\csname _#1_#2\endcsname}%
+	\edef\ifnxt{\noexpand\ifx\expandafter\noexpand\csname _#1_#2\endcsname}%
+	\ifnxt\empty
+		\def\next{\box\dotbox}% Macro not defined; just use \.{.NAME.}.
+	\else
+		\def\next{\futurelet\nextchar\W@q}% Be careful about |\WEE|.
+	\fi
+	\next}%
+}
+
+\global\let\Wb\Wop
+\global\let\Wu\Wop
+
+\let\Lbrace{
+
+\def\W@q{\ifx\nextchar\Lbrace
+		\let\next\nxt % There's an argument coming up.
+	\else
+		\ifop
+			\def\next{\nxt{}\equiv\box\dotbox}%
+		\else
+			\let\next\nxt
+		\fi
+	\fi
+	\opfalse
+	\next}
+
+
+\DRC\WTeX[1]{\ [{\ifmmode\def\XX{}\else\def\XX{\null$\null}\fi
+\XX#1\XX}]\ }
+
+
+\newtoks\W@ARRAYarga
+\newtoks\W@ARRAYargb
+
+\DRC\WXA[1]{\begingroup
+	\def\Wshort##1{##1}%
+	\def\Wid##1{\mathit{##1\/\kern.05em}}%
+	\global\W@ARRAYarga{#1}%
+	\futurelet\W@next\WARRAYm}
+
+\def\WARRAYm{\ifx\W@next\WXA
+		\global\let\W@next\WARRAYn% Multiple indices in C:  a[i][j][k]
+	\else
+		\global\let\W@next\relax
+		\WARRAY{\the\W@ARRAYarga}% Typeset the accumulated indices.
+	\fi
+	\endgroup
+	\W@next}
+
+\def\WARRAYn#1#2{\W@ARRAYargb{#2}%
+	\edef\W@next{\noexpand\WXA{\the\W@ARRAYarga,\the\W@ARRAYargb}}%Concatenate
+	\W@next}
+
+\DRC\WARRAY[1]{[#1]}% Default definition.
+\DRC\WSUB[1]{_{\scriptstyle#1}}% E.g., subscript indices.
+
+
+\def\Wouto#1#2{\Wreserved{@#1}\W@Hspace\Wtypewriter{#2}}
+\def\Wout#1{\Wouto{o}{#1}}
+\def\WOut#1{\Wouto{O}{#1}}
+
+
+\def\WRCS#1#2{\langle\!\langle\,\Wtypewriter{#2}\,\rangle\!\rangle
+	\ifnum#1=0 _{0}\fi}
+
+
+\def\modlabel#1{%
+	\ifLaTeXisloaded
+		\label{MOD#1}%
+	\else
+		\edef\next{\gdef\expandafter\noexpand\csname MOD#1\endcsname{\modno}}%
+		\next
+	\fi}
+
+\def\Wmodule#1{\ifLaTeXisloaded
+		\ref{MOD#1}%
+	\else
+		\csname MOD#1\endcsname
+	\fi}
+
+\def\WEBsection#1{section~\Wmodule{#1}}% |\section| is used by \LaTeX.
+\def\WEBmodule#1{module~\Wmodule{#1}}
+\let\module\WEBmodule% For backward compatibility.
+
+
+\def\strutdepth{\dp\strutbox}
+
+\def\W@marginal#1{\strut\vadjust{\kern-\strutdepth\W@specialmargin{#1}}}
+
+\def\W@specialmargin#1{\vtop to\strutdepth{
+	\baselineskip\strutdepth
+	\vss\llap{#1 }\null}}
+
+\def\LANGUAGE#1{\W@marginal{\smash{\vtop{\hbox{%
+	\hbox{\tt @L\lowercase{#1}\textcolon\enspace}}\null}}}\ignorespaces}
+
+
+
+
+\newif\ifon
+\def\onmaybe{\let\ifon=\maybe} \let\maybe=\iftrue
+
+
+\newif\iftitle \newif\ifpagesaved
+
+\newcount\contentspageno
+
+
+\def\Wmodhd#1{ [#1]}
+
+\newif\ifW@headers
+\W@headerstrue% Stand-alone setting (might be changed in fwebinsert.sty).
+
+\def\W@seczero{0}
+
+\def\WsetLmarks{
+	\def\Wsecrange##1##2{%
+		\def\W@tempa{##1}\def\W@tempb{##2}%
+		\ifx\W@tempa\W@tempb% Equal sec.\ nums; just print one.
+			\W@S\Wmodtrans{##1}\Wmodhd{\###1}%
+		\else\ifx\W@tempb\W@seczero
+			\W@S\Wmodtrans{##1}\Wmodhd{\###1}%
+		\else
+		    \W@S\Wmodtrans{##1}--\W@S\Wmodtrans{##2}%
+\Wmodhd{\###1--\###2}%
+		\fi\fi}
+
+	\gdef\@leftmark##1##2##3##4{%
+		\let\protect\relax
+		\let\\\ %
+		\qquad\mainfont##2
+		\hfill
+		\Wtitle\qquad
+		\ifnum##1>0%
+		  \mainfont\Wsecrange{##1}{##3}%
+		\fi
+		}
+
+	\gdef\@rightmark##1##2##3##4{%
+		\let\protect\relax
+		\let\\\ %
+		\ifnum##1>0
+			\mainfont\Wsecrange{##1}{##3}\qquad%
+		\fi
+		\mainfont\Wtitle
+		\hfill
+		\mainfont##4\qquad
+		}
+
+	\gdef\leftmark{%
+\ifnoLaTeXe
+\else
+	\let\protect\@unexpandable@protect
+\fi
+\edef\W@tempb{\expandafter\iftrue\botmark\fi}%
+\edef\W@tempa{\expandafter\iffalse\topmark\fi}%
+\expandafter\expandafter\expandafter\@leftmark\expandafter\W@tempa\W@tempb{}{}}
+
+	\gdef\rightmark{%
+\ifnoLaTeXe
+\else
+	\let\protect\@unexpandable@protect
+\fi
+\edef\W@tempb{\expandafter\iftrue\botmark\fi}%
+\edef\W@tempa{\expandafter\iffalse\topmark\fi}%
+\expandafter\expandafter\expandafter\@rightmark\expandafter\W@tempa%
+\W@tempb{}{}}
+
+	\gdef\W@markN{\gdef\W@mark####1####2{{\def\WIN{\WIM}%
+		\mark{####1\noexpand\else####2}}}}
+
+	\ifx\selectfont\undefined
+		\W@markN
+	\else
+		\gdef\W@mark##1##2{{%\def\WIN{\WIM}%
+			\let\protect\@unexpandable@protect
+			\mark{##1\noexpand\else##2}}}
+	\fi
+}
+
+\ifLaTeXisloaded
+\else
+\def\lheader{\mainfont\the\pageno\eightrm\qquad\Whead\hfill\Wtitle\qquad
+	\ifnum\pageno=\contentspageno\else
+		\W@S\mainfont\Wmodno
+	\fi}
+
+\def\rheader{\ifnum\pageno=\contentspageno\else
+		\W@S\mainfont\Wmodno
+	\fi
+	\eightrm\qquad\Wtitle\hfill\Whead
+	\qquad\mainfont\the\pageno}
+\fi
+
+
+\def\pagewidtho{6.5}% The width of each page
+\def\pageheighto{8.7}% The height of each page
+\def\fullpageheighto{9}% Page height including headlines
+
+\newdimen\pagewidth \pagewidth\pagewidtho in
+\newdimen\pageheight \pageheight\pageheighto in
+\newdimen\fullpageheight \fullpageheight\fullpageheighto in
+
+\newdimen\pageshift \pageshift=0in% Shift righthand pages wrt lefthand ones
+
+\def\setpage{\hsize\pagewidth
+	\vsize\pageheight
+	\ifLaTeXisloaded
+		\oddsidemargin=0pt
+		\evensidemargin=0pt
+		\topmargin=0pt
+		\setlength{\linewidth}{\pagewidth}
+		\setlength{\textwidth}{\pagewidth}
+		\setlength{\textheight}{\pageheight}
+	\fi
+	}
+	
+\ifLaTeXisloaded
+\else
+\def\magnify#1{\mag=#1
+	\pagewidth\pagewidtho truein
+	\pageheight\pageheighto truein
+	\fullpageheight\fullpageheighto truein
+	\setpage}
+
+\fi
+
+
+\def\page{\box255 }
+
+\newif\ifidenticalpageheads
+
+\def\normaloutput#1#2#3{
+	\ifodd\pageno\hoffset=\pageshift\fi
+	\shipout\vbox
+		{
+		\vbox to\fullpageheight
+			{
+			\iftitle\global\titlefalse
+			\else \hbox to\pagewidth
+				{\vbox to10pt{}%
+				\ifidenticalpageheads#2\else
+				\ifodd\pageno
+					#3% Pg nos alternate left \& right.
+				\else#2\fi
+				\fi
+				}%	
+			\fi
+			\vfill#1% Parameter |#1| is the page itself.
+			}
+		}
+	\global\advance\pageno by1}
+
+\def\W@name{{FWEB} OUTPUT}% This section name is reset by starred sections.
+
+
+\newtoks\Woutput
+\Woutput\output% Remember \FWEB's definition.
+
+
+
+\newcount\minutes
+\newcount\hours
+
+\hours=\time
+\divide\hours by 60
+\multiply\hours by 60
+\minutes=\time
+\advance\minutes by -\hours
+\divide\hours by 60
+
+\def\Time{\the\hours\textcolon\ifnum\minutes<10 0\fi\the\minutes}
+
+\def\Date{\ifcase\month\or
+	January\or February\or March\or April\or May\or June\or
+	July\or August\or September\or October\or November\or December\fi
+	\space\number\day, \number\year}
+
+
+
+\def\Wtitle{}% Short title for running heads.  Can redefine after |\Title|.j
+
+\def\Title{\@ifnextchar[\W@@Title\W@Title}
+\def\W@Title#1{\W@@Title[#1]{#1}}
+\def\W@@Title[#1]#2{\gdef\Wtitle{{\large\tt#1}}\title{{\ttitlefont#2}}}
+
+
+
+\ifLaTeXisloaded
+	\def\topofcontents{}% We use \LaTeX's defaults.
+\else
+	\def\topofcontents{\centerline{\titlefont\Wtitle}
+	  \vfill} % This is the default.
+\fi
+
+
+
+\ifLaTeXisloaded
+	\def\botofcontents{}
+\else
+\def\botofcontents{\vfill
+	\rightline{\Date}
+	\rightline{\Time}}
+\fi
+
+\ifLaTeXisloaded
+	\contentspageno=1
+	\pageno=\contentspageno
+\else
+	\contentspageno=0% Default page number for table of contents
+\fi
+
+
+\newwrite\W@cont % For the table of contents.
+
+\ifLaTeXisloaded
+	\def\Wfirst#1#2#3#4#5{#1}
+
+	\def\W@output{\setcounter{pagemodule}{0}%
+		\xdef\W@botmodno{\expandafter\Wfirst\botmark}}
+
+	\def\W@botmodno{0}
+
+	\def\Newlabel#1#2#3{%
+		\ifFWEBstandalone
+			\@ifundefined{r@#1}{}%
+				{\@warning {Label `#1' multiply defined}}
+		\fi
+		\global\@namedef{r@#1}{#2{#3}}% |\@namedef| is from \LaTeX.
+		\global\W@lpha=#3
+		\ifnum\W@lpha=\W@ref\global\advance\W@pmcount by1
+		\else
+			\ifnum\W@pmcount=1
+			\edef\next{\gdef\csname W@\the\W@ref\endcsname{}}\next
+			\fi
+			\W@ref=\W@lpha
+			\W@pmcount=1
+		\fi}
+\fi
+
+
+\newcount\W@ref
+\W@ref=-1
+
+\newcount\W@lpha
+
+\newcount\W@pmcount
+\W@pmcount=1
+
+\outer\def\Wbegin[#1]#2#3#4#5#6#7#8#9{\edef\contentsfile{#5}%
+	\def\readcontents{\input\contentsfile}%
+
+	\Wequate#6
+	\W@modequate{#7}%
+	\edef\INDEX{#9}%
+	\def\W@splitprms##1##2[##3;##4]{\def##1{##3}\def##2{##4}}%
+	\W@splitprms\W@preamble\W@postamble[#8]%
+	\ifLaTeXisloaded
+		  \ifFWEBstandalone
+		\def\FWEBend{% \LaTeX\ redefines |\end|.
+			\W@outlsmax{1}% The `1' is because sec. #
+				% isn't incremented for the module list.
+			  \global\advance\W@ssmax by1
+	  \immediate\write\@auxout{\string\W@maxdepth{\the\W@ssmax}}%
+			  \W@postamble
+			  \W@makeatend% Override |\makeatletter|
+			  \end{document}%
+			}%
+			\def\W@ssmin{0}
+		\else% Insert mode; not stand-alone.
+			\def\FWEBend{}
+			% |\W@ssmin| isn't defined; it's set by |\fweblevel|.
+		  \fi
+		\W@splitprms\W@prma\W@prmb[#1]%
+		\W@splitprms\W@prmc\W@prmd[#2]%
+		\ifusedocumentstyle
+		   \edef\W@temp{\noexpand\documentstyle[\W@prma]{\W@prmc}}%
+			\W@temp
+		\else
+			\ifFWEBstandalone
+				\documentclass[\W@prma]{\W@prmc}%
+				\usepackage[\W@prmb]{\W@prmd}%
+			\fi
+		\fi
+		\ifFWEBstandalone
+			\textwidth\pagewidth
+			\textheight\pageheight
+		\fi
+		\TeXindent#3
+		\title{}%
+		\author{}%
+		\date{\today\\[3pt]\Time}%
+		\pagestyle{myheadings}%
+		\ifx\c@pagemodule\undefined
+			\newcounter{pagemodule}%
+			\newcounter{W@tempcounter}%
+		\fi
+		\gdef\cl@section{\@elt{subsection}\cl@subsection}
+		\gdef\cl@subsection{\@elt{subsubsection}\cl@subsubsection}
+		\gdef\cl@subsubsection{\@elt{subsubsubsection}}
+		\xdef\normaloutput##1##2##3{\the\output \noexpand\W@output}%
+		\ifW@headers
+			\WsetLmarks
+		\else
+			\def\W@markN{}%
+			\def\W@mark##1##2{}%
+		\fi
+		\W@preamble
+		\W@raggedbottom
+		\ifFWEBstandalone
+			\begin{document}
+		\else
+			\begingroup
+			\makeatletter
+			\@input{\jobname.aux}
+				%|\jobname| is redefined in \.{fwebinsert.sty}.
+			\endgroup
+		\fi
+		\W@setsecdepth
+	\else % Plain \TeX.
+		\immediate\openout\W@cont=\contentsfile
+		\def\FWEBend{\W@postamble\end}
+		\TeXindent#3
+		\W@preamble
+	\fi
+	\W@setboxes{#4}% Set dimensions of backspace boxes.
+	\ifFWEBstandalone
+		\output
+			{\setbox0=\page% The first page is garbage
+			\global\output{\normaloutput\page\lheader\rheader}%
+			}%
+		\setpage
+		\vbox to \vsize{}
+	\fi
+	}
+
+
+\def\W@makeatend{\let\W@makeatletter\makeatletter
+	\def\makeatletter{\def\Newlabel{\W@testdef r}%
+	\W@makeatletter}}
+
+\def\W@testdef#1#2#3#4{\def\reserved@a{#3{#4}}%
+\expandafter\ifx\csname#1@#2\endcsname
+		\reserved@a
+	\else
+		\@tempswatrue
+	\fi
+}
+
+
+\def\Wch{\note{The following sections were changed by the change file:}
+	\let\*=\relax}% English!
+
+
+\newbox\Sbox % Saved box preceding the index
+\newbox\Lbox % Lefthand column in the index
+
+\ifLaTeXisloaded
+	\def\startindex{\ifx\multicols\undefined
+				\medskip
+			\else
+				\begin{multicols}{2}%
+			\fi
+			}
+\else
+	\def\startindex{\par\vskip6pt plus 1fil}
+\fi
+
+
+\def\Winx{\startindex
+\ifLaTeXisloaded
+\else
+	\write\W@cont{ }% Ensure that the contents file isn't empty
+	\closeout\W@cont % The contents information has been fully gathered
+	\output{\ifpagesaved\normaloutput{\box\Sbox}\lheader\rheader\fi
+		\global\setbox\Sbox=\page \global\pagesavedtrue}
+	\pagesavedfalse \eject % Eject the page-so-far and predecessors
+	\setbox\Sbox\vbox{\unvbox\Sbox}% Take it out of its box
+	\vsize=\pageheight \advance\vsize by -\ht\Sbox % The remaining height
+	\hsize=.5\pagewidth \advance\hsize by -10pt
+		% Column width for the index (20pt between cols)
+	\parfillskip 0pt plus .6\hsize % Try to avoid almost empty lines
+	\def\lr{L}% This tells whether the left or right column is next
+	\output{\if L\lr\global\setbox\Lbox=\page \gdef\lr{R}
+		\else\normaloutput{\vbox to\pageheight{\box\Sbox\vss
+		\hbox to\pagewidth{\box\Lbox\hfil\page}}}\lheader\rheader
+		\global\vsize\pageheight\gdef\lr{L}\global\pagesavedfalse\fi}
+\fi
+	\outer\def\:##1, {\par\hangindent2em\noindent##1\textcolon\kern1em}% Index 
+%entry
+	\def\[##1]{$\underline{##1}$}% Underlined index item
+	\def\(##1){$^{\rm ##1}$}% Language marker
+	\let\Windexspace\medskip % Spacing between letter groups in index.
+	\rm
+	{\ifFWEBstandalone\let\glbl\global\else\let\glbl\empty\fi
+	\glbl\parskip 0pt plus .5pt
+	\glbl\rightskip0pt plus 2.5em
+	\glbl\tolerance 10000
+	\glbl\let\*=\W@lapstar
+	\glbl\hyphenpenalty 10000
+	\glbl\parindent0pt
+	}
+	}
+
+
+\ifLaTeXisloaded
+	\def\Wfin{\ifx\multicols\undefined\else\end{multicols}\fi}
+\else
+	\let\Wfin\relax
+\fi
+
+
+\def\W@onecolumn{%
+	\ifx\multicols\undefined
+		\onecolumn% In case of insertions & no module list.
+	\fi
+	}
+
+
+\def\pgfmt#1{\uppercase\expandafter{\romannumeral#1}}
+
+\def\pg#1#2#3{\def\temp{#1}%
+\ifx\temp\empty% For the case where \.{idxmerge} hasn't been run.
+\else
+	\pgfmt{#1}.%
+\fi
+#2{#3}%
+}
+
+
+\def\topofindex{}
+\def\botofindex{}
+
+
+
+\def\Wmods{%
+	\def\W@name{Names of the Modules}%
+\ifLaTeXisloaded
+	\W@outlsmax{1}% The `1' is because sec. # hasn't been incremented
+	\edef\next{\noexpand\W@mark{{0}{\INDEX}}
+		{{0}{\W@name}}}\next
+	\onecolumn% This also starts a new page.
+	\edef\next{\noexpand\W@mark{{0}{\W@name}}{{0}{\W@name}}}\next
+	\parfillskip 0pt plus 1fil
+\else
+	\par\vfill\eject
+	\ifpagesaved\null\vfill\eject\fi % Output a null index column
+	\if L\lr\else\null\vfill\eject\fi % Finish the current page
+	\parfillskip 0pt plus 1fil
+	\edef\rhead{\W@name}%
+	\output{\normaloutput\page\lheader\rheader}
+	\setpage
+\fi
+	\def\note##1##2.{\quad{\footnotesize##1 ##2.}}
+	\def\WU{\note{Used in}}% Cross-reference for uses of sections. English!
+	\def\:{\par\hangindent 2em}\let\*=*%
+	}
+
+
+
+\def\Winfo#1#2#3#4{%
+	\bigskip
+	\:{{\bf COMMAND LINE\textcolon}\ \ \Wtypewriter{#1}.}\smallskip
+	\:{{\bf WEB FILE\textcolon}\ \ \Wtypewriter{#2}.}\smallskip
+	\:{{\bf CHANGE FILE\textcolon}\ \ \Wtypewriter{#3}.}\smallskip
+	\:{{\bf GLOBAL LANGUAGE\textcolon}\ \ {\rm #4}.}\bigskip
+	}
+
+\def\Wkwds{\:{\leavevmode{\bf Global RCS-like keywords\textcolon}}\medskip}
+\def\Wkwd#1#2{\:{\leavevmode\quad{\bf \dollar#1\textcolon}\ \ %
+\Wtypewriter{"#2"}}}
+
+
+\ifLaTeXisloaded
+	\def\W@settoc#1{}%
+
+	\def\Wtoc#1{\begingroup
+		\W@settoc{#1}%
+		\def\Newlabel##1##2##3{}%
+		\setcounter{tocdepth}{\W@depth}%
+		\thispagestyle{empty}%
+		\def\W@name{Table of Contents}% English!
+		\edef\next{\noexpand\W@mark{{0}{\W@name}}{{0}{\W@name}}}%
+		\next%
+		\pagenumbering{roman}%
+		\maketitle
+		\topofcontents
+		\tableofcontents
+		\botofcontents
+		\edef\next{\noexpand\W@mark{{1}{\W@name}}{{1}{}}}\next
+		\gdef\W@name{}%
+		\newpage% Break after TOC.
+		\endgroup
+		\pagenumbering{arabic}%
+		\pageno=1
+		}
+
+	\def\Wcon#1{\newpage
+		\let\WIM\WIN % Restore the proper definition.
+		\pageno=\contentspageno
+		\Wtoc{#1}%
+		}
+
+	\def\FWEBtoc{%
+		\ifFWEBstandalone
+			\Wtoc{}% No toc for insertions.
+		\fi
+		\gdef\Wcon##1{% Redefinition!
+			\W@onecolumn
+			}%
+		}
+\else
+\def\Wcon#1{\par\vfill\eject
+	\rightskip 0pt \hyphenpenalty 50 \tolerance 200
+	\setpage
+	\output{\normaloutput\page\lheader\rheader}
+	\titletrue % Prepare to output the table of contents
+	\pageno=\contentspageno
+	\def\rhead{Table of Contents}% English!
+	\topofcontents
+	\catcode`\@=11
+	\hbox to\hsize{\hfil Section\hbox to3em{\hss Page}}
+	\def\WZ##1##2##3##4{\hbox to\hsize{\kern##1em\ignorespaces##2
+		\leaders\hbox to .5em{.\hfil}\hfil\ ##3\hbox to3em{\hss##4}}}
+	\let\WIM\WIN % Restore the proper definition.
+	\readcontents\relax % Read the contents info.
+	\botofcontents
+	}
+
+\def\FWEBtoc{\message{! Front Table of Contents is only supported with LaTeX.}}
+\fi
+
+
+
+\newskip\ttglue
+
+\ttglue=0.5em plus 0.25em minus 0.15em
+
+\def\ttother{\catcode`\\=\other \catcode`\{=\other \catcode`\}=\other
+	\catcode`\$=\other \catcode`\&=\other \catcode`\#=\other
+	\catcode`\%=\other \catcode`\~=\other \catcode`\_=\other
+	\catcode`\^=\other}
+
+\def\ttverbatim{\begingroup \ttother \obeyspaces \obeylines \tt}
+
+{\obeyspaces\gdef {\ }}
+
+\def\begintt{$$\let\par=\endgraf
+	\ttverbatim
+	\parskip=0pt
+	\rightskip=-\parindent
+	\ttfinish}
+
+\def\Begintt{\bgroup
+	\let\par=\endgraf
+	\ttverbatim
+	\parskip=0pt
+	\rightskip=-\parindent
+	\ttFinish}
+
+{\catcode`\|=0
+	|catcode`|\=\other
+	|obeylines%
+	|gdef|ttfinish#1^^M#2\endtt{#1|vbox{#2}|endgroup$$}%
+	|gdef|ttFinish#1\Endtt{#1|endgroup|egroup}}
+
+\let\verticalbar|
+
+\def\activebar{\catcode`\|=\active}
+
+{\activebar
+\gdef\normalbar{\activebar
+	\let|\verticalbar}}
+
+
+{\obeylines%
+\gdef\ttbar{\activebar%
+	{\obeylines\gdef|{\ttverbatim%
+		\spaceskip=\ttglue%
+		\let^^M=\ \let|=\endgroup}}}}
+
+\let\WCX\Begintt
+
+
+\catcode`\@=12
+
+

@@ -1,0 +1,3358 @@
+@z --- ratfor.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+
+\Title{RATFOR.WEB} % Ratfor statement translation for FTANGLE.
+
+@c
+@* RATFOR. Here we endow \FTANGLE\ with a \RATFOR-like syntax that will
+be expanded directly into \Fortran\ code. This processing will work
+during the output phase involving |get_output()| and |out_char()|.
+
+This code is recent; the initial goal was to achieve functionality. Some
+improvements are obvious. In particular, the \RATFOR\ tokens and associated
+functions should be better integrated into the list of all tokens, instead 
+of being held in a separate list. This improvement will be made in future
+versions. 
+ 
+@m _RATFOR_
+@d _RATFOR_h
+@d _ratfor_ /* Used in \.{r\_type.web}. */
+
+@A
+@<Possibly split into parts@>@;
+
+@<Include files@>@;
+@<Typedef declarations@>@;
+@<Prototypes@>@;
+@<Global variables@>@;
+
+/* For pc's, the file is split into two compilable parts using the
+compiler-line macro |part|, which must equal either~1 or~2. */
+#if(part != 2)
+	@<Part 1@>@;
+#endif /* Part 1 */
+
+#if(part != 1)
+	@<Part 2@>@;
+#endif /* Part 2 */
+
+@I typedefs.hweb /* Declarations common to both \FTANGLE\ and \FWEAVE. */
+
+@I t_codes.hweb /* Definitions of some constants. */
+@I texts.hweb 
+@I stacks.hweb
+@I val.hweb
+@I macs.hweb
+@I trunc.hweb
+
+@
+@<Include...@>=
+#include "map.h"
+
+@ The function prototypes must appear before the global variables.
+@<Proto...@>=
+
+#include "t_type.h" /* Function prototypes for everything. */
+
+@ We need to declare variables defined in \FTANGLE.
+
+@d UNNAMED_MODULE 0
+@d N_IDBUF 100
+
+@<Glob...@>=
+
+EXTERN boolean mac_protected,in_string; 
+EXTERN text_pointer macro_text;
+EXTERN long cur_val;
+EXTERN OUTPUT_STATE out_state;
+EXTERN int indent_level,out_pos,rst_pos,indnt_size;
+EXTERN eight_bits sent;
+
+IN_COMMON STMT_LBL max_stmt;
+IN_COMMON sixteen_bits outp_line[];
+
+@ We need to know whether this whole package has been linked on.
+
+@<Part 1@>=@[
+
+SRTN 
+is_Rat_present(VOID)
+{
+Rat_is_loaded = YES;
+}
+
+@
+@<Part 1@>=@[
+
+boolean 
+Rat_OK FCN((msg))
+	outer_char *msg C1("")@;
+{
+return YES;
+}
+
+@ Here are the various special tokens:
+
+@<Global variables@>=
+
+/* Expandable input tokens. */
+IN_RATFOR sixteen_bits
+ id_block, id_blockdata, id_break, 
+ id_case, 
+#if(0)
+ id_continue,
+#endif
+ id_default, id_do,  
+ id_else, id_elseif, id_end,
+ id_endif, 
+ id_for,
+#if(0)
+ id_goto,
+#endif
+ id_if, 
+ id_next, id_procedure, id_repeat,
+ id_return, id_switch, id_then, id_until, 
+ id_while;
+
+IN_RATFOR sixteen_bits id_function,id_program,id_subroutine;
+
+IN_RATFOR sixteen_bits
+ id_contains, id_elsewhere, id_endinterface, id_endtype, id_endmodule,
+ id_endselect, id_endwhere, id_interface, id_module,  id_type, id_where;
+
+/* Non-expandable input tokens. */
+IN_RATFOR sixteen_bits id_data;
+
+/* Output tokens. */
+IN_RATFOR sixteen_bits
+  id__CASE,id__CONTINUE,id__DEFAULT,
+	id__DO,id__ELSE,id__ELSEIF,id__END,
+	id__ENDIF,id__EXIT,id__GOTO,id__IF,
+	id__RETURN,id__THEN,
+	id__WHILE;
+
+/* More output tokens for \Fortran--90. */
+IN_RATFOR sixteen_bits
+  id__CONTAINS,id__CYCLE,id__ENDWHERE,id__INTERFACE,id__MODULE,
+  id__SELECT,id__TYPE,id__WHERE;
+
+@% static sixteen_bits id__ELSEWHERE; // This must be worked on.
+
+/* The following tokens are printed as the result of \Ratfor\ translation.
+(The lengths are filled in by |ini_out_tokens|.) */
+IN_RATFOR SPEC out_tokens[]
+#if(part == 0 || part == 1)
+	 = {
+	{"CASE",0,NULL,&id__CASE},
+	{"CONTINUE",0,NULL,&id__CONTINUE},
+	{"DEFAULT",0,NULL,&id__DEFAULT},
+	{"DO",0,NULL,&id__DO},
+	{"ELSE",0,NULL,&id__ELSE},
+	{"ELSEIF",0,NULL,&id__ELSEIF},
+	{"END",0,NULL,&id__END},
+	{"ENDIF",0,NULL,&id__ENDIF},
+	{"EXIT",0,NULL,&id__EXIT},
+	{"GOTO",0,NULL,&id__GOTO},
+	{"IF",0,NULL,&id__IF},
+	{"RETURN",0,NULL,&id__RETURN},
+	{"THEN",0,NULL,&id__THEN},
+	{"WHILE",0,NULL,&id__WHILE},
+	{"",0,NULL,NULL}
+	}
+#endif
+	;
+
+IN_RATFOR SPEC out90_tokens[]
+#if(part == 0 || part == 1)
+	 = {
+	{"CONTAINS",0,NULL,&id__CONTAINS},
+	{"CYCLE",0,NULL,&id__CYCLE},
+	{"ENDWHERE",0,NULL,&id__ENDWHERE},
+	{"INTERFACE",0,NULL,&id__INTERFACE},
+	{"MODULE",0,NULL,&id__MODULE},
+	{"SELECT",0,NULL,&id__SELECT},
+	{"TYPE",0,NULL,&id__TYPE},
+	{"WHERE",0,NULL,&id__WHERE},
+	{"",0,NULL,NULL}
+	}
+#endif
+	;
+
+/* The following is used during \FORTRAN-88\ |case| expansion to see
+whether the last |case| ended with |break|. */
+eight_bits break_tokens[3];
+
+/* These are the special \Ratfor\ tokens that are expanded. */
+IN_RATFOR SPEC spec_tokens[]
+#if(part == 0 || part == 1)
+	 = {
+	{"block",0,x_block,&id_block},
+	{"blockdata",0,x_blockdata,&id_blockdata},
+	{"break",0,x_break,&id_break},
+	{"case",0,(X_FCN (*@e)(VOID))x_case,&id_case},
+	{"default",0,(X_FCN (*@e)(VOID))x_default,&id_default},
+	{"do",0,x_do,&id_do},
+	{"else",0,x_else,&id_else},
+	{"elseif",0,x_els_if,&id_elseif},
+	{"end",0,x_end,&id_end},
+	{"endif",0,x_en_if,&id_endif},
+	{"for",0,x_for,&id_for},
+	{"function",0,x_function,&id_function},
+	{"if",0,x_if,&id_if},
+	{"next",0,x_next,&id_next},
+	{"procedure",0,x_procedure,&id_procedure},
+	{"program",0,x_program,&id_program},
+	{"repeat",0,x_repeat,&id_repeat},
+	{"return",0,x_return,&id_return},
+	{"switch",0,x_switch,&id_switch},
+	{"subroutine",0,x_subroutine,&id_subroutine},
+	{"then",0,x_then,&id_then},
+	{"until",0,x_until,&id_until},
+	{"while",0,x_while,&id_while},
+	{"",0,NULL,NULL}
+	}
+#endif
+	;
+
+/* \Fortran--90. */
+IN_RATFOR SPEC spec90_tokens[]
+#if(part == 0 || part == 1)
+	 = {
+	{"contains",0,x_contains,&id_contains},
+	{"endinterface",0,x_en_interface,&id_endinterface},
+	{"endmodule",0,x_en_module,&id_endmodule},
+	{"endselect",0,x_en_select,&id_endselect},
+	{"endtype",0,x_en_type,&id_endtype},
+	{"endwhere",0,x_en_where,&id_endwhere},
+	{"interface",0,x_interface,&id_interface},
+	{"module",0,x_module,&id_module},
+	{"type",0,x_type,&id_type},
+	{"where",0,x_where,&id_where},
+	{"",0,NULL,NULL}
+	}
+#endif
+	;
+
+@ Interface to \.{reserved}; initialize the special \Ratfor\ tables. 
+
+@<Part 1@>=@[
+
+SRTN 
+ini_RAT_tokens FCN((language0))
+	LANGUAGE language0 C1("")@;
+{
+switch(language0)
+	{
+   case RATFOR_90:
+	ini_special_tokens(language0,spec90_tokens);
+	ini_out_tokens(out90_tokens); 
+
+/* The previous case falls through to here! */
+   case RATFOR:
+	ini_special_tokens(language0,spec_tokens);// Initialize special tokens.
+	ini_out_tokens(out_tokens); //  Printed during Ratfor expansion.
+	break;
+
+   default:
+	CONFUSION("ini_RAT_tokens","Language should be RATFOR-like here");
+	}
+
+ini_univ_tokens(language0);
+@<Store miscellaneous tokens@>@;
+}
+
+@
+@<Store miscellaneous tokens@>=
+{
+ASCII HUGE *pd;
+
+/* Store the phrase ``|break;|''. */
+break_tokens[0] = LEFT(id_break,ID0);
+break_tokens[1] = RIGHT(id_break);
+break_tokens[2] = @';';
+
+pd = x_to_ASCII(OC("data"));
+id_data = ID_NUM(pd,pd+4);
+}
+
+@ Here is another interface to \FTANGLE.  In \Fortran--90, certain loops
+can be preceded by symbolic labels.  \Ratfor--90 checks for that, and if
+they're present will label the ends of the loops with those labels.
+@<Glob...@>=
+
+IN_RATFOR sixteen_bits sym_label RSET(0);
+
+@ This function is called from \FTANGLE.  It considers whether the token in
+|cur_val| is a label; it returns one of three values:
+$$\vbox{\halign{#\hfil&\ ---\ \vtop{\hsize0.75\hsize\noindent\hang\strut
+	#\strut}\hfil\cr
+|NO|&The identifier isn't followed by a colon, so it's not a label.\cr
+|-1|&It's a label, but doesn't label a special \Ratfor\ token.\cr
+|YES|&It's a label on a special \Ratfor\ token such as |@r9 where|.\cr
+}}$$
+
+@<Part 1@>=@[
+
+int 
+chk_lbl(VOID)
+{
+sixteen_bits a;
+
+if(next_byte() == @':')
+	{
+	sym_label = (sixteen_bits)cur_val; // Remember symbolic label.
+
+	if(TOKEN1(a=next_byte())) BACK_UP@;
+	else 
+		{ // Labelled identifier.
+		a = IDENTIFIER(a,next_byte()); // Labelled token.
+
+		if(name_dir[a].expandable)
+			{ // It's a labelled \Ratfor\ token.
+			cur_val = a;
+			return YES;
+			}
+		else
+			{ // Nothing special about this label; spit it out.
+			BACK_UP@;
+			cur_val = sym_label;
+			sym_label = ignore;
+
+			checking_label = YES;
+				out_char(identifier);
+			checking_label = NO;
+
+			return -1;
+			}
+		}
+	}
+
+// The identifier isn't followed by a colon, so it isn't a label.
+sym_label = ignore;
+BACK_UP@;
+return NO;
+}
+
+@* ERROR MESSAGES.
+The Ratfor routines issue special error messages. They employ ANSI's
+variable argument conventions. This may be a sticky point for users of
+pre-ANSI compilers.
+
+@d fatal_RAT_ERROR(s1,s2,s3) {RAT_ERROR(ERROR,s1,0); FATAL(R, s2, s3);}
+
+@<Part 1@>=@[
+
+SRTN 
+RAT_error FCN(VA_ALIST((err_type,msg,n VA_ARGS)))
+	VA_DCL(
+	ERR_TYPE err_type C0("Is it warning or error?")@;
+	CONST outer_char msg[] C0("Error message.")@;
+	int n C2("Number of arguments to follow.")@;)@;
+{
+VA_LIST(arg_ptr)@;
+outer_char HUGE *temp, HUGE *temp1;
+int last_level;
+#if(NUM_VA_ARGS == 1)
+	ERR_TYPE err_type;
+	CONST outer_char *msg;
+	int n;
+#endif
+
+temp = GET_MEM("RAT_error:temp",N_MSGBUF,outer_char);
+temp1 = GET_MEM("RAT_error:temp1",N_MSGBUF,outer_char);
+
+VA_START(arg_ptr,n);
+
+#if(NUM_VA_ARGS == 1)
+	err_type = va_arg(arg_ptr,ERR_TYPE);
+	msg = va_arg(arg_ptr,char *);
+	va_arg(arg_ptr,int);
+#endif
+
+vsprintf((char *)temp1,(CONST char *)msg,arg_ptr);
+va_end(arg_ptr);
+
+SPRINTF(N_MSGBUF,temp,`"RATFOR %s (Output l. %u in %s):  %s.",
+	err_type == ERROR ? "ERROR" : "WARNING",
+	OUTPUT_LINE,params.OUTPUT_FILE_NAME,temp1`);
+
+last_level = MAX(rlevel-1,0);
+
+SPRINTF(N_MSGBUF,temp1,
+	`"%s  Expanding \"%s\" (loop level %d) beginning at output line %u.  \
+In \"%s %s\" beginning at line %u.",
+	(char *)temp,
+	(char *)cmd_name(begun[last_level].cmd),
+	begun[last_level].level, begun[last_level].line,
+	(char *)cmd_name(begun[0].cmd),
+	(char *)name_of(begun[0].name),
+	begun[0].line`);
+
+printf("\n%s\n", (char *)temp1);	 // Error msg to the terminal.
+OUT_MSG(to_ASCII(temp1),NULL); // Error msg to the file.
+
+mark_error;
+
+FREE_MEM(temp,"RAT_error:temp",N_MSGBUF,char);
+FREE_MEM(temp1,"RAT_error:temp1",N_MSGBUF,char);
+}
+
+@ Various checks are made for premature end-of-file. The next routine
+prints an appropriate error message, then aborts.
+
+@m OUTPUT_ENDED(msg,n,...) 
+	output_ended(OC(msg),n,#.)
+
+@<Part 1@>=@[
+
+SRTN 
+output_ended FCN(VA_ALIST((msg,n VA_ARGS)))
+	VA_DCL(
+	CONST outer_char msg[] C0("Error message.")@;
+	int n C2("Number of arguments to follow.")@;)@;
+{
+VA_LIST(arg_ptr)@;
+char HUGE *temp;
+
+temp = GET_MEM("output_ended:temp",N_MSGBUF,char);
+
+VA_START(arg_ptr,n);
+vsprintf_(temp,(CONST char *)msg,arg_ptr)@;
+va_end(arg_ptr);
+
+RAT_ERROR(ERROR,"Output ended %s",1,temp);
+FATAL(R, "ABORTING!", "");
+}
+
+@ For the error messages, we need to translate between the |CMD| type and
+the actual name.
+
+@m TC(name) case name##_CMD: return OC(#name)
+
+@<Part 1@>=@[
+
+outer_char HUGE *
+cmd_name FCN((cmd))
+	CMD cmd C1("Type of command.")@;
+{
+switch(cmd)
+	{
+   case _DO_CMD:
+	return OC("$DO");
+
+	TC(blockdata);
+	TC(break);
+	TC(case);
+	TC(contains);
+	TC(default);
+	TC(do);
+	TC(for);
+	TC(function);
+	TC(if);	
+	TC(interface);
+	TC(module);
+	TC(next);
+	TC(program);
+	TC(repeat);
+	TC(return);
+	TC(subroutine);
+	TC(switch);
+	TC(type);
+	TC(until);
+	TC(where);
+	TC(while);
+	default: return OC("UNKNOWN CMD");
+	}
+}
+
+@ Print an error message if |case| or |default| don't occur inside a |switch|.
+
+@<Part 1@>=@[
+
+SRTN 
+not_switch FCN((s))
+	CONST outer_char s[] C1("Error message.")@;
+{
+RAT_ERROR(ERROR,"Misplaced keyword: \
+\"%s\" must be used only inside \"switch\"",1,s);
+}
+
+@ Miscellaneous error-checking macros.
+@<Part 1@>=@[
+SRTN didnt_expand FCN((c0,c,op))
+	eight_bits c0 C0("")@;
+	eight_bits c C0("")@;
+	CONST char *op C1("")@;
+{
+RAT_ERROR(ERROR,"Was expecting '%c', not '%c', after \"%s\"; \
+expansion aborted",3,XCHR(c0),XCHR(c),op);
+}
+
+@ Print an error message if the appropriate character didn't follow a
+keyword.  If the correct character did follow, then it is eaten.
+
+@<Part 1@>=@[
+boolean 
+char_after FCN((c))
+	outer_char c C1("Character expected next.")@;
+{
+if((ASCII)(next_byte()) != XORD(c)) 
+	{
+	RAT_ERROR(WARNING,"Inserted '%c' after \"%s\"",
+		1,c,cmd_name(begun[rlevel-1].cmd)); 
+	BACK_UP@;
+	return NO;
+	}
+
+return YES;
+}
+
+@* SCANNING AHEAD.
+When we scan ahead to process the various \Ratfor\ commands, we must
+expand macros; we can't wait until they're sent to the output file. The
+function |next_byte| is akin to |get_output|; it returns the next
+(eight-bit) byte after macro expansion, but doesn't send it to the output.
+Because sometimes two bytes must be read as a unit, but we return only one
+at a time, we must sometimes save one byte until the next call to
+|next_byte|.
+
+@<Glob...@>=
+
+IN_RATFOR boolean saved_token RSET(NO); // Is there another byte waiting?
+IN_RATFOR eight_bits last_a; // The byte that was saved.
+IN_RATFOR int last_bytes; 
+	/* Length (either~1 or~2) of the token just read. Used to
+			back up properly. */
+
+@ The |next_byte| function automatically advances the |cur_byte| pointer
+beyond the thing it returns. Sometimes, we must back up because of that.
+
+@<Part 1@>=@[
+
+eight_bits 
+next_byte(VOID)
+{
+eight_bits a0; // The next byte.
+sixteen_bits a; // Next two-byte token.
+static boolean ended_module = NO;
+long cur_val0; // Incoming value of |cur_val|.
+
+/* Check if there's a byte already waiting. */
+if(saved_token)
+	{
+	saved_token = NO;
+	return last_a;
+	}
+
+cur_val0 = cur_val; // Trouble if we don't restore the state of |cur_val|.
+
+WHILE()
+	{
+	if(DONE_LEVEL)
+		{
+		if(!ended_module)
+			{
+			cur_val = -(long)cur_mod;
+			if(cur_val != ignore) OUT_CHAR(module_number);
+			ended_module = YES;
+			}
+
+		if(!pop_level()) 
+			{
+			a0 = ignore;
+			break;
+			}
+
+		ended_module = NO;
+		}
+
+	if(TOKEN1(a0= *cur_byte++)) 
+		{
+		if(a0==ignore && !in_string) 
+			continue; // Forget about null bytes.
+
+		if(rlevel > 0 && a0==begin_language)
+			{ /* Skip the |begin_language|--|NUWEB_OFF| pair. */
+			cur_byte++;
+			continue;
+			}
+
+		last_bytes = 1;
+		break;
+		}
+
+	@<Expand two-byte token@>@;
+	}
+
+return_next_byte:
+	cur_val = cur_val0;
+	return a0;
+}
+
+@ For |next_byte|:
+@<Expand two-byte token@>=
+{
+a = IDENTIFIER(a0,last_a= *cur_byte++);
+last_bytes = 2;
+
+/* Expand the two-byte token. */
+switch(a/MODULE_NAME)
+	{
+	case 0: /* An identifier. */
+
+		if(is_deferred(a)) continue; // Execute deferred macro def'n.
+
+/* If it's a macro, expand it. */
+		if(!mac_protected && 
+			   (macro_text=(text_pointer)mac_lookup(a)) != NULL) 
+			{
+			eight_bits HUGE *p;
+			long cur_val0 = cur_val;
+
+			cur_val = a; // In case it's a built-in function.
+			p = xmacro(macro_text, &cur_byte, &cur_end, YES,
+				macrobuf);
+			cur_val = cur_val0;
+			push_level(NULL, p, mp);
+			break;
+			}
+		else if(!balanced && language==RATFOR &&
+			 (a==id_function || a==id_program || a==id_subroutine))
+			{
+	RAT_ERROR(ERROR,"Inserted missing '%c' at beginning of function",
+		1,XCHR(cur_delim));
+			cur_byte -= 2;
+			saved_token = NO;
+			a0 = cur_delim;
+			goto return_next_byte;
+			}
+		else
+			{
+			saved_token = YES;
+			goto return_next_byte;
+			}
+
+	case 1: /* Module name. */
+		x_mod_a(a);
+		break;
+
+	default:
+		cur_val = a - MODULE_NUM;
+		if(cur_val > UNNAMED_MODULE) cur_mod = (sixteen_bits)cur_val;
+		OUT_CHAR(module_number);
+	}
+}
+
+@ In various contexts, we must skip over newlines.  In doing so, verbatim
+comments are either copied to the output or saved in a buffer for later
+writing. 
+
+@d COPY_COMMENTS NO
+@d SAVE_COMMENTS YES
+
+@<Glob...@>=
+
+IN_RATFOR eight_bits HUGE *cmnt_buf RSET(NULL), 
+	HUGE *cmnt_buf_end RSET(NULL),
+	HUGE *cmnt_pos RSET(NULL);
+
+@
+@<Part 1@>=@[
+
+SRTN 
+skip_newlines FCN((save_comments))
+	boolean save_comments C1("")@;
+{
+eight_bits a;
+
+if(save_comments)
+	{ // Allocate a buffer to hold the comments.
+	cmnt_pos = cmnt_buf = GET_MEM("cmnt_buf",SAVE8,eight_bits);
+	cmnt_buf_end = cmnt_buf + SAVE8;
+	}
+
+while((a=copy_comment(save_comments)) == @'\n') ;
+
+if(a == ignore) OUTPUT_ENDED("while skipping newlines",0);
+
+BACK_UP@;
+}
+
+@ While skipping newlines, we should also copy any verbatim comments
+directly to the output, or save them in a buffer. Verbatim comments are
+bracketed by |stringg|.  
+
+@<Part 1@>=@[
+eight_bits 
+copy_comment FCN((save_comments))
+	boolean save_comments C1("")@;
+{
+eight_bits a;
+
+WHILE()
+	if((a=next_byte()) != stringg) return a;
+/* Beginning of string. */
+	else if(save_comments)
+		{ /* Save in preallocated buffer, for later use with
+|flush_comments|. */
+		*cmnt_pos++ = a;
+		in_string = YES;
+		while((a=next_byte()) != stringg)
+			{
+			if(cmnt_pos == cmnt_buf_end)
+			       resize(&cmnt_buf,SAVE8,&cmnt_pos,&cmnt_buf_end);
+
+			*cmnt_pos++ = a;
+			}
+		*cmnt_pos++ = a;
+		in_string = NO;
+		}
+	else
+		{ // Copy directly to output.
+		OUT_CHAR(stringg);
+		while((a=get_output()) != stringg) ;
+		}
+
+DUMMY_RETURN(ignore);
+}
+
+@ When comments have been saved in |cmnt_buf|, the following code writes
+them out. 
+
+@<Part 1@>=@[
+
+SRTN 
+flush_comments(VOID)
+{
+eight_bits *p;
+
+if(!cmnt_buf) return; // Nothing left in buffer.
+
+for(p=cmnt_buf; p < cmnt_pos; p++) out_char(*p); // Print out saved stuff.
+if(cmnt_pos > cmnt_buf) NL; // If there was a comment, issue a newline.
+
+FREE_MEM(cmnt_buf,"cmnt_buf",SAVE8,eight_bits);
+cmnt_buf = cmnt_buf_end = cmnt_pos = NULL;
+}
+
+@ In the course of the expansions, one must print out special tokens,
+but not expand them again.
+
+@<Part 1@>=@[
+
+SRTN 
+id0 FCN((cur_val))
+	sixteen_bits cur_val C1("Token to print out.")@;
+{
+if(cur_val == ignore) return;
+
+if (out_state==NUM_OR_ID) C_putc(' '); // Space properly between identifiers.
+
+out_ptrunc(cur_val); /* Output a possibly truncated identifier; see
+			\.{ftangle.web}. */
+out_state = NUM_OR_ID;
+}
+
+@ We will maintain a stack of labels, referring to the top of, the bottom
+of, and the next statement after the block being expanded. It also holds
+the labels of the next |case| and |default| statements, and the identifier
+token that is being used for comparisons in the current |switch|.
+
+@d current_cmd lbl[wlevel].cmd
+@d do_or_while (current_cmd==do_CMD || current_cmd==while_CMD)
+
+@d s_top lbl[wlevel].Top
+@d s_next lbl[wlevel].Next
+@d was_next lbl[wlevel].was_Next
+@d s_break lbl[wlevel].Break
+@d was_break lbl[wlevel].was_Break
+@d s_case lbl[wlevel].Case
+@d s_default lbl[wlevel].Default
+@d icase lbl[wlevel].Icase
+
+@f CMD int
+
+@<Glob...@>=
+typedef struct
+	{
+	CMD cmd; // The command that initiated this block.
+	STMT_LBL Top,Next,Break; // Statement labels for loops.
+	STMT_LBL Case,Default; // Labels for next |case| or |default|.
+	sixteen_bits Icase; // Identifier token for current comparand.
+	unsigned was_Break:1, // Did a |break| occur?
+		was_Next:1; // Did a |@r next| occur?
+	} LBL;
+
+IN_RATFOR LBL HUGE *lbl, HUGE *lbl_end; // Dynamic array.
+IN_RATFOR BUF_SIZE max_lbls; // Dynamic allocation length.
+
+IN_RATFOR int wlevel RSET(0); 
+	/* Current level of expansion that can be broken out of
+			with a |break| or |next|.  This is incremented for
+			such things as |do|, but not for such things as
+			|if|. */
+
+@ Allocate an array of loop info.
+@<Allocate dynamic memory@>=
+
+ALLOC(LBL,lbl,ABBREV(max_lbls),max_lbls,0);
+lbl_end = lbl + max_lbls;
+
+@ At the beginning of the loop expansion routines such as |@n9 where| or~|do|
+(but not~|if|), we must put appropriate statement labels onto the stack.
+
+@<Part 1@>=@[
+
+int 
+save_lbls FCN((cmd,top0,next0,break0,n_used))
+	CMD cmd C0("The current command.")@;
+	STMT_LBL top0 C0("Label number for top of block.")@;
+	STMT_LBL next0 C0("Go here on |next|.")@;
+	STMT_LBL break0 C0("Go here on |break|.")@;
+	int n_used C1("Number of labels used in this expansion.")@;
+{
+/* Advance the level counter; check for overflow. */
+if(++wlevel >= (int)max_lbls) OVERFLW("stmt labels","");
+
+current_cmd = cmd; /* Save type of block. */
+s_top = top0; /* Top of block. */
+s_next = next0; /* Jump here on |@r next|. */
+s_break = break0; /* Jump here on |@r break|. */
+was_break = was_next = NO; // Did one occur during loop?
+
+max_stmt += n_used; /* Advance the statement counter to ensure unique 
+				labels. */ 
+
+s_case = s_default = 0;
+icase = ignore;
+
+return wlevel;
+}
+
+@ In various contexts, we must send the character expansion of a statement
+number or other integer. If it's a statement label, we should suppress it
+if it's~0.
+
+@d DONT_PRINT_IF_0 YES
+@d PRINT_IF_0 NO
+
+@<Part 1@>=@[
+
+SRTN 
+out_label FCN((suppress_0,stmt_num))
+	boolean suppress_0 C0("Suppress if zero?")@;
+	STMT_LBL stmt_num C1("Statement number to print.")@;
+{
+outer_char temp[N_IDBUF];
+outer_char *p;
+
+if(stmt_num == (STMT_LBL)0 && suppress_0) return;
+
+/* In \Fortran, the statement number must be $\le 99999$. */
+if(stmt_num > (STMT_LBL)99999)
+	{
+	stmt_num = (STMT_LBL)99999;
+	RAT_ERROR(WARNING,
+		"Automatic statement number out of bounds; %ld assumed",
+		1,stmt_num);
+	}
+
+SPRINTF(N_IDBUF,temp,`"%ld",stmt_num`);
+
+OUT_CHAR(constant);
+	for(p=temp; *p; p++) 
+		OUT_CHAR(XORD(*p));
+OUT_CHAR(constant);
+}
+
+@ In expanding |if|s and |while|s, we must copy stuff through a balanced
+closing delimiter, ignoring such delimiters within strings. The routine is
+also used for scanning compound statements. In this case, it is expected
+that the opening brace has already been read.
+
+When we're in the middle of a scan, the variable |balanced| will be~|NO|;
+this can be used in the various output routines such as |get_output| to
+help limit the scope of the scan, if one recognizes a situation that
+couldn't possibly arise within the scan.
+
+@<Glob...@>=
+
+IN_RATFOR boolean balanced RSET(YES);
+IN_RATFOR ASCII cur_delim RSET('\0');
+
+@ The |copyd| function is basically simple: it copies from left-hand
+delimiter~|l| to and including right-hand delimiter~|r|. If the |to|
+argument is |NULL|, stuff is copied to the output. Otherwise, it is copied
+to memory. The memory copy is necessary only when processing a |switch|.
+All the text of the |switch| must be read and stored so the cases can be
+analyzed for the appropriate kind of expansion---computed |goto| or |if|
+statements. While processing a |switch|, only the keywords |case| and
+|default| are expanded immediately. (Expansion means closing off the
+previous case and initializing the new one, so the tokens are stored in the
+appropriate place.)  However, if a |switch| is nested, then the
+|case| and |default| of the inner |switch| should not be processed when
+it's stored. The argument |xpn_cases| prevents such premature expansion.
+
+@d TO_OUTPUT NO /* First  argument of |copyd|. */
+@d TO_MEMORY YES
+
+@d SAVE_IN_MEM(a) {if(cur_case->txt.next >= cur_case->txt.end)
+			resize(&cur_case->txt.start,BIG_SAVE8,
+				&cur_case->txt.next, 
+				&cur_case->txt.end);
+	*(cur_case->txt.next++) = (eight_bits)(a);}
+
+@d SAVE_16 {SAVE_IN_MEM(a0)@; SAVE_IN_MEM(a1)@;} /* Store a 16-bit token. */
+
+@d XPN_CASES YES
+@d DONT_XPN_CASES NO
+
+@d BLEVELS 100
+
+@<Part 1@>=@[
+
+SRTN 
+copyd FCN((to_memory,xpn_cases,l,r,semi_allowed))
+	boolean to_memory C0("To memory?")@;
+	boolean xpn_cases C0("Expand |case| statements?")@;
+	ASCII l C0("Left-hand delimiter.")@;
+	ASCII r C0("Right-hand delimiter.")@;
+	boolean semi_allowed C1("Is a semicolon allowed in the text to be \
+copied?")@; 
+{
+int bal,bal0[BLEVELS];
+LINE_NUMBER starting_line;
+eight_bits (*output_rtn)(VOID);
+sixteen_bits a,last_token;
+sixteen_bits l0 = ignore,r0 = ignore;
+boolean found_semi;
+boolean balanced0 = balanced; // Save since possible recursion.
+ASCII cur_delim0 = cur_delim;
+
+@<Set up |l0| and |r0|@>@;
+
+if(l == @'{' && xpn_cases) /* We should be positioned after the brace. */
+	{
+	if(DONE_LEVEL && !pop_level()) OUTPUT_ENDED("after '{'",0);
+
+	bal0[bal = 1] = 0; /* Don't copy the opening brace. */
+	}
+else 
+	{
+	if((ASCII)(next_byte()) != l) 
+		{
+		RAT_ERROR(ERROR,"Missing opening delimiter '%c'; \
+text not copied",
+			1,XCHR(l));
+		return;
+		}
+
+/* Include the opening delimiter in the copy. */
+	BACK_UP@;
+	bal0[bal = 0] = 0; 
+	}
+
+starting_line = OUTPUT_LINE;
+
+/* Normally we copy the stuff directly to the output. However, if we're
+	processing a |switch|, we store it. */
+output_rtn = to_memory ? next_byte : get_output;
+
+/* We use |last_token| to help check for a semicolon just before the closing
+delimiter. */
+last_token = ignore;
+found_semi = NO;
+
+/* For use with check in |get_output|. */
+balanced = NO;
+cur_delim = r;
+
+WHILE()
+	{
+	a = (sixteen_bits)(*output_rtn)(); /* Copy a token to the output,
+and remember it. */ 
+
+	if(to_memory && a==(sixteen_bits)stringg) 
+		in_string = BOOLEAN(!in_string);
+
+	if(!in_string) @<Check for balanced delimiter@>@;
+
+	if(to_memory) @<Store stuff in memory@>@;
+	}
+
+balanced = balanced0;
+cur_delim = cur_delim0;
+}
+
+@ The routine |copyd| is used to scan only between matched parentheses or
+matched braces.  We check to avoid imbalances such as \.{(\dots \{\dots )}.
+The scan set is |{l,r}|; the alternate set is |{l0,r0}|.
+
+@<Set up |l0|...@>=
+
+switch(l)
+	{
+   case @'{':
+	l0 = @'('; @~ r0 = @')';
+	break;
+
+   case @'(':
+	l0 = @'{'; @~ r0 = @'}';
+	break;
+
+   default:
+	CONFUSION("copyd", "Invalid left delimiter 0x%x", l);
+	}
+
+@ We maintain a brace balance for the scan set, and also for the alternate
+set, so we can catch various kinds of interlacing problems.
+
+@<Check for balanced delim...@>=
+{
+if(a == ignore)	OUTPUT_ENDED("while scanning for '%c'.  Scan began \
+with delimiter '%c' at line %u",3,XCHR(r),XCHR(l),starting_line);
+
+if(a == (sixteen_bits)l) bal0[++bal] = 0;
+else if(a == (sixteen_bits)r) @<Check right-hand delimiter~|r|@>@;
+else if(a == l0) bal0[bal]++;
+else if(a == r0) @<Check alternate right-hand delimiter~|r0|@>@;
+else if(a != stringg)
+	{
+	if(a==@';')
+		if(semi_allowed) found_semi = YES;
+		else RAT_ERROR(ERROR,"Spurious semicolon",0);
+
+	if(chk_stmts)
+		if(!to_memory && a==id_keyword) last_token = ignore;
+		else last_token = a; /* Remember last character so we can check
+				for semicolon. */
+	}
+}
+
+@
+@<Check right-hand delim...@>=
+{
+if(bal <= 0)
+	{
+	if(!to_memory) out_pos--; // Kill off what was already output.
+	unmatched(l,r);
+	continue;
+	}
+else 
+	{
+	if(bal0[bal] != 0)
+		{
+		inserted(bal0[bal],l0,r0,l,bal);
+
+		while(bal0[bal]--)
+			if(to_memory) SAVE_IN_MEM(r0)@;
+			else OUT_CHAR(r0);
+		}
+		
+	if(--bal == 0) 
+		{
+		if(semi_allowed && last_token && last_token != @';')
+			{
+			RAT_ERROR(WARNING,"Supplied missing ';' before \
+delimiter '%c'", 1,r);
+
+			if(to_memory) SAVE_IN_MEM(@';')@;
+			else OUT_CHAR(@';');
+			}
+
+		if(to_memory) SAVE_IN_MEM(r)@;
+
+/* We've successfully found the end of the scan. */
+		balanced = YES;
+		cur_delim = '\0';
+		break;
+		}
+	}
+}
+
+@
+@<Check alternate right...@>=
+{
+if(bal0[bal] <= 0)
+	{
+	if(!to_memory) out_pos--;
+	unmatched((ASCII)l0,(ASCII)r0);
+	continue;
+	}
+else bal0[bal]--;
+}
+
+@ The nuance here is to remember that certain single-byte tokens such as
+|dot_const| are really escapes that are followed by data.  That data need
+not conform to the standard interpretation of a token, so must be copied
+explicitly. 
+@<Store stuff in memory@>=
+{
+if(TOKEN1(a)) 
+	{
+	SAVE_IN_MEM(a)@; /* Store it if necessary. */ 
+
+	switch(a)
+		{
+	   case dot_const:
+	   case begin_language:
+		SAVE_IN_MEM(*cur_byte++);
+		break;
+
+	   case new_output_file:
+		RAT_ERROR(ERROR,"@@o command not allowed inside switch",0);
+		}
+	}
+else
+	{
+	if(xpn_cases)
+		@<Possibly expand 16-bit token@>@;
+	 else 
+		{/* For inner |switches|, just copy tokens. */
+		SAVE_IN_MEM(a)@;
+		SAVE_IN_MEM(next_byte())@;
+		}
+	}
+}
+
+@ While processing a |switch|, we copy everything to memory except for
+|case| and |default|, which are expanded immediately. Also, an inner
+|switch| should just be copied in its entirety.
+
+@<Possibly expand 16...@>=
+@B
+eight_bits a0,a1;
+
+@b
+a = IDENTIFIER(a0=(eight_bits)a,a1=next_byte());
+
+if(a==id_switch)
+	{
+	SAVE_16; /* |switch|. */
+	copyd(TO_MEMORY,DONT_XPN_CASES,@'(',@')',NO); /* $(\dots)$ */
+	skip_newlines(COPY_COMMENTS);
+	copyd(TO_MEMORY,DONT_XPN_CASES,@'{',@'}',YES); /* |{body;}| */
+	}
+else if(a==id_case) x_case();
+else if(a==id_default) x_default();
+else SAVE_16;
+}
+
+@ Interface to \FTANGLE.
+
+@<Part 1@>=@[
+
+SRTN 
+cp_fcn_body(VOID)
+{
+brace_level++;
+copyd(TO_OUTPUT,XPN_CASES,@'{',@'}',YES);
+
+if(--brace_level == 0) 
+	{
+	END; /* Automatically insert an |@r end| statement. */
+	cur_fcn = NO_FCN; /* No longer inside a function. */
+	rlevel--;
+	}
+}
+
+@ Copy to output, stopping just \It{before} a delimiter~|r_before|
+(generally~\.{'\{}') or just \It{after} a delimiter~|r_after|
+(generally~\.{';'}).  As a special case, if |r_before == 0177|, we just
+look for |r_after|.
+
+@d copy_to(r_after) copy_2to(NOT_BEFORE,r_after)
+
+@<Unused@>=
+
+unsigned copy_2to FCN((r_before,r_after))
+	ASCII r_before C0("")@;
+	char r_after C1("Terminating delimiter.")@;
+{
+eight_bits a;
+LINE_NUMBER starting_line;
+unsigned k = 0;
+
+starting_line = OUTPUT_LINE; // Remember where scan started in case of error.
+
+WHILE()
+  if(TOKEN1(a= next_byte()))
+	{
+	k++;
+	if(!in_string)
+		{
+		if(a == ignore) OUTPUT_ENDED("while copying \
+from line %u to delimiter (before = '%c', after = '%c')",3,
+			starting_line,
+			r_before==NOT_BEFORE ? '\0' : XCHR(r_before),
+			r_after==NOT_AFTER ? '\0' : XCHR(r_after));
+
+		if(a == (sixteen_bits)r_after && a != NOT_AFTER) return k;
+		if(a == (sixteen_bits)r_before && a != NOT_BEFORE) 
+			{
+			BACK_UP@;
+			return k-1;
+			}
+		}
+
+	OUT_CHAR(a);
+	}
+  else
+	{
+	cur_val = IDENTIFIER(a,next_byte());
+	k += 2;
+	OUT_CHAR(identifier);
+	}
+}
+
+@ A very important function is the one that copies and possibly expands a
+(possibly compound) statement. One annoyance is that in the auto-semi mode
+an extra semicolon may be put after constructions such as |for()|; this
+must be eaten.
+
+@d BRACE_ONLY 1 /* In some situations such as after |switch|, only a brace
+			is expected. */
+
+@<Part 1@>=@[
+
+SRTN 
+stmt FCN((to_memory,brace_only))
+	boolean to_memory C0("")@;
+	boolean brace_only C1("Is only a left brace allowed next?")@;
+{
+sixteen_bits a;
+
+EAT_AUTO_SEMI;
+skip_newlines(COPY_COMMENTS);
+
+if((a=next_byte()) != @'{')
+	{
+	if(a == ignore) OUTPUT_ENDED("at beginning of statement",0);
+
+/* Issue error message if was expecting brace. */
+	if(brace_only)
+		{
+		RAT_ERROR(WARNING,"Inserted '{'",0);
+		BACK_UP@;
+		copyd(to_memory,XPN_CASES,@'{',@'}',YES);
+		return;
+		}
+
+	if(TOKEN1(a)) 
+		{ /* Definitely not a compound statement. */
+		BACK_UP@;
+		x_stmt();
+		}
+	else 
+		{ /* Check if it's a Ratfor token that needs to be
+expanded. */
+		SPEC HUGE *s;
+
+		a = IDENTIFIER(a,next_byte());
+
+		for(s=spec_tokens; s->len != 0; s++)
+			if(a == *s->pid && s->expand != NULL)
+				{
+				(*s->expand)();
+				return; // Successfully expanded special token.
+				}
+		BACK_UP@;
+		x_stmt();
+		}
+	}
+else copyd(to_memory,XPN_CASES,@'{',@'}',YES); /* Scan compound
+			statement. */ 
+}
+
+
+@ Expand a simple statement, by copying to and eating a semicolon. If
+verbatim comments are present, we copy those as well.
+
+@<Part 1@>=@[
+
+SRTN 
+x_stmt(VOID)
+{
+eight_bits a;
+
+WHILE()
+	{
+	if( (a=get_output()) == ignore) OUTPUT_ENDED("during scan of simple \
+statement ",0);
+
+	if(a == @';' && !in_string) break;
+	}
+
+/* Does a verbatim comment follow? If so, it's bracketed by |stringg|. */
+if( (a=next_byte()) != stringg) {BACK_UP@; @~ return;}
+
+if(*cur_byte != @'\n') {BACK_UP@; @~ return;}
+
+/* Copy verbatim comment. */
+OUT_CHAR(a);
+while((a=get_output()) != stringg) ;
+}
+
+
+@* SAVING and OUTPUTTING RATFOR TEXT.  We need a routine to save the
+token-by-token output in a buffer~|p| of maximum length~|nmax|. We scan
+until we encounter the right delimiter, which may be either/or |r_before|
+or |r_after|.  If it's |r_before|, the scan stops before |r_before|.  If
+it's |r_after| (which may be either~\.{')'}, \.{';'}, or~\.{':'}), the scan
+stops after |r_after|, and |r_after| is eaten.  Note that if |r_after ==
+')'|, then we're in the midst of a parenthesized expression, and we must be
+careful not to stop prematurely if there are extra balanced parentheses.
+
+In some cases, we just need to copy stuff directly to the output.
+Nevertheless, it's convenient to save it first, then output it, because the
+save operation handles the single-token escapes conveniently.
+
+@<Glob...@>=
+
+IN_RATFOR eight_bits HUGE *save_buffer RSET(NULL), HUGE *psave_buffer;
+
+@
+
+@d unmatched(l,r) RAT_ERROR(WARNING,"Ignored '%c' not matched with %s",
+		2,XCHR(r),qdelim(l))
+
+@d inserted(n,l0,r0,l,level) RAT_ERROR(WARNING,
+	"Inserted %d '%c' to balance '%c' at %s level %d",
+	5,n,XCHR(r0),XCHR(l0),qdelim(l),level)
+
+/* Copy, then immediately output. */
+@d COPY_TO(r) psave_buffer = SAVE_AFTER(&save_buffer,BIG_SAVE8,r);
+	copy_out(save_buffer,psave_buffer,!macro)@;
+
+@d COPY_2TO(r_before,r_after) 
+	psave_buffer = save_out(&save_buffer,BIG_SAVE8,r_before,r_after);
+	copy_out(save_buffer,psave_buffer,!macro)@;
+
+@<Part 1@>=@[
+
+eight_bits HUGE *
+save_out FCN((pp,nmax,r_before,r_after))
+	eight_bits HUGE **pp C0("Address of pointer to buffer where result is \
+saved.")@; 
+	int nmax C0("Length of above buffer.")@;
+	eight_bits r_before C0("Stop before here.")@;
+	eight_bits r_after C1("Stop after here.")@;
+{
+eight_bits a,l;
+eight_bits HUGE *p, HUGE *p_end;
+LINE_NUMBER starting_line;
+int bal,bal0[BLEVELS];
+
+/* If a save buffer hasn't already been allocated, do that. */
+if(!(*pp)) 
+	*pp = GET_MEM("*pp",nmax,eight_bits); /* Send back the buffer
+address, so we can free later. */
+p = *pp;
+p_end = p + nmax - 1; /* End of buffer. When we get this far, we must
+				reallocate. The $-1$~is because we might
+				increment~|p| by~2. */
+
+switch(r_after)
+	{
+   case @')':
+	l = (eight_bits)@'(';
+	bal = 1;
+	break;
+
+   case @'}':
+	l = (eight_bits)@'{';
+	bal = 1;
+	break;
+
+   default:
+	l = '\0';
+	bal = 0;
+	break;
+}
+
+bal0[bal] = 0;
+					
+starting_line = OUTPUT_LINE; /* Remember where the scan started, in case
+					there is an error. */
+
+if(in_string) 
+	CONFUSION("save_out","Shouldn't be inside string here");
+
+WHILE()
+	{
+	if(p >= p_end) resize(pp,nmax,&p,&p_end); /* Reallocate the save
+buffer. */ 
+
+	if(TOKEN1(a= next_byte()))
+		{
+		if(!in_string) 
+			@<Check for balanced parentheses or braces@>@;
+
+		@<Save single-byte token@>@;
+		}
+	else
+		{
+		*p++ = a;
+		*p++ = next_byte();
+		}
+	}
+
+DUMMY_RETURN(NULL);
+}
+
+
+@
+@<Check for balanced paren...@>=
+{
+if(a == ignore) OUTPUT_ENDED("while scanning from line %u \
+for delimiter (r_before = '%c', r_after = '%c')",
+	3,starting_line,XCHR(r_before),XCHR(r_after));
+			
+if(a==l) bal0[++bal] = 0;
+else if(a == r_after && r_after != NOT_AFTER) @<Check right-hand balance@>@;
+else if(a == r_before && r_before != NOT_BEFORE)
+	{
+	BACK_UP;
+	*p = '\0';
+	return p;
+	}
+else if(a == @'{') bal0[bal]++;
+else if(a == @'}') @<Check alternate balance@>@;
+}
+
+@
+@<Check right-hand balance@>=
+{
+if(l && bal <= 0)
+	{
+	p--;
+	unmatched(l,r_after);
+	continue;
+	}
+else 
+	{
+	if(bal0[bal] != 0)
+		{
+		inserted(bal0[bal],@'{',@'}',l,bal);
+
+		while(bal0[bal]--)
+			{
+			*p++ = @'}';
+			if(p >= p_end) resize(pp,nmax,&p,&p_end);
+			}
+		}
+
+	if(l) bal--;
+	if(bal == 0)
+		{  /* Found right-hand delimiter. */
+		*p = '\0'; /* Mark end of tokens. */
+		return p;
+		}
+	}
+}
+
+@
+@<Check alternate balance@>=
+{
+if(bal0[bal] <= 0)
+	{
+	p--;
+	unmatched(@'{',@'}');
+	continue;
+	}
+else bal0[bal]--;	
+}
+
+@
+@<Save single-byte token@>=
+{
+*p++ = a;
+
+switch(a)
+	{
+   case stringg:
+	in_string = BOOLEAN(!in_string);
+	break;
+
+   case dot_const:
+   case begin_language:
+	*p++ = *cur_byte++;
+	break;
+	}
+}
+
+@
+@<Part 1@>=@[
+
+outer_char *
+qdelim FCN((delim))
+	ASCII delim C1("")@;
+{
+static outer_char q0[4];
+
+sprintf((char *)q0,delim ? "'%c'" : "?",XCHR(delim));
+return q0;
+}
+
+@ If necessary, we reallocate the save buffer to a larger size.
+
+@<Part 1@>=@[
+
+SRTN 
+resize FCN((pp,nmax,pq,pp_end))
+	eight_bits HUGE **pp C0("Addr of ptr to beginning of buffer")@;
+	int nmax C0("Resizing increment")@;
+	eight_bits HUGE **pq C0("Address of current pointer")@;
+	eight_bits HUGE **pp_end C1("Addr of ptr to end of buffer")@;
+{
+int old_len = PTR_DIFF(int, *pq, *pp); // Old length.  Should this be |size_t|?
+int new_len = old_len + nmax; // New length.
+
+*pp = (eight_bits HUGE *)REALLOC(*pp, 
+		new_len*sizeof(eight_bits),
+		old_len*sizeof(eight_bits));
+*pq = *pp + old_len; /* New next position to which to accrete. */
+*pp_end = *pp + new_len - 1; // New end.
+}
+
+@* KEYWORD TRANSLATION.
+A variety of macro definitions facilitate constructing the expanded output.
+
+/* The |INDENT| and |OUTDENT| macros are used to beautify the \.{FOR}
+output. */
+@d INDENT indent_level++; blank_out(1)@;
+@d OUTDENT indent_level--; out_pos -= indnt_size@;
+
+@d LABEL(lbl) out_label(DONT_PRINT_IF_0,(STMT_LBL)(lbl)) /* Statement label. */
+@d NUMBER(lbl) out_label(PRINT_IF_0,(STMT_LBL)(lbl)) /* Ordinary integer,
+							including~0. */ 
+
+@d PARENS copyd(TO_OUTPUT,XPN_CASES,@'(',@')',NO) /* Copies text between
+				(and including) parens. */ 
+
+@m ID(type) id0(id__##type) /* Send identifier directly to output. */
+@m XPN_BODY(var1,flag,var2) xpn_body(id__##var1,flag,id__##var2) /* For
+				|if| or |where| stmts. */ 
+@m XPN_ELSE(id1,id2,var1,flag,var2) 
+	xpn_else(id1,id2,id__##var1,flag,id__##var2) /* For
+				|if| or |where| stmts. */ 
+
+/* Macro up various single characters to be sent to the output. */
+@d NL out_char(@'\n')
+@d LP out_char(@'(')
+@d RP out_char(@')')
+@d COMMA out_char(@',')
+@d NOT out_char(@'!')
+@d EQUALS out_char(@'=')
+@d MINUS out_char(@'-')
+@d EQ_EQ out_char(eq_eq)
+@d OR out_char(or_or)
+@d LT out_char(@'<')
+@d GT out_char(@'>')
+
+@d IF(stmt_num) LABEL(stmt_num); @~ ID(IF)@;
+@d THEN ID(THEN); @~ NL@;
+@d ELSE ID(ELSE)
+@d ENDIF ID(ENDIF); @~ if(symbolic_label) id0(symbolic_label); @~ NL@;
+@d ENDWHERE ID(ENDWHERE); @~ NL@;
+@d GOTO(stmt) ID(GOTO); @~ LABEL(stmt); @~ NL@;
+@d CONTINUE(stmt) LABEL(stmt); @~ ID(CONTINUE); @~ NL@;
+@d RETURN ID(RETURN); @~ NL@;
+@d END ID(END); @~ NL@;
+
+@d END_DO ID(END); @~ ID(DO); @~ NL@;
+@d END_SELECT ID(END); @~ ID(SELECT); @~ NL@;
+
+@ Ratfor has the ability to generate comments about each keyword it's
+expanding. (These can be suppress by command-line option~`\.{-k}'.)
+
+We'll need a couple of buffers.
+@<Glob...@>=
+
+IN_RATFOR outer_char HUGE *cmd_fmt;
+IN_RATFOR ASCII HUGE *cmd_msg, HUGE *cmd_end;
+IN_RATFOR BUF_SIZE cmd_fsize,cmd_size;
+
+@ We also need an interface to \FTANGLE.
+
+@<Part 2@>=@[
+
+SRTN 
+alloc_Rat(VOID)
+{
+@<Allocate dynamic memory@>@;
+}
+
+@
+@<Allocate dyn...@>=
+
+ALLOC(outer_char,cmd_fmt,ABBREV(cmd_fsize),cmd_fsize,0);
+ALLOC(ASCII,cmd_msg,ABBREV(cmd_size),cmd_size,0);
+cmd_end = cmd_msg + cmd_size;
+
+@
+@m OUT_CMD(emit,abbrev,beginning,fmt0,n,...)
+	out_cmd(emit,abbrev,OC(beginning),OC(fmt0),n,#.)
+
+@<Part 2@>=@[
+
+SRTN 
+out_cmd FCN(VA_ALIST((emit_continue,abbrev,beginning,fmt0,n VA_ARGS)))
+	VA_DCL(
+	boolean emit_continue C0("Put a |continue| in case of label.")@;
+	outer_char abbrev C0("Abbreviation of command.")@;
+	CONST outer_char beginning[] C0("Beginning part of message.")@;
+	CONST outer_char *fmt0 C0("Format of the message.")@;
+	int n C2("Number of arguments to message.")@;)@;
+{
+VA_LIST(arg_ptr)@;
+#if(NUM_VA_ARGS == 1)
+	boolean emit_continue;
+	char abbrev;
+	CONST outer_char *beginning;
+	CONST outer_char *fmt0;
+	int n;
+#endif
+
+VA_START(arg_ptr,n);
+
+#if(NUM_VA_ARGS == 1)
+	emit_continue = va_arg(arg_ptr,boolean);
+	abbrev = va_arg(arg_ptr,char);
+	beginning = va_arg(arg_ptr,char *);
+	fmt0 = va_arg(arg_ptr,char *);
+	va_arg(arg_ptr,int);
+#endif
+
+@<Check if command is suppressed@>@;
+
+if(emit_continue)
+	{
+	CONTINUE(ignore); /* In case there's a statement label. */
+	}
+
+/* Make prettier format. */
+SPRINTF(cmd_fsize,cmd_fmt,
+	`"--- %s \"%s%s\" ---",beginning,cmd_name(begun[rlevel-1].cmd),fmt0`); 
+
+@<Fill in the variable parts of the msg@>;
+
+if(Fortran88 && symbolic_label)
+	{
+	id0(symbolic_label); @~ OUT_CHAR(@':');
+	}
+}
+
+@ Filling in the token strings is a bit annoying. We can't simply treat
+them as character strings, because some of the tokens may be zero. Thus, we
+actually parse the format looking for |"%s"| and replace that by the
+appropriate token string.
+
+@<Fill in the var...@>=
+@B
+outer_char HUGE *p;
+ASCII HUGE *q;
+eight_bits HUGE *s, HUGE *s1;
+
+@b
+p = cmd_fmt; 
+q = cmd_msg;
+
+while(*p)
+	{
+	if(q >= cmd_end) 
+		OVERFLW("cmd_msg",ABBREV(cmd_size)); 
+
+	if(*p == '%' && *(p+1) == 's')
+		{
+		p += 2;
+
+/* For compilers that don't implement variable arguments, the following
+calls return a string beginning with \.{"KLUDGE"}. (See
+\.{proto.hweb}.) This doesn't work right on the MAC, since it seems to
+put copies of identical strings into different locations. Thus, the
+\Ratfor\ comments look strange. To kill off those comments, use the \.{-k}
+option. */
+		s = va_arg(arg_ptr,eight_bits *);
+		s1 = va_arg(arg_ptr,eight_bits *);
+
+		while(s < s1)
+			*q++ = *s++;
+		}
+	else 
+		*q++ = XORD(*p++);
+	}
+
+va_end(arg_ptr);
+
+/* Translate it to the output. */
+OUT_MSG(cmd_msg,q);
+}
+
+@ The command-line option~`\.{-k}' gives a list of abbreviations for which
+a comment should not be output. '\.*' means nothing should be output.
+Option `\.{-K}' means output comments only for those abbreviations; '\.*'
+means output all comments. 
+@<Check if command is ...@>=
+@B
+static outer_char brkset[3] = "*?"; /* Prototype list of possible characters to
+			be searched for in the command-line list. */
+char *strpbrk();
+boolean found_abbrev;
+
+@b
+brkset[1] = abbrev;
+found_abbrev = BOOLEAN(STRPBRK(abbrev_cmds,brkset) != NULL);
+
+if(suppress_cmds) {if(found_abbrev) return;}
+else {if(!found_abbrev) return;}
+}
+
+@ We just use |max_lbls| here, rather than defining a new dynamic type.
+@<Allocate dyn...@>=
+
+begun = GET_MEM("begun",max_lbls,BEGUN);
+
+@
+@<Part 2@>=@[
+
+SRTN 
+expanding FCN((cmd))
+	CMD cmd C1("Type of identifier being expanded.")@;
+{
+if(rlevel >= (int)max_lbls) OVERFLW("Nesting","");
+
+begun[rlevel].cmd = cmd;
+begun[rlevel].name = rlevel ? cur_fcn : NO_FCN;
+begun[rlevel].symbolic = sym_label; // For |do| or |switch|.
+begun[rlevel].function = BOOLEAN(CHOICE(rlevel, is_function, NO));
+begun[rlevel].line = OUTPUT_LINE;
+begun[rlevel].level = wlevel;
+rlevel++;
+}
+
+@ Expand a |while| statement.
+@<Rdoc@>=
+@r
+/* Source construction: */
+	while(expr) {stmt;}
+
+@n
+/* Translation: */
+TOP:	continue
+	if(expr) then
+		stmt
+	endif
+	goto TOP
+BREAK:	continue
+
+@
+@<Part 2@>=@[
+
+X_FCN 
+x_while(VOID)
+{
+eight_bits HUGE *a = NULL, HUGE *pa;
+
+expanding(while_CMD);
+save_lbls(while_CMD,max_stmt,max_stmt,max_stmt+1,2);
+
+/* Is parenthesized condition present? */
+IS_NEXT_PAREN(while);
+pa = SAVE_AFTER(&a,SAVE8,@')'); /* Save the condition. */
+
+OUT_CMD(YES,'w',"","(%s)",2,a,pa); /* Comment to output. */
+
+if(Fortran88)
+	{
+	ID(DO); @~ ID(WHILE); @~ LP; @~ copy_out(a,pa,!macro); @~ RP; @~
+NL; /* |@n DO WHILE|$(\dots)$ */
+	}
+else
+	{
+	IF(s_top); @~ LP; @~ copy_out(a,pa,!macro); @~ RP; @~ THEN;
+	}
+INDENT;
+	stmt(TO_OUTPUT,0); /* Body. */
+	if(!Fortran88) {GOTO(s_top);}
+OUTDENT;
+
+if(Fortran88) {END_DO;}
+else
+	{
+	ENDIF;
+	if(was_break) {CONTINUE(s_break);}
+	}
+
+wlevel--;
+rlevel--;
+FREE_MEM(a,"while:a",SAVE8,eight_bits);
+}
+
+@ Expand a  |break| statement. Outputs a jump statement to the |break|
+label saved earlier. 
+
+@<Part 2@>=@[
+
+X_FCN 
+x_break(VOID)
+{
+sixteen_bits a;
+
+/* Check that we're in a loop or |switch|. */
+if(wlevel==0 && switch_level==0)
+	{
+	NOT_LOOP("break"," or \"switch\"");
+	COPY_TO(@';');
+	return;
+	}
+
+expanding(break_CMD);
+
+was_break = YES; /* Remember that at least one
+			|break| statement happened during this loop. */
+
+OUT_CMD(YES,'b',"","",0); /* Comment to output. */
+
+if(Fortran88 && do_or_while)
+	{
+	ID(EXIT); 
+
+	if(TOKEN1(a=next_byte())) BACK_UP@;
+	else id0(IDENTIFIER(a,next_byte()));
+
+	NL; /* The |do_or_while| is used since |EXIT| can only
+be used inside of |do|'s or |while|'s. */
+	}
+else {GOTO(s_break);}
+
+char_after(';'); /* |break| must be immediately followed by semicolon. */
+rlevel--;
+}
+
+@ Issue an error message about misplaced command.
+
+@d NOT_LOOP(id,msg) not_loop(OC(id),OC(msg))
+
+@<Part 2@>=@[
+
+SRTN 
+not_loop FCN((id,msg))
+	CONST outer_char id[] C0("Errant identifier name.")@;
+	CONST outer_char msg[] C1("Error message.")@;
+{
+RAT_ERROR(WARNING,"Misplaced keyword: \
+\"%s\" must appear inside loop%s; command ignored",
+	2,id,msg);
+}
+
+@ Expand a |@r next| statement. Outputs a jump statement to the |@r next| label
+saved earlier.
+
+@<Part 2@>=@[
+
+X_FCN 
+x_next(VOID)
+{
+sixteen_bits a;
+
+/* Check that |next| occurs inside loop. */
+if(wlevel == 0)
+	{
+	NOT_LOOP("next","");
+	COPY_TO(@';');
+	return;
+	}
+
+expanding(next_CMD);
+
+was_next = YES; /* At least one |next| occurred during this loop. */
+OUT_CMD(YES,'n',"","",0);
+
+if(Fortran88 && do_or_while) 
+	{
+	ID(CYCLE); 
+
+	if(TOKEN1(a=next_byte())) BACK_UP@;
+	else id0(IDENTIFIER(a,next_byte()));
+
+	NL;
+	}
+else {GOTO(s_next);}
+
+char_after(';');
+rlevel--;
+}
+
+@ Expand a |repeat| statement. Note that in the \Ratfor\ syntax the |@r
+until| is optional.
+@<Rdoc@>=
+@r
+/* Source construction: */
+	repeat {stmt;} until(expr);
+
+@n
+/* Translation: */
+TOP:	continue
+	stmt
+NEXT:	if(!(expr)) goto TOP
+BREAK:	continue
+
+@
+@<Part 2@>=@[
+
+X_FCN 
+x_repeat(VOID)
+{
+sixteen_bits a;
+eight_bits HUGE *u = NULL, HUGE *pu;
+
+expanding(repeat_CMD);
+save_lbls(repeat_CMD,max_stmt,max_stmt+1,max_stmt+2,3);
+
+OUT_CMD(YES,'p',"","",0); /* Comment to output. */
+
+CONTINUE(s_top);
+INDENT;
+	stmt(TO_OUTPUT,0);
+OUTDENT;
+if(was_next) LABEL(s_next);
+
+skip_newlines(SAVE_COMMENTS);
+
+/* Check for optional |@r until|. */
+if(TOKEN1(a=next_byte())) BACK_UP@;
+else
+	{
+	a = IDENTIFIER(a,next_byte());
+
+	if(a == id_until)
+		{
+		flush_comments();
+		rlevel--;
+		expanding(until_CMD);
+
+		IS_NEXT_PAREN(until);
+		pu = SAVE_AFTER(&u,SAVE8,@')'); /* The |until| condition. */
+		OUT_CMD(NO,'p',"","(%s)",2,u,pu);
+
+		IF(ignore); @~ LP; @~ NOT; 
+			@~ LP; @~ copy_out(u,pu,!macro); @~ RP;
+			 @~ RP;
+		FREE_MEM(u,"repeat:u",SAVE8,eight_bits);
+		}
+	else BACK_UP@;
+	}
+
+GOTO(s_top);
+flush_comments();
+
+if(was_break) {CONTINUE(s_break);}
+
+wlevel--;
+rlevel--;
+}
+
+@ Expand a |do| statement.
+@<Rdoc@>=
+@r
+/* Source construction: */
+	do expr;
+		{
+		stmt;
+		}
+
+@n
+/* Translation: */
+	do NEXT@,@,expr
+		stmt
+NEXT:	continue
+BREAK:	continue
+
+@
+@<Part 2@>=@[
+X_FCN 
+x_do(VOID)
+{
+eight_bits b;
+sixteen_bits a;
+
+/* Is the next a statement number? */
+b = next_byte(); @~ BACK_UP@;
+
+/* Don't expand the ordinary Fortran numbered |do|. */
+if(b == constant) 
+	{
+	id0(id_do); /* Numbered |do|. */
+	return;
+	}
+
+/* Expand the Ratfor |do|. */
+expanding(do_CMD);
+save_lbls(do_CMD,0L,max_stmt,max_stmt+1,2);
+
+OUT_CMD(YES,'d',"","",0); /* Comment to output. */
+
+/* The following |if| accounts for the possibility of a semicolon or left
+brace immediately following the |do|. */
+if(!TOKEN1(a = next_byte())) 
+	a = IDENTIFIER(a,next_byte());
+
+BACK_UP@;
+
+if(!(a==id_while))
+	{
+	ID(DO); @~ if(!Fortran88) LABEL(s_next); @~ COPY_2TO(@'{',@';'); @~ NL;
+	INDENT;
+		stmt(TO_OUTPUT,0);
+	OUTDENT;
+	if(Fortran88)
+		{
+		ID(END); @~ ID(DO); 
+		if(symbolic_label) id0(symbolic_label);
+		NL;
+		}
+	else
+		{
+		CONTINUE(s_next);
+		if(was_break) {CONTINUE(s_break);}
+		}
+	}
+
+wlevel--;
+rlevel--;
+}
+
+@ Expand a |for| statement. 
+@<Rdoc@>=
+@r
+/* Source construction: */
+	for(a;b;c)
+		{stmt;}
+
+@n
+/* Translation: */
+	a
+TOP:	if(b) then
+		stmt
+NEXT:	continue
+	c
+	goto TOP
+	endif
+BREAK:	continue
+
+@ Here, we must parse and save the three elements
+of the |for|, then spit them out later.
+
+@d SAVE8 200 /* Default length of buffer for parenthesized stuff like
+			|if(...)@;|. */
+@d BIG_SAVE8 10000 /* Default length for |case| text. */
+
+@<Part 2@>=@[
+
+X_FCN 
+x_for(VOID)
+{
+eight_bits HUGE *a=NULL, HUGE *b=NULL, HUGE *c=NULL, 
+	 HUGE *pa, HUGE *pb, HUGE *pc;
+
+expanding(for_CMD);
+save_lbls(for_CMD,max_stmt,max_stmt+1,max_stmt+2,3);
+
+/* Check for parenthesized list. */
+IS_NEXT_PAREN(for);
+pa = SAVE_AFTER(&a,SAVE8,@';'); /* Initialization. */
+pb = SAVE_AFTER(&b,SAVE8,@';'); /* Test. */
+pc = SAVE_AFTER(&c,SAVE8,@')'); /* Reinitialization. */
+
+OUT_CMD(YES,'f',"","(%s;%s;%s)",6,a,pa,b,pb,c,pc); /* Comment to output. */
+
+/* Initialization. */
+	if(pa > a) {copy_out(a,pa,!macro); @~ NL;}
+
+/* Conditional. */
+	if(pb > b)
+		{IF(s_top); @~ LP; @~ copy_out(b,pb,!macro); @~ RP; @~ THEN;}
+	else {CONTINUE(s_top);}
+
+/* Body. */
+	INDENT;
+		stmt(TO_OUTPUT,0);
+
+/* Reinitialization. */
+		if(was_next) {CONTINUE(s_next);}
+		if(pc > c) 
+			{
+			OUT_CMD(NO,'f',"Reinitialization of",
+					"(%s;%s;%s)",6,a,pa,b,pb,c,pc); 
+			copy_out(c,pc,!macro); @~ NL;
+			}
+		GOTO(s_top);
+	OUTDENT;
+	if(pb > b) {ENDIF;}
+	if(was_break) {CONTINUE(s_break);}
+	wlevel--;
+rlevel--;
+FREE_MEM(a,"for:a",SAVE8,eight_bits); 
+FREE_MEM(b,"for:b",SAVE8,eight_bits); 
+FREE_MEM(c,"for:c",SAVE8,eight_bits);
+}
+
+@ Expand an |if| statement.
+@<Rdoc@>=
+@r
+/* Source construction: */
+	if(expr)
+		{stmt;}
+	else if(expr)
+		{stmt;}
+	else
+		{stmt;}
+
+@n
+/* Translation: */
+	if(expr) then
+		stmt
+	else if(expr) then
+		stmt
+	else
+		stmt
+	endif
+
+@
+@<Part 2@>=@[
+
+X_FCN 
+x_if(VOID)
+{
+expanding(if_CMD);
+OUT_CMD(YES,'i',"","",0);
+
+XPN_BODY(IF,YES,THEN);
+
+/* Hunt for |else| or |elseif|. */
+WHILE()
+	if(!XPN_ELSE(id_if,id_elseif,IF,YES,THEN)) break;
+
+ENDIF;
+flush_comments();
+rlevel--;
+}
+
+
+@
+@<Part 2@>=@[
+
+SRTN 
+xpn_body FCN((token1,scan_parens,token2))
+	sixteen_bits token1 C0("")@;
+	boolean scan_parens C0("")@;
+	sixteen_bits token2 C1("")@;
+{
+LABEL(ignore); @~ id0(token1);
+
+if(scan_parens) PARENS;
+if(token2) id0(token2);
+NL;
+
+INDENT;
+	stmt(TO_OUTPUT,0);
+OUTDENT;
+}
+
+@
+@<Part 2@>=@[
+
+boolean 
+xpn_else FCN((id_x,id_else_x,token1,scan_parens,token2))
+	sixteen_bits id_x C0("")@;
+	sixteen_bits id_else_x C0("")@;
+	sixteen_bits token1 C0("")@;
+	boolean scan_parens C0("")@;
+	sixteen_bits token2 C1("")@;
+{
+sixteen_bits a;
+
+skip_newlines(SAVE_COMMENTS);
+
+if(TOKEN1(a= next_byte())) 
+	{ /* Not a keyword. */
+	BACK_UP@;
+	return NO;
+	}
+else
+	{
+	a = IDENTIFIER(a,next_byte());
+
+	if(a == id_else_x)
+		{ /* |@r elseif| */
+		flush_comments();
+		ELSE;
+		xpn_body(token1,scan_parens,token2);
+		return YES;
+		}
+
+	if(a != id_else) 
+		{ /* Neither |else if| nor |else|. */
+		BACK_UP@;
+		return NO;
+		}
+	else
+		{ /* |@r else| */
+		flush_comments();
+		ELSE;
+
+		if(TOKEN1(a= next_byte())) BACK_UP@;
+		else
+			{ /* Possible |@r if| or |@r where|. */
+			a = IDENTIFIER(a,next_byte());
+
+			if(a == id_x) /* |else if|  or |else where@;| */
+				{
+				xpn_body(token1,scan_parens,token2);
+				return YES;
+				}
+			else BACK_UP@;
+			}
+
+		if(out_pos > rst_pos) NL;  /* Terminate the |else|. */
+
+		INDENT;
+			stmt(TO_OUTPUT,0); /* Expand body of |else|. */
+		OUTDENT;
+		return NO;
+		}
+	}
+}
+
+@ The previous scan should have found all the |else|'s. If an |else| is
+encountered anywhere else, it's an error and is just skipped.
+@<Part 2@>=@[
+
+X_FCN 
+x_else(VOID)
+{
+UNEXPECTED("else");
+}
+
+X_FCN 
+x_els_if(VOID)
+{
+UNEXPECTED("elseif");
+}
+
+@ Also, no |end| statements should appear explicitly anywhere; the
+terminating |end| statement is inserted automatically. Therefore, if we
+encounter any of these, it's an error.
+
+@<Part 2@>=@[
+
+X_FCN 
+x_end(VOID)
+{
+UNEXPECTED("end");
+}
+
+X_FCN 
+x_en_if(VOID)
+{
+UNEXPECTED("endif");
+}
+
+X_FCN 
+x_en_interface(VOID)
+{
+UNEXPECTED("endinterface");
+}
+
+X_FCN 
+x_en_module(VOID)
+{
+UNEXPECTED("endmodule");
+}
+
+X_FCN 
+x_en_select(VOID)
+{
+UNEXPECTED("endselect");
+}
+
+X_FCN 
+x_en_type(VOID)
+{
+UNEXPECTED("endtype");
+}
+
+X_FCN 
+x_en_where(VOID)
+{
+UNEXPECTED("endwhere");
+}
+
+X_FCN 
+x_procedure(VOID)
+{
+UNEXPECTED("procedure");
+}
+
+X_FCN 
+x_then(VOID)
+{
+UNEXPECTED("then");
+}
+
+X_FCN 
+x_until(VOID)
+{
+UNEXPECTED("until");
+}
+
+@ Expand a |@n9 where| statement.
+@<Rdoc@>=
+@r9
+/* Source construction: */
+	where(expr)
+		{stmt;}
+	else
+		{stmt;}
+
+@n[-n9]
+/* Translation: */
+	where(expr) 
+		stmt
+	else where
+		stmt
+	end where
+
+@
+@d id__ignore ignore
+
+@<Part 2@>=@[
+
+X_FCN 
+x_where(VOID)
+{
+expanding(where_CMD);
+OUT_CMD(YES,'h',"","",0);
+
+XPN_BODY(WHERE,YES,ignore);
+XPN_ELSE(id_where,id_elsewhere,WHERE,NO,ignore);
+
+ENDWHERE;
+rlevel--;
+}
+
+@ An error message about an unexpected keyword.
+
+@d UNEXPECTED(id) unexpected(OC(id))
+
+@<Part 2@>=@[
+
+SRTN 
+unexpected FCN((id))
+	CONST outer_char id[] C1("Error message.")@;
+{
+RAT_ERROR(WARNING,"Unexpected keyword \"%s\" ignored",1,id);
+}
+
+@*1 Expand a |switch| statement. This is the most complicated \Ratfor\
+statement. Several different kinds of expansions may be made, for
+efficiency reasons. If the list of cases is fairly dense, with few gaps,
+then a computed |goto| is used; otherwise, the |switch| is expanded into a
+series of |if| statements. In order to know which expansion to make, the
+entire |switch| must be read into memory first. 
+@<Rdoc@>=
+@r
+/* Source construction: */
+	switch(expr)
+		{
+		case 1:
+			stmts;
+			break;
+
+		case 2:
+			stmts;
+			break;
+
+		default:
+			stmts;
+			break;
+		}
+
+@n
+/* Translation: */
+	i123 = expr
+	if(!(i123 == 1)) goto S2
+		stmts
+		goto 123
+
+S2:	continue
+	if(!(i123==2)) goto S3
+	stmts
+	goto 123
+DFLT:	continue
+	stmts
+	goto 123
+S3:	continue
+	goto DFLT
+123:	continue
+
+@ We need a flag to say that we're inside at least one |switch|, so we can
+check whether the |case| or |default| statements are in valid places. We
+also need various structures to hold the various parts of the |switch| as
+it is parsed.
+
+@<Typedef...@>=
+
+IN_RATFOR int switch_level RSET(0);
+
+/* The starting and ending positions of a token string. */
+typedef struct
+	{
+	eight_bits HUGE *start, HUGE *next, HUGE *end;
+	} TEXT;
+
+/* The info for one |case| or |default|. */
+typedef struct
+	{
+	STMT_LBL label; // Statement label assigned to this |case|.
+	TEXT case_txt; // The token string for the |case| value.
+	CASE_TYPE value; // The numerical value of the above string.
+	TEXT txt; // The body of the |case| or |default|.
+	boolean is_default; // Distinguishes between |default| and |case|.
+	} CASE;
+
+IN_RATFOR CASE HUGE *cur_case; // A pointer to the current case being processed.
+
+/* A whole |switch|. */
+typedef struct
+	{
+	CASE HUGE *cases; // The array of cases.
+	unsigned short ncases; // How many cases?
+	boolean has_default; // At most one |default| is allowed.
+	} SWITCH;
+
+IN_RATFOR SWITCH HUGE *switches; // Switches may be nested, so we need an array.
+
+@ Memory is only allocated for |switches| and |cases| when and if it is
+actually needed. However, once allocated, it is never deallocated.
+
+For convenience, |switches[0]| and |cases[0]| are not used.
+
+@d NSWITCHES 20 /* Nesting level for |switch| statements. */
+@d NCASES 257 /* Number of |case| labels in a |switch|. */
+@d cur_switch switches[switch_level]
+
+@<Part 2@>=@[
+
+X_FCN 
+x_switch(VOID)
+{
+eight_bits HUGE *a=NULL, HUGE *pa;
+outer_char temp[N_IDBUF];
+unsigned short k;
+boolean computed_goto = NO;
+CASE_TYPE cmin=0,cmax; /* Minimum and maximum |case| values. */
+CASE_TYPE mcases=0; // Spread in the case value.
+unsigned short num_cases; // Number of cases.
+
+expanding(switch_CMD);
+
+if(switches==NULL) switches = GET_MEM("switches",NSWITCHES,SWITCH);
+
+++switch_level;
+if(cur_switch.cases == NULL) 
+	cur_switch.cases = GET_MEM("cur_switch.cases",NCASES,CASE); 
+cur_switch.ncases = 0;
+cur_switch.has_default = NO;
+
+/* Allocate the zeroth case.  This won't be used, except if there's text
+before the first |case|. */
+cur_case = &cur_switch.cases[0];
+cur_case->txt.next = cur_case->txt.start =
+	GET_MEM("cur_case->txt.start",BIG_SAVE8,eight_bits); 
+cur_case->txt.end = cur_case->txt.start + BIG_SAVE8;
+
+save_lbls(switch_CMD,0L,s_next,max_stmt,1);
+
+/* Look for the parenthesized expression. */
+IS_NEXT_PAREN(switch);
+pa = SAVE_AFTER(&a,SAVE8,@')'); /* Save the expression. */
+
+OUT_CMD(YES,'s',"","(%s)",2,a,pa); /* Comment to output. */
+
+if(Fortran88)
+	{
+	ID(SELECT); @~ ID(CASE); @~ LP; @~ copy_out(a,pa,!macro); @~ RP; @~ NL;
+	}
+INDENT;
+	stmt(TO_MEMORY,BRACE_ONLY); /* Read the |switch| into memory. */ 
+
+	if(Fortran88)
+		{
+		computed_goto = NO;
+		}
+	else @<Analyze the cases@>;
+
+	if(computed_goto) @<Use computed |goto|@>@;
+	else @<Use multiple |if|s@>@;
+OUTDENT;
+
+if(Fortran88) 
+	{
+	if(was_break) LABEL(s_break); 
+	ID(END); @~ ID(SELECT);
+		if(symbolic_label) id0(symbolic_label);
+	NL;
+	}
+else if(was_break) {CONTINUE(s_break);}
+
+wlevel--;
+rlevel--;
+switch_level--;
+
+FREE_MEM(a,"switch:a",SAVE8,eight_bits);
+}
+
+@ First, evaluate all the cases. If they don't all evaluate to integers,
+use |if| statements. Otherwise, if the ratio of the case value spread to
+the total number of cases is less than |g_ratio|, then use a computed
+|goto|. Also do that if the number of cases if greater than
+|marginal_cases| (if the spread is less than |max_spread|). Otherwise, use
+|if| statements.
+
+@<Glob...@>=
+
+IN_COMMON double g_ratio;
+IN_COMMON CASE_TYPE max_spread;
+IN_COMMON unsigned short marginal_cases;
+
+IN_EVAL VAL HUGE *val_ptr, HUGE *val_heap;
+
+@
+@<Analyze the cases@>=
+@B
+unsigned short k;
+VAL val;
+
+@b
+/* We need to find the minimum and maximum |case| value. */
+cmin = LONG_MAX; // See |limits.h|.
+cmax = LONG_MIN + 1; // The |+1| takes care of an \.{scc} bug.
+
+for(k=1; k<=cur_switch.ncases; k++)
+	{
+	cur_case = &cur_switch.cases[k];
+
+	if(cur_case->is_default) continue;
+	
+/* Call up the expression evaluator to reduce the |case| text to an
+integer. */
+	{
+	extern boolean eval_msgs;
+
+	eval_msgs = NO;
+	EVALUATE(val,cur_case->case_txt.start,cur_case->case_txt.next);
+	eval_msgs = YES;
+	}
+
+	switch(val.type)
+		{
+		case Int:
+			cur_case->value = (CASE_TYPE)(val.value.i);
+			break;
+
+		case Double:
+			RAT_ERROR(WARNING,
+"Case value %#g of type double truncated to int",1,val.value.d); 
+			cur_case->value = (CASE_TYPE)(val.value.d);
+			break;
+
+		default:
+/* The case didn't evaluate to an integer. */
+			computed_goto = NO;
+			goto not_integer;
+		}
+
+/* Running determination of the minimum and maximum |case| value. */
+	if(cur_case->value < cmin) cmin = cur_case->value;
+	if(cur_case->value > cmax) cmax = cur_case->value;
+	}
+
+if(cur_switch.ncases==1 && s_default!=0) 
+	{
+	mcases = 0;
+	computed_goto = YES;
+	goto not_integer;
+	}
+else mcases = (cmax - cmin + 1); // Spread in the cases.
+
+if((num_cases = cur_switch.ncases-(unsigned short)(s_default!=0)) == 0)
+	{
+	computed_goto = NO;
+	goto not_integer;
+	}
+computed_goto = BOOLEAN((num_cases > marginal_cases &&
+		    mcases < max_spread) ? YES : 
+			((double)mcases)/num_cases <= g_ratio); 
+
+not_integer: ;
+}
+
+@ We use the computed |goto| when the list of cases is fairly dense, with
+few gaps. Out of bounds cases branch to the |default| if present, or around
+the whole |switch| otherwise.
+
+@<Use computed |goto|@>=
+@B
+CASE_TYPE m; // Indexes case values.
+unsigned short k; // Indexes the cases.
+
+@b
+/* Generate computed |goto| to handle the cases; fill in any gaps. */
+OUTDENT;
+if(mcases > 0) {ID(GOTO); @~ LP;}
+
+for(m=0; m<mcases; m++,m<mcases ? COMMA : RP)
+	LABEL(label_case(cmin,m));
+
+if(mcases > 0) 
+	{
+	COMMA; @~ LP; @~ copy_out(a,pa,!macro); @~ RP;
+		@~ MINUS; @~ LP; @~ NUMBER(cmin-1); @~ RP; @~ NL;
+	}
+
+/* Handle the out-of-bound statements. (If the previous |goto| was out of
+range, control passes to here.) */
+GOTO(s_default ? s_default : (was_break=YES,s_break)); 
+INDENT;
+
+/* Output the various cases. */
+for(k=1; k<=cur_switch.ncases; k++)
+	{
+	cur_case = &cur_switch.cases[k];
+
+	show_cmd(cur_case);
+	OUTDENT;
+	CONTINUE(cur_case->label);
+	INDENT;
+	copy_out(cur_case->txt.start,cur_case->txt.next,!macro);
+	rlevel--;
+	}
+}
+
+@ This code is used when the computed |@r goto| is not appropriate.  In this
+case, the |switch| is expanded into a series of multiple |if|s.
+
+@<Use multiple...@>=
+{
+boolean case_ended_with_break = NO;
+boolean made_temp = YES; /* Did we construct a temporary integer for the
+				|switch|? */
+
+/* |made_temp == NO| means the expression is a single identifier. */
+if(!Fortran88 && (made_temp = BOOLEAN(!((pa-a)==2 && !TOKEN1(*a)))))
+	{
+/* Make a temporary integer identifier to effect the comparisons. */
+	SPRINTF(N_IDBUF,temp,`"I%d",s_break`);
+	to_ASCII(temp);
+	icase = ID_NUM((ASCII HUGE *)temp,(ASCII HUGE *)(temp+STRLEN(temp)));
+
+	id0(icase); @~ EQUALS; @~ copy_out(a,pa,!macro); @~ NL;
+	}
+
+for(k=1; k<=cur_switch.ncases; k++) 
+	@<Expand a |case| or |default|@>@; 
+
+if(!Fortran88)
+	{
+	CONTINUE(s_case); /* Finish off the last |case|. */
+	if(s_default) 
+		{
+		GOTO(s_default); /* Jump to the |default|, if present. */ 
+		}
+	}
+}
+
+@ Display a |case| or |default| command as an output comment.
+
+@<Part 2@>=@[
+
+SRTN 
+show_cmd FCN((cur_case))
+	CONST CASE HUGE *cur_case C1("")@;
+{
+if(cur_case->is_default) 
+	{
+	expanding(default_CMD);
+	OUT_CMD(NO,'t',"",":",0); 
+	}
+else 
+	{
+	expanding(case_CMD);
+	OUT_CMD(NO,'c',""," %s:",2,
+		cur_case->case_txt.start,cur_case->case_txt.next);
+	}
+}
+
+@ Return the appropriate label: If it's a |case|, generate a new label; if
+it's a |default|, return |s_default|; otherwise, return |s_default| if a
+|default| was present, or |s_break| otherwise.
+
+@<Part 2@>=@[
+
+STMT_LBL 
+label_case FCN((cmin,m))
+	CASE_TYPE cmin C0("")@;
+	CASE_TYPE m C1("")@;
+{
+CASE_TYPE num = cmin + m;
+unsigned short k;
+
+/* Check for ordinary cases. */
+for(k=1; k<=cur_switch.ncases; k++)
+	{
+	cur_case = &cur_switch.cases[k];
+
+	if(!cur_case->is_default && cur_case->value == num)
+		return cur_case->label = s_case = max_stmt++;
+	}
+
+/* Look for |default|. */
+for(k=1; k<=cur_switch.ncases; k++)
+	if(cur_case->is_default) return s_default;
+	
+return s_break; // A gap.
+}
+
+@
+@<Expand a |case|...@>=
+{
+cur_case = &cur_switch.cases[k];
+
+if(Fortran88)
+	if(k==1) s_case = max_stmt++;
+	else 
+		{
+		@<Did last |case| end with ``|break;|''?@>@;
+		if(!case_ended_with_break) {GOTO(s_case);}
+		}
+	
+show_cmd(cur_case);
+OUTDENT;
+if(Fortran88)
+	{
+	ID(CASE); 
+
+	if(cur_case->is_default) ID(DEFAULT);
+	else
+		{
+		if(*cur_case->case_txt.start != @'(') LP;
+		copy_out(cur_case->case_txt.start,cur_case->case_txt.next,
+				!macro);
+		if(*(cur_case->case_txt.next - 1) != @')') RP;
+		}
+	NL;
+	INDENT;
+	if(k > 1 && !case_ended_with_break) 
+		{
+		CONTINUE(s_case);
+		s_case = max_stmt++;
+		}
+	}
+else
+	{
+	if(cur_case->is_default) {CONTINUE(s_default);}
+	else 
+		{
+		IF(s_case); @~ LP; @~ NOT; @~ LP; 
+/* The |made_temp?@e@:@e| form of the next command crashed the Apollo
+compiler. */ 
+			if(made_temp) id0(icase); else copy_out(a,pa,!macro); 
+			EQ_EQ; 
+			copy_out(cur_case->case_txt.start,
+				cur_case->case_txt.next,!macro); 
+			RP; @~ RP;
+		GOTO(s_case=max_stmt++);
+		}
+	INDENT;
+	}
+
+/* Recall the text stored previously. */
+copy_out(cur_case->txt.start,cur_case->txt.next,!macro);
+
+rlevel--;
+}
+
+@ To pretty up the \FORTRAN-88 output, we check to see if the previous case
+ended with a |break| statement. If so, we don't output a |@r goto| to the
+next case.
+@<Did last...@>=
+@B
+CASE HUGE *last_case = &cur_switch.cases[k-1];
+
+@b
+if(PTR_DIFF(long,last_case->txt.next,last_case->txt.start) >= 3)
+	case_ended_with_break = 
+		BOOLEAN(MEMCMP(last_case->txt.next-3,break_tokens,3) == 0);
+else case_ended_with_break = NO;
+}
+
+@ Expand a |case| statement.
+@<Part 2@>=@[
+X_FCN x_case(VOID)
+{
+if(switch_level ==0)
+	{
+	not_switch(OC("case"));
+	return;
+	}
+
+expanding(case_CMD);
+
+@<Initialize a |case| or |default|@>;
+cur_case->case_txt.next = SAVE_AFTER(&cur_case->case_txt.start,SAVE8,@':');
+cur_case->is_default = NO;
+
+@<Check for duplicate |case|s@>@;
+
+rlevel--;
+}
+
+@ This fragment is used in expanding |case| and |default| statements; it
+sets things up so the text is stored in the proper place.
+@<Initialize a |case|...@>=
+
+*cur_case->txt.next = '\0'; /* Terminate previous text. */
+
+/* Get address of next available |CASE| structure. */
+cur_case = &cur_switch.cases[++cur_switch.ncases];
+
+/* If that hasn't been allocated yet, do so. */
+if(cur_case->case_txt.start==NULL) 
+	{
+	cur_case->case_txt.start = 
+		GET_MEM("cur_case->case_txt.start",SAVE8,eight_bits);
+	cur_case->case_txt.end = cur_case->case_txt.start + SAVE8;
+
+	cur_case->txt.start = 
+		GET_MEM("cur_case->txt.start",BIG_SAVE8,eight_bits);
+	cur_case->txt.end = cur_case->txt.start + BIG_SAVE8;
+	}
+
+/* Initialize the pointer to beginning of buffer. */
+cur_case->txt.next = cur_case->txt.start;
+
+@
+@<Check for duplicate...@>=
+{
+unsigned short k;
+CONST CASE HUGE *old_case;
+
+for(k=1; k<cur_switch.ncases; k++)
+	{
+	old_case = &cur_switch.cases[k];
+
+	if(web_strcmp((CONST ASCII HUGE *)cur_case->case_txt.start,
+			(CONST ASCII HUGE *)cur_case->case_txt.next,
+		   	(CONST ASCII HUGE *)old_case->case_txt.start,
+			(CONST ASCII HUGE *)old_case->case_txt.next) == EQUAL)
+		{
+		RAT_ERROR(ERROR,"Duplicate case value in switch",0);
+		break;
+		}
+	}
+}
+
+@ Expand a |default| statement. This just initializes stuff so the text is
+stored in the proper place.
+
+@<Part 2@>=@[
+
+X_FCN 
+x_default(VOID)
+{
+if(switch_level == 0) 
+	{
+	not_switch(OC("default"));
+	return;
+	}
+
+expanding(default_CMD);
+
+if(cur_switch.has_default)
+	RAT_ERROR(ERROR,"Only one default allowed per switch",0);
+else cur_switch.has_default = YES;
+
+@<Initialize a |case| or |default|@>;
+cur_case->case_txt.next = cur_case->case_txt.start;
+cur_case->is_default = YES;
+
+cur_case->label = s_default = max_stmt++;
+
+char_after(':'); /* |default| must be followed immediately by colon. */
+rlevel--;
+}
+
+@*1 Program units. 
+@r9
+@v .IN. "\\in" <
+@n9
+@v .IN. "\\in" <
+@<Rdoc@>=
+@r9
+/* Source construction: */
+program main
+{stmt;}
+
+/* Translation: */
+@n9
+	program main
+	stmt
+	end program main
+
+/* Source: */
+@r9
+subroutine s(x,y,z)
+	real x,y,z;
+{stmt;}
+
+/* Translation: */
+@n9
+	subroutine s(x,y,z)
+	real x,y,z
+
+	stmt
+	end subroutine s
+
+/* Source: */
+@r9
+function f(i)
+	integer i;
+{
+return 10;
+}
+
+/* Translation: */
+@n9
+	function f(i)
+	integer i
+
+	f = 10
+	return
+	end function f
+
+/* Source: */
+@r9
+block data work
+{
+common/wrkcom/ a,b,c;
+data a/1.0/, b/2.0/, c/0.0/;
+}
+
+/* Translation: */
+@n9
+	block data work
+	common/wrkcom/ a,b,c
+	data a/1.0/, b/2.0/, c/0.0/
+	end block data work
+
+/* Source: */
+@r9
+module integer_sets
+{
+integer i;
+
+type set
+	{
+	private:
+	integer card;
+	};
+
+interface operator (.IN.)
+	{
+	module procedure element;
+	}
+}
+
+/* Translation: */
+@n9
+	module integer_sets
+	integer i
+
+	type set
+		private
+		integer card
+	end type set
+
+	interface operator (.IN.)
+		module procedure element
+	end interface
+
+	end module integer_sets
+
+@ Expand a |@r program|, |@r9 module|, |@r subroutine|, or |@r function|
+statement. We define a \WEB\ macro to generate separate functions.
+
+@#if 0
+if(brace_level != 0)
+	{
+	RAT_ERROR(ERROR,
+"Missing '}' (level %d) at beginning of %s; \
+END statement inserted",2,brace_level,#type);
+	END;
+	brace_level = 0;
+	}
+@#endif
+
+@m X_ROUTINE(type,is_fcn,check_id)@/
+X_FCN x_##type(VOID)
+{
+sixteen_bits a;
+eight_bits b;
+
+expanding(type##_CMD);
+
+// Insert |brace_level| check here.
+
+WHILE()
+	{
+	a = next_byte();
+	
+	if(!(a == @' ' || a == tab_mark))
+		break;
+	}
+
+if(TOKEN1(a))
+	{
+	$P if(check_id)
+		RAT_ERROR(ERROR,"Expected identifier after \"%s\"",1,#type);
+	$P endif
+	BACK_UP@;
+	cur_fcn = NO_FCN;
+	is_function = NO;
+	}
+else
+	{
+	cur_fcn = IDENTIFIER(a,next_byte());
+	is_function = is_fcn;
+	}
+
+id0(id_##type); @~ id0(cur_fcn); /* |@r subroutine sub| */
+
+if(cur_fcn == id_procedure) 
+	{ // |@r9 module procedure test;|
+	COPY_TO(@';'); @~ NL;
+	}
+else 
+	{
+	b = next_byte(); @~ BACK_UP@; 
+	if(b == @'(') PARENS; /* Routine with arguments. */
+	NL; // Start the body on the next line.
+	EAT_AUTO_SEMI;
+	skip_newlines(COPY_COMMENTS);
+	INDENT;
+		copy_out(insert.type.start,insert.type.end,!macro);
+		out_char(@';');
+		COPY_2TO(@'{',NOT_AFTER);
+		if(psave_buffer > save_buffer) NL; /* Argument declarations,
+		   with blank line between argument declarations and body. */
+		brace_level++;
+			stmt(TO_OUTPUT,BRACE_ONLY);
+		brace_level--;
+	OUTDENT;
+
+	ID(END); 
+	if(Fortran88) {id0(id_##type); @~ id0(cur_fcn);}
+	NL;
+	}
+
+cur_fcn = NO_FCN; // No longer inside a function.
+
+rlevel--;
+}
+
+@<Part 2@>=@[
+
+X_ROUTINE(program,NO,YES)@;
+X_ROUTINE(module,NO,YES)@;
+X_ROUTINE(subroutine,NO,YES)@;
+X_ROUTINE(function,YES,YES)@;
+X_ROUTINE(blockdata,NO,NO)@;
+X_ROUTINE(interface,NO,NO)@;
+
+@ The |@r block data| statement has optional spaces.
+@<Part 2@>=@[
+
+X_FCN 
+x_block(VOID)
+{
+sixteen_bits a;
+
+if(TOKEN1(a=next_byte()))
+	{
+	BACK_UP@;
+	id0(id_block);
+	}
+else
+	{
+	a = IDENTIFIER(a,next_byte());
+
+	if(a == id_data) x_blockdata();
+	else
+		{
+		BACK_UP@;
+		id0(a);
+		}
+	}
+}
+
+@*1 Expand a |@r9 contains| statement.
+@<Rdoc@>=
+@r9
+/* Source construction: */
+subroutine outer
+{
+call inner(a);
+
+contains:
+subroutine inner(b)
+{}
+}
+
+/* Translation:  The |@r9 contains| is appropriately outdented. */
+
+@ We do nothing here except outdent the |@r9 contains|.
+
+@<Part 2@>=@[
+
+X_FCN 
+x_contains(VOID)
+{
+OUTDENT;
+ID(CONTAINS);
+char_after(':');
+NL;
+INDENT;
+}
+
+@*1 Expand a |@r9 type| statement.
+
+@<Rdoc@>=
+@r9
+/* Source construction: */
+type person
+	{
+	integer i;
+	real x;
+	};
+
+@n9
+/* Translation: */
+type person
+	integer i
+	real x
+end type person
+
+@ We define a macro to generate separate functions.
+
+@m X_STRUCT(type)@/
+
+X_FCN x_##type(VOID)
+{
+sixteen_bits a;
+eight_bits b;
+
+b = next_byte(); @~ BACK_UP@; 
+if(b == @',') {} /* Access spec. */
+else if(b==@'(') 
+	{
+	id0(id_##type);
+	return;
+	}
+
+expanding(type##_CMD);
+
+if(TOKEN1(a= next_byte())) 
+	{
+	RAT_ERROR(ERROR,"Expected identifier after \"%s\"",1,#type);
+	BACK_UP@;
+	cur_struct = NO_FCN;
+	}
+else
+	{
+	cur_struct = IDENTIFIER(a,next_byte());
+	}
+
+id0(id_##type); @~ id0(cur_struct); /* |@r9 type person| */
+NL; // Start the body on the next line.
+INDENT;
+	brace_level++;
+	stmt(TO_OUTPUT,BRACE_ONLY);
+	brace_level--;
+OUTDENT;
+
+ID(END); @~ id0(id_##type); @~ id0(cur_struct);
+char_after(';'); @~ OUT_CHAR(';');
+
+wlevel--;
+rlevel--;
+}
+
+@<Part 2@>=@[
+X_STRUCT(type)@;
+@#if 0
+	X_STRUCT(module)@;
+@#endif
+
+@ Expand a |return| statement. Turns construction `|@r return expr@;|' into `|@n
+f = expr; return;|'
+. 
+@<Part 2@>=@[
+
+X_FCN 
+x_return(VOID)
+{
+eight_bits HUGE *return_expr=NULL, HUGE *pr;
+
+expanding(return_CMD);
+
+/* Save the return expression, if it's there. */
+if((pr=SAVE_AFTER(&return_expr,SAVE8,@';')) > return_expr)
+	{
+	if(!is_function)
+		RAT_ERROR(ERROR,
+"Can't return value from program or subroutine",0);
+	else
+		{
+		OUT_CMD(YES,'r',""," %s",2,return_expr,pr);
+		id0(cur_fcn); @~ EQUALS; @~
+			copy_out(return_expr,pr,!macro); @~ NL; 
+		}
+	}
+
+RETURN;
+rlevel--;
+FREE_MEM(return_expr,"return_expr",SAVE8,eight_bits);
+}
+
+@ This function implements the |$DO| and |$UNROLL| built-ins.  |$DO| is
+defined in \FTANGLE.
+
+@<Part 2@>=@[
+
+X_FCN 
+x_unroll(VOID)
+{
+eight_bits HUGE *I = NULL, HUGE *pI;
+eight_bits HUGE *Imin = NULL, HUGE *pImin;
+eight_bits HUGE *Imax = NULL, HUGE *pImax;
+eight_bits HUGE *Di = NULL, HUGE *pDi;
+eight_bits HUGE *txt = NULL, HUGE *ptxt;
+int i,imin,imax,di;
+name_pointer n;
+text_pointer t;
+eight_bits temp[20];
+extern int last_bytes;
+extern boolean saved_token;
+eight_bits c;
+
+expanding(_DO_CMD);
+
+IS_NEXT_PAREN("$DO");
+
+pI = SAVE_AFTER(&I,SAVE8,@',');
+
+if(TOKEN1(*I))
+	{
+	RAT_ERROR(ERROR, "Expected identifier for first argument of $DO; \
+expansion aborted",0);
+	return;
+	}
+
+pImin = SAVE_AFTER(&Imin,SAVE8,@',');
+imin = neval(Imin,pImin);
+
+pImax = SAVE_AFTER(&Imax,SAVE8,@',');
+imax = neval(Imax,pImax);
+
+pDi = SAVE_AFTER(&Di,SAVE8,@')');
+di = neval(Di,pDi);
+
+EAT_AUTO_SEMI;
+skip_newlines(NO);
+
+c = next_byte();
+
+if(!(c==@'{' || c==@'('))
+	{
+	RAT_ERROR(ERROR, "Was expecting '{' or '(', not '%c', after $DO(); \
+expansion aborted", 1, XCHR(c));
+	return;
+	}
+
+/* Absorb the body of the |$DO|.  Tell |next_byte| to not expand macros, so
+the loop counter can be used as an argument to a macro such as |$IFCASE|. */
+mac_protected = YES;
+ ptxt = SAVE_AFTER(&txt, BIG_SAVE8, c==@'{' ? @'}' : @')');
+mac_protected = NO;
+
+n = name_dir + IDENTIFIER(*I, *(I+1));
+n->info.Macro_type = IMMEDIATE_MACRO;
+t = GET_MEM("equiv", 2, text);
+n->equiv_or_xref = (EQUIV)t;
+t->tok_start = temp;
+t->moffset = 2;
+
+if(!((di >= 0 && imax < imin) || (di < 0 && imax > imin)))
+   for(i=imin;di >= 0 ? i<=imax : i>=imax; i+=di)
+	{
+	STRNCPY(temp,I,2);
+	sprintf((char *)(temp+2), "%c%d%c", XCHR(constant), i, XCHR(constant));
+	to_ASCII(temp+2);
+#if 0
+	(t+1)->tok_start = temp + STRLEN(temp);
+#endif
+	t->nbytes = STRLEN(temp);
+	copy_out(txt, ptxt, !macro);
+
+	if(i == imax) 
+		break;
+	}
+
+rlevel--;
+
+FREE_MEM(t, "t", 2, text);
+n->equiv_or_xref = NULL;
+n->info.Macro_type = NOT_DEFINED;
+
+FREE_MEM(I, "unroll:I", SAVE8, eight_bits);
+FREE_MEM(Imin, "unroll:Imin", SAVE8, eight_bits);
+FREE_MEM(Imax, "unroll:Imax", SAVE8, eight_bits);
+FREE_MEM(txt, "unroll:txt", SAVE8, eight_bits);
+}
+
+@ Initialize automatic insertion material.
+@m INI_INSERT(type) insert.type.start = insert.type.end =
+	GET_MEM(#type,2,eight_bits) 
+
+@<Part 2@>=@[
+
+SRTN 
+ini_Ratfor(VOID)
+{
+INI_INSERT(program);
+INI_INSERT(module);
+INI_INSERT(subroutine);
+INI_INSERT(function);
+INI_INSERT(blockdata);
+INI_INSERT(interface);
+}
+
+@* INDEX.

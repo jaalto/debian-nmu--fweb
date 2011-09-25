@@ -1,0 +1,33 @@
+@z --- d_type.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+
+\Title{D\_TYPE.WEB} % Prototypes for \.{reserved}.
+
+@c 
+@* PROTOTYPES for {\tt RESERVED.WEB}.  The function prototypes are macroed
+up so that if |PROTOTYPES==1| (see \.{proto.hweb}) one gets full function
+prototyping; otherwise just old-style declarations.
+
+@I formats.hweb
+
+@I os.hweb
+
+@ The make file produces \.{d\_type.h} from these prototypes.
+
+@a
+
+int cmpr_nd PROTO((NAME_INFO HUGE **p0,NAME_INFO HUGE **p1));
+SRTN ini_tokens PROTO((LANGUAGE language0));
+SRTN ini_RAT_tokens PROTO((LANGUAGE language0));
+SRTN ini_reserved PROTO((LANGUAGE l));
+SRTN save_id PROTO((WORD_TYPE word_type,LANGUAGE language0,
+			CONST outer_char HUGE **words));
+SRTN save_words PROTO((LANGUAGE language0,CONST RESERVED_WORD HUGE *words));
+SRTN see_reserved PROTO((CONST RSRVD HUGE *prsrvd));
+

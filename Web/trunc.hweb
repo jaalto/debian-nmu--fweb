@@ -1,0 +1,48 @@
+@z --- trunc.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ Various structure definitions for identifier truncation.
+
+@d BP_MARKER 1
+
+@d PROPER_END(end) 
+	end = (np+1)->byte_start; 
+	if(*end == BP_MARKER && np != npmax) end = ((BP *)end)->byte_start@;
+
+@d MAX_ID_LENGTH 32 // Truncated identifiers can't be longer than this.
+
+@<Typedef...@>=
+
+#if(0)
+IN_COMMON boolean truncate_ids; /* Truncate identifers? */
+IN_COMMON unsigned short tr_max[]; /* Truncate to this length. */
+IN_COMMON name_pointer npmax; /* |name_ptr - 1|. */
+#endif
+
+/* Back-pointer structure points back to the original name in |name_dir|. */
+typedef struct Bp
+	{
+	ASCII c; // Dummy byte that always remains~|BP_MARKER|.
+	LANGUAGE Language;
+	CONST ASCII HUGE *byte_start,HUGE *byte_end; /* Points to original,
+untruncated name. */ 
+	struct Bp HUGE *next; /* Links to next back-pointer structure, in
+case a truncated name came from more than one original name. */  
+	struct Trunc HUGE *Root;
+	} BP;
+
+/* Info about a truncated identifier. */
+typedef struct Trunc
+	{
+	boolean Language; // All languages associated with this name.
+	size_t num[NUM_LANGUAGES]; 
+		// \# of instances of the truncated name.
+	ASCII HUGE *id, HUGE *id_end; // Truncated variable name.
+	BP HUGE *first, HUGE *last; // First and last back-pointer structures.
+	struct Trunc HUGE *next; // Next structure in truncated chain.
+	} TRUNC;

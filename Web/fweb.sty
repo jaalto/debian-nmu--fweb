@@ -1,0 +1,49 @@
+% --- STYLE FILE fweb.sty USED FOR WEAVING the FWEB SOURCES ---
+
+% (For a more extensive example, see Fweb/Manual/fweb.sty.)
+
+% NOTE:  If you are not using this file to typeset the FWEB sources,
+% comment out the next command!!!
+
+% Include typesetting and page-layout macros for FWEB sources.
+limbo.begin "\\input fweb" % Input fweb.tex automatically.
+	
+% Get LaTeX2e to include the optional file `twoside.sty'.
+LaTeX.class.options "twoside"
+
+% Activate several packages.  Multicol is used for the Index.
+LaTeX.package "indentfirst,multicol"
+
+% Here's how to get the entire document in two-column format.  (One must
+% include `multicol' in `LaTeX.package'.)
+% limbo.end "\\def\\beforeindex{\\end{multicols}\\newpage}\n\
+%\\begin{multicols}{2}\n\
+%\\raggedcolumns"
+
+% Use the following for two-column format, or for generally tightening up
+% the manuscript.
+doc.preamble "\\secpenalty0"
+
+% Pretty up the documentation.
+named.preamble "\\7" % Empty line after module name.
+
+% Non-default names for the TeX output files.
+index.tex "#.ndx"
+modules.tex "#.mds"
+contents.tex "#.cts"
+
+% Separate index entries by \letter{...}. See `fweb.tex' for a sample
+% definition of \letter.
+lethead.prefix "\\letter{" 
+lethead.suffix "}\n"
+lethead.flag -1 % Use lower case letters.
+
+% Subscript symbols with the section number where they were defined.  With
+% this setting, function names will be subscripted with cross-reference
+% information.  To turn off all such subscripting, use the command-line
+% option `-f'.
+mark_defined.fcn_name 1
+mark_defined.WEB_macro 0
+mark_defined.outer_macro 0 
+mark_defined.exp_type 0
+mark_defined.typedef_name 0

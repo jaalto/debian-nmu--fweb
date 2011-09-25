@@ -1,0 +1,435 @@
+@z --- common.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@i typedefs.hwb
+
+@* DEFINITIONS for TANGLE and WEAVE. Here's stuff required for
+\.{tangle.web} and \.{weave.web}. 
+
+@ As much as possible, we adhere to ANSI conventions. However, to support
+pre-ANSI compilers such as \.{gcc}, we must make some modifications. It is
+assumed that the compilers predefine macros such as |vax|, |sun|, or |mac|,
+in \It{lower case}; if they do not, then these macros must be defined from
+the command line. In addition, the \WEB\ files must be tangled with
+\It{upper case} macros such as |VAX|, |SUN|, or |MAC| defined from the
+command line, as in \.{ftangle tangle -m"SUN"}. It is conventional to put
+the machine macro command into the ini file \.{.fweb}, as in ``\.{+mSUN}''.
+
+@i os.hweb // System-dependent definitions.
+
+@ The following flag is used for \Cpp. (??)
+@<Common...@>=
+
+EXTERN boolean long_comment;
+
+@ Code related to the character set. \It{Mess around here only at your own
+risk.} 
+
+@D and_and OCTAL(4) // `|&&|'.
+@D star_star OCTAL(5) // `|@r x**y|' .
+@D colon_colon OCTAL(11) // \Cpp\ and \Fortran--90: `$\CF$'.
+
+/* The next two only occur in different languages, so they can have the same
+value. */  
+@D neqv OCTAL(10) // `|@r .neqv.|'.
+@D ellipsis neqv // `|...|'.
+
+@D stmt_label OCTAL(30)
+
+@D slash_slash OCTAL(26)  // Concatenation `|@r \/|' .
+
+@D bell OCTAL(7) // |ASCII| code for ringing the bell.
+@D tab_mark @'\t' // |ASCII| code used as tab-skip.
+@D line_feed OCTAL(12) /* |ASCII| code thrown away at end of line; $\equiv$
+			\.{'\\n'}. */
+@D form_feed OCTAL(14) // |ASCII| code used at end of page.
+@D carriage_return OCTAL(15) // |ASCII| code used at end of line.
+
+@D gt_gt OCTAL(20) // `|>>|'; this doesn't exist in MIT.
+@D lt_lt OCTAL(22) // `|<<|'; this doesn't exist in MIT.
+
+@D plus_plus OCTAL(13) // `|++|'; this corresponds to MIT's up-arrow.
+@D minus_minus OCTAL(1) // `|--|'; this corresponds to MIT's down-arrow.
+
+@D minus_gt OCTAL(31) // `|->|'.
+@D eqv minus_gt // `|@r .eqv.|'.
+
+@D not_eq OCTAL(32) // `|!=|'.
+
+@D paste OCTAL(33) // `|##|'.
+
+@D lt_eq OCTAL(34) // `|<=|'.
+@D gt_eq OCTAL(35) // `|>=|'.
+
+@D eq_eq OCTAL(36) // `|==|'.
+
+@D or_or OCTAL(37) // `||| |'.
+
+@D begin_language OCTAL(16) // Mark a language switch.
+
+@D left_array OCTAL(21)  // `$\LS$'.
+@D right_array OCTAL(25) // `$\SR$'.
+
+@D interior_semi OCTAL(24) // `\.;'.
+
+@<Common code...@>=
+
+IN_COMMON ASCII xord[]; // specifies conversion of input characters.
+@#ifdef scramble_ASCII
+	IN_COMMON ASCII xxord[];
+@#endif
+IN_COMMON outer_char xchr[]; // specifies conversion of output characters.
+
+@ Code related to input routines:
+
+@<Common code...@>=
+
+IN_COMMON BUF_SIZE buf_size; // Used for \FWEAVE; see \.{common.web}.
+IN_COMMON ASCII HUGE *loc; /* points to the next character to be read from the
+				buffer*/ 
+
+@ Code related to identifier and module name storage:
+
+@d ID_FLAG 10240 // \bf DON'T MONKEY WITH THIS NUMBER!.
+
+@d length(c) (c+1)->byte_start-(c)->byte_start // the length of a name.
+
+@d llink link // left link in binary search tree for module names.
+@d root name_dir->rlink /* the root of the binary search tree
+  for module names */
+
+@d is_intrinsic(n) (n->intrinsic_word & (boolean)language)
+@d is_keyword(n) (n->keyword & (boolean)language)
+
+@<Common code...@>=
+
+IN_COMMON name_pointer name_ptr; // first unused position in |byte_start|.
+IN_COMMON ASCII HUGE *byte_ptr; // first unused position in |byte_mem|.
+
+typedef name_pointer HUGE *hash_pointer;
+IN_COMMON hash_pointer hash, /* heads of hash lists */
+	hash_end, /* end of |hash| */
+	h; /* index into hash-head array */
+
+
+@ To distinguish between the constructions \.{@@<\dots@@>} and
+\.{\#<\dots@@>}, both of which return |module_name|, we introduce the flag
+|mac_mod_name|. 
+
+@<Common code...@>=
+
+EXTERN boolean mac_mod_name;
+
+@ Code related to module numbers:
+@<Common code...@>=
+
+IN_COMMON sixteen_bits module_count; // The current module number.
+IN_COMMON boolean HUGE *chngd_module; // Dynamic array: Is the module changed?
+IN_COMMON boolean prn_where; // Tells \.{TANGLE} to print line and file	info.
+
+@ Code relating to output:
+
+@d UPDATE_TERMINAL fflush(stdout) // Empty the terminal output buffer.
+@d new_line putchar('\n') @d putxchar putchar
+@d ASCII_write(p0,n) fflush(stdout),
+		ASCII_file_write(stdout,p0,(int)(n))@;
+	/* Write on the standard output, converting from |ASCII|. */ 
+
+@ For FORTRAN, \&{format} commands are annoying, because the use of slashes
+doesn't fit with the rest of the \Fortran\ syntax. Thus, we'll deal with the
+|format| statement something like a preprocessor statement, in that we'll
+raise a special flag when we're inside it, and issue special tokens to
+indicate the start and the end of the statement.
+
+@D begin_format_stmt OCTAL(171)
+@D end_format_stmt OCTAL(172)
+
+@ For~C, getting an identifier is simple. For FORTRAN, we treat \&{format}
+statements much like C's preprocessor statement. However, there's no
+special character to start a \&{format} line; we have to actually check the
+identifier. Furthermore, it looks nicer if constructions such as \\{f6.2}
+are treated as one identifier, so when we're inside a \&{format} statement
+we allow the period to be an acceptable (internal) character for an identifier.
+
+@d is_identifier(c) (isAlpha(c) || c==@'_' || c==@'$' ||
+	(c==@'%' && language!=C && !Fortran88) ) /* This defines the starting
+					character of an identifier. */ 
+
+@d is_kind(c) (isDigit(c) || isAlpha(c) || c==@'_' || c==@'$') 
+	/* \Fortran-90 kind parameter. */
+
+@<Get an identifier@>= 
+@{
+IN_COMMON ASCII HUGE *pformat, HUGE *pdata;
+@% IN_COMMON ASCII HUGE *pdefault, HUGE *pcontains;
+
+get_identifier:
+  id_first = --loc;
+
+/* Scan over subsequent elements of an identifier. */
+  for(++loc; isAlpha(*loc) || isDigit(*loc) || 
+	*loc==@'_' || *loc==@'$' || (in_format && *loc==@'.'); loc++)
+		;
+
+id_loc=loc;  /* End plus one of the identifier. */
+
+if(FORTRAN_LIKE(language))
+	{
+	if(web_strcmp(pformat,pformat+6,id_first,id_loc) == EQUAL)
+		{ /* Raise special flag to say we're inside a |@r format|
+statement. */ 
+		in_format = YES;
+		return begin_format_stmt; 
+		}
+	else if(program==weave)
+		{
+		if(web_strcmp(pdata,pdata+4,id_first,id_loc) == EQUAL)
+			{ // Inside a |@r data| statement.
+			in_data = YES;
+			return identifier;
+			}
+		else if(at_beginning && *loc==@':' &&
+				!is_in(non_labels,id_first,id_loc))
+			return stmt_label;  
+		}
+	}
+
+if(is_include_like()) sharp_include_line = YES;
+return identifier;
+}
+
+@ Here we obtain the file name after an \.{@@o}~command.
+@<Scan the output file name@>=
+{
+while(*loc == @' ' || *loc == tab_mark)
+	{
+	loc++;
+	if(loc > limit) return ignore;
+	}
+
+id_first = loc;
+while(*loc != @' ' && *loc != tab_mark) loc++; // Absorb file name.
+id_loc = loc;
+if(*id_first == @'"') id_first++;
+if(*(id_loc-1) == @'"') id_loc--;
+if(id_loc - id_first >= MAX_FILE_NAME_LENGTH)
+	{
+	err_print(T,"Output file name too long; allowed only %d characters",
+		MAX_FILE_NAME_LENGTH - 1);
+	id_loc = id_first + MAX_FILE_NAME_LENGTH - 1;
+	}
+}
+
+@ These tables are initialized during |common_init|.
+
+@<Common...@>=
+
+#undef expr
+#define expr 1
+
+#undef unop
+#define unop 2
+
+#undef binop
+#define binop 3
+
+extern DOTS HUGE *dots; /* The dynamic table; see \.{common.web}. */
+
+#ifdef _FWEB_h
+
+	EXTERN DOTS dots0[]
+   #if(part == 0 || part == 1)
+	    = {
+		{(ASCII *)"@@@@@@",3,dot_const,expr,0}, /* Dummy */
+		{(ASCII *)"AND",3,dot_const,binop,and_and}, /* |and_and| */
+		{(ASCII *)"EQ",2,dot_const,binop,eq_eq}, /* |eq_eq| */
+		{(ASCII *)"EQV",3,dot_const,binop,eqv}, /* |eqv| */
+		{(ASCII *)"FALSE",5,dot_const,expr,0},
+		{(ASCII *)"GE",2,dot_const,binop,gt_eq}, /* |gt_eq| */
+		{(ASCII *)"GT",2,dot_const,binop,@'>'}, /* |@'>'| */
+		{(ASCII *)"LE",2,dot_const,binop,lt_eq}, /* |lt_eq| */
+		{(ASCII *)"LT",2,dot_const,binop,@'<'}, /* |@'<'| */
+		{(ASCII *)"NE",2,dot_const,binop,not_eq}, /* |not_eq| */
+		{(ASCII *)"NEQV",4,dot_const,binop,neqv}, /* |neqv| */
+		{(ASCII *)"NOT",3,dot_const,unop,@'!'}, /* |@'!'| */
+		{(ASCII *)"OR",2,dot_const,binop,or_or}, /* |or_or| */
+		{(ASCII *)"TRUE",4,dot_const,expr,1},
+		{(ASCII *)"XOR",3,dot_const,binop,neqv}, /* |neqv| */
+		{(ASCII *)"",0,0,0,0}
+		}
+	#endif /* |part == 1| */
+		;
+#endif /* |_FWEB_h| */
+
+@ The preprocessor commands have a similar format.
+@<Common...@>=
+
+#ifdef _FWEB_h
+
+	EXTERN DOTS mcmds[] 
+   #if(part ==0 || part == 1)
+	 = {
+		{(ASCII *)"define",6,WEB_definition},
+		{(ASCII *)"elif",4,m_elif},
+		{(ASCII *)"elseif",6,m_elif},
+		{(ASCII *)"else",4,m_else},
+		{(ASCII *)"endfor",6,m_endfor},
+		{(ASCII *)"endif",5,m_endif},
+		{(ASCII *)"for",3,m_for},
+		{(ASCII *)"if",2,m_if},
+		{(ASCII *)"ifdef",5,m_ifdef},
+		{(ASCII *)"ifndef",6,m_ifndef},
+		{(ASCII *)"pragma",6,m_pragma},
+		{(ASCII *)"undef",5,m_undef},
+		{(ASCII *)"",0,0}
+	    }
+	#endif /* |part == 1| */
+		;
+#endif /* |_FWEB_h| */
+
+@ The preprocessor commands are piggy-backed on the \.{@@\#} command. If
+there's text after that command, then we hunt through the above table.
+Otherwise, it's a |big_line_break|.
+
+@<Process possible preprocessor command@>=
+@{
+boolean mcode;
+
+@b
+*limit = @' '; /* Terminator for identifier search. */
+id_first = loc;
+
+while(isAlpha(*loc)) loc++; /* Find end of identifier. */
+
+if((mcode=is_mcmd(mcmds,id_first,loc)) != 0) return mcode;
+
+loc = id_first; /* Failed to recognize preprocessor command. */
+}
+
+@i mem.hweb /* Macros for memory allocation. */
+
+@ Miscellaneous definitions.
+
+@#ifndef _FWEAVE_
+
+	@D MCHECK0(n,reason) mcheck0((unsigned long)(n),(outer_char *)reason)
+
+	@d EVALUATE(val,p0,p1) 
+	  {unsigned long nbytes;
+	  val_ptr = val_heap = 
+	  GET_MEM("val_heap",nbytes=2*((p1)-(p0)),VAL); 
+		evaluate(&val,p0,p1); 
+	  if(val_heap) FREE_MEM(val_heap,"val_heap",nbytes,VAL);
+	  }
+
+	@d DONE_LEVEL (cur_byte >= cur_end) /* Do we need to pop? */
+
+@#endif /* |_FWEAVE_| */
+
+@<Glob...@>=
+
+/* The shorter length here is primarily to keep the stack under control.
+Now that |N_MSGBUF| is used  dynamically, maybe this statement isn't
+necessary. */ 
+#ifdef SMALL_MEMORY
+	#define N_MSGBUF 2000
+#else
+	#define N_MSGBUF 10000
+#endif 
+
+
+@ The following helps insert spaces in the output.
+@<Typedef...@>=
+
+@#ifndef _FWEAVE_
+
+	typedef enum
+		{
+		MISCELLANEOUS, /* ``normal'' state */
+		NUM_OR_ID, /* state associated with numbers and identifiers */
+		UNBREAKABLE, /* state associated with \.{@@\&} */
+		VERBATIM /* state in the middle of a string */
+		} OUTPUT_STATE;
+
+@#endif /* |_FWEAVE_| */
+
+@ For debugging and error messages, we need a routine that gives the name
+of a control code.
+@m CN(code) case code: return (outer_char *)#code
+@A
+@#if defined _FWEAVE_ || defined _FTANGLE_
+#if(part == 0 || part == 1)
+
+@[outer_char *ccode_name FCN((code))
+	eight_bits code C1("")@;
+{
+switch(code)
+	{
+	CN(begin_FORTRAN);
+	CN(begin_RATFOR);
+	CN(begin_C);
+	CN(ascii_constant);
+	CN(big_line_break);
+	CN(begin_meta);
+	CN(end_meta);
+	CN(TeX_string);
+	CN(xref_roman);
+	CN(xref_typewriter);
+	CN(xref_wildcard);
+	CN(formatt);
+	CN(definition);
+	CN(WEB_definition);
+	CN(begin_code);
+	CN(module_name);
+	CN(new_module);
+	CN(m_ifdef);
+	CN(m_ifndef);
+	CN(m_if);
+	CN(m_else);
+	CN(m_elif);
+	CN(m_endif);
+	CN(m_undef);
+
+@#ifdef _FTANGLE_
+	CN(begin_vcmnt);
+	CN(begin_bp);
+	CN(insert_bp);
+	CN(control_text);
+@#endif /* |_FTANGLE_| */
+
+@#ifdef _FWEAVE_
+	CN(dont_expand);
+	CN(auto_label);
+	CN(macro_module_name);
+	CN(switch_math_flag);
+	CN(underline);
+	CN(thin_space);
+	CN(math_break);
+	CN(line_break);
+	CN(ln_break_outdent);
+	CN(no_line_break);
+	CN(pseudo_semi);
+	CN(macro_space);
+	CN(copy_mode);
+	CN(toggle_output);
+	CN(pseudo_expr);
+	CN(pseudo_colon);
+	CN(trace);
+@#endif /* |_FWEAVE_| */
+	default: return OC("UNKNOWN");
+	}	
+}
+#endif /* |part == 1| */
+@#endif /* |defined _FWEAVE_ || defined _FTANGLE_| */
+
+@ This dummy module avoids warning messages from \FWEAVE\ if the indicated
+modules aren't actually used.
+@<Unused@>=
+@<Get an id...@>@;
+@<Process possible ...@>@;
+

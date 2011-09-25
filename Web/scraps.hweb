@@ -1,0 +1,131 @@
+@z --- scraps.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@* IMPLEMENTING the PRODUCTIONS.  For the actual grammar implemented by
+\FWEB, see \.{prod.web}. This was split off in order to shorten the length
+of \FWEAVE.
+
+More specifically, a scrap is a structure
+consisting of a category |cat| and a |text_pointer| |trans|, which points
+to the translation in |tok_start|.  When \cee\ text is to be processed with
+the grammar above, we form an array |scrap_info| containing the initial
+scraps.  Our production rules have the nice property that the right-hand
+side is never longer than the left-hand side. Therefore it is convenient to
+use sequential allocation for the current sequence of scraps. Five pointers
+are used to manage the parsing:
+
+\yskip\hang |pp| is a pointer into |scrap_info|.  We will try to match the
+category codes |pp->cat| |(pp+1)->cat|,\dots to the left-hand sides of
+productions.
+
+\yskip\hang |scrap_base|, |lo_ptr|, |hi_ptr|, and |scrap_ptr| are such that
+the current sequence of scraps appears in positions |scrap_base| through
+|lo_ptr| and |hi_ptr| through |scrap_ptr|, inclusive, in the |cat| and
+|trans| arrays. Scraps located between |scrap_base| and |lo_ptr| have been
+examined, while those in positions $\ge$~|hi_ptr| have not yet been looked at
+by the parsing process.
+
+\yskip\noindent Initially |scrap_ptr| is set to the position of the final
+scrap to be parsed, and it doesn't change its value. The parsing process
+makes sure that |lo_ptr>=pp+3|, since productions have as many as four
+terms, by moving scraps from |hi_ptr| to |lo_ptr|. If there are fewer than
+|pp+3| scraps left, the positions up to |pp+3| are filled with blanks that
+will not match in any productions. Parsing stops when |pp=lo_ptr+1| and
+|hi_ptr=scrap_ptr+1|.
+
+Since the |scrap| structure will later be used for other purposes, we
+declare its second element as unions.
+
+@<Type...@>=
+
+typedef struct 
+	{
+	  eight_bits cat; /* Category. It would be nice to |enum| this, but
+that would turn it into an |int|, which could be as much as four times
+bigger. */
+	  eight_bits mathness;
+	  union 
+		{
+		    text_pointer Trans;
+		    @<Rest of |trans_plus| union@>@;
+		  } trans_plus;
+	} scrap;
+
+typedef scrap HUGE *scrap_pointer;
+
+@ 
+@d trans trans_plus.Trans /* translation texts of scraps */
+@d no_math 2
+@d yes_math 1
+@d maybe_math 0
+
+@<Global...@>=
+
+EXTERN long max_scraps; /* Length of the next array. */
+EXTERN scrap HUGE *scrp_info; /* Dynamic memory array for scraps */
+EXTERN scrap_pointer scrp_end; /* end of |scrap_info|. */
+
+EXTERN scrap_pointer pp; /* current position for reducing productions */
+EXTERN scrap_pointer scrp_base; /* beginning of the current scrap sequence */
+EXTERN scrap_pointer scrp_ptr; /* ending of the current scrap sequence */
+EXTERN scrap_pointer lo_ptr; /* last scrap that has been examined */
+EXTERN scrap_pointer hi_ptr; /* first scrap that has not been examined */
+
+EXTERN scrap_pointer mx_scr_ptr; /* largest value assumed by |scrap_ptr| */
+
+@ Token lists in |@_tok_mem| are composed of the following kinds of
+items for \TeX\ output.
+\begin{itemize}
+\item ASCII codes and special codes like |force| and
+|math_rel| represent themselves;
+
+\item |id_flag+p| represents \.{\\\\\{{\rm identifier $p$}\}};
+
+\item |res_flag+p| represents \.{\\\&\{{\rm identifier $p$}\}};
+
+\item |mod_flag+p| represents module name |p|;
+
+\item |tok_flag+p| represents token list number |p|;
+
+\item |inner_tok_flag+p| represents token list number |p|, to be
+translated without line-break controls.  (This is used for code between
+vertical bars.)
+
+\end{itemize}
+
+/* In the following, note
+that the casts are absolutely essential on machines with sixteen-bit
+integers.) */
+@d id_flag ID_FLAG // Signifies an identifier.
+@d res_flag 2*id_flag // Signifies a reserved word.
+@d mod_flag ((sixteen_bits)(3*(sixteen_bits)id_flag)) 
+	// Signifies a module name.
+@d tok_flag ((sixteen_bits)(4*(sixteen_bits)id_flag)) // signifies a token list.
+@d inner_tok_flag ((sixteen_bits)(5*(sixteen_bits)id_flag)) 
+	// Signifies a token list in `\Cb'.
+
+
+@ The `|freeze_text|' macro is used to give official status to a token
+list.  Before saying |freeze_text|, items are appended to the current token
+list, and we know that the eventual number of this token list will be the
+current value of |text_ptr|. But no list of that number really exists as
+yet, because no ending point for the current list has been stored in the
+|tok_start| array. After saying |freeze_text|, the old current token list
+becomes legitimate, and its number is the current value of |text_ptr-1|
+since |text_ptr| has been increased. The new current token list is empty
+and ready to be appended to.  Note that |freeze_text| does not check to see
+that |text_ptr| hasn't gotten too large, since it is assumed that this test
+was done beforehand.
+
+@d freeze_text *(++text_ptr)=tok_ptr
+
+@ If \.{WEAVE} is being run in debugging mode, the production numbers and
+current stack categories will be printed out when |tracing| is set
+to~|VERBOSE|; a sequence of two or more irreducible scraps will be printed
+out when |tracing| is set to~|BRIEF|.
+

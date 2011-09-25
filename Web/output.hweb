@@ -1,0 +1,75 @@
+@z --- output.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ The token lists for translated \TeX\ output contain some special control
+symbols as well as ordinary characters. These control symbols are
+interpreted by \.{WEAVE} before they are written to the output file.
+
+\yskip\hang |break_space| denotes an optional line break or an en space;
+
+\yskip\hang |force| denotes a line break;
+
+\yskip\hang |big_force| denotes a line break with additional vertical space;
+
+\yskip\hang |opt| denotes an optional line break (with the continuation
+line indented two ems with respect to the normal starting position)---this
+code is followed by an integer~|n|, and the break will occur with
+penalty~$10n$; 
+
+\yskip\hang |backup| denotes a backspace of one em;
+
+\yskip\hang |cancel| obliterates any |break_space| or |force| or
+|big_force| tokens that immediately precede or follow it and also cancels
+any |backup| tokens that follow it;
+
+\yskip\hang |indent| causes future lines to be indented one more em;
+
+\yskip\hang |outdent| causes future lines to be indented one less em.
+
+\yskip\noindent All of these tokens are removed from the \TeX\ output that
+comes from \cee\ text between \Cb\ signs; |break_space| and |force| and
+|big_force| become single spaces in this mode. The translation of other
+\cee\ texts results in \TeX\ control sequences~\.{\\1}, \.{\\2}, \.{\\3},
+\.{\\4}, \.{\\5}, \.{\\6}, and~\.{\\7} corresponding respectively to
+|indent|, |outdent|, |opt|, |backup|, |break_space|, |force|, and
+|big_force|. However, a sequence of consecutive~`\.\ ', |break_space|,
+|force|, and/or |big_force| tokens is first replaced by a single token (the
+maximum of the given ones).
+
+The tokens |math_rel| and |math_bin| will be translated into
+\.{\\mathrel\{} and \.{\\mathbin\{}, respectively.  Other control sequences
+in the \TeX\ output will be `\.{\\\vertbar}', which prefaces single-letter
+identifiers, `\.{\\\\\{}$\,\ldots\,$\.\}' surrounding
+identifiers, `\.{\\\&\{}$\,\ldots\,$\.\}' surrounding reserved words,
+`\.{\\\@@\{\dots\}}' surrounding names of intrinsic functions,
+`\.{\\.\{}$\,\ldots\,$\.\}' surrounding strings,
+`\.{\\WC\{}$\,\ldots\,$\.\}$\,$|force|' surrounding comments, and
+`\.{\\WX$n$:}$\,\ldots\,$\.{\\X}\.{\ }$\ell$\.{\\X}' surrounding module
+names, where |n|~is the module number and $\ell$~is the language symbol.
+
+@d math_bin OCTAL(345)
+@d math_rel OCTAL(346)
+
+@d toggle_meta OCTAL(347)
+
+/* --- Non-math tokens (see |big_app| in \.{prod.web}) --- */
+@d big_cancel OCTAL(360) // Like |cancel|; also overrides spaces.
+@d cancel OCTAL(361) // Override |backup|, |break_space|, |force|, |big_force|.
+
+/* \bf The numerical order of the following must be preserved!! */
+@d indent OCTAL(362) // One more tab (\.{\\1}).
+@d outdent OCTAL(363) // One less tab (\.{\\2}).
+@d opt OCTAL(364) // Optional break in mid-statement (\.{\\3}).
+@d backup OCTAL(365) // Stick out one unit to the left (\.{\\4}).
+@d break_space OCTAL(366) // Optional break between statements (\.{\\5}).
+@d force OCTAL(367) // Forced break between statements (\.{\\6}).
+@d big_force OCTAL(370) // Forced break with additional space (\.{\\7}).
+
+@d out_force OCTAL(371) // Output biggest force command to this point.
+
+@d end_translation OCTAL(377) // Special sentinel token at end of list.

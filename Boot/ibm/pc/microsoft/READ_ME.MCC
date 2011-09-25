@@ -1,0 +1,182 @@
+	      --- COMPILING WITH THE MICROSOFT C COMPILER ---
+
+   It is not profitable to compile FWEB with any compiler that puts it into
+low memory; it's too big.  See the alternative in ../gnu.
+
+   The following discussion, circa 1993, is included for historical interest.  
+
+
+* HISTORICAL REMARKS ON BOOTSTRAPPING
+
+   NOTE: The bootstrap code has been only tested so far with the Microsoft
+C compiler.  (It may be tested with TURBO-C++; check with me.)  If you
+attempt to use another compiler, you may encounter difficulties; consult
+with me.
+
+   ALSO NOTE: If you have one of the original 8088 machines, with no hardware
+speed-up enhancements, you will likely find FWEB unusably slow for jobs of
+any substantial length. There's no problem with enhanced versions. Give it
+a try.
+
+   (Thorsten Ohl has proposed and tested a buffering scheme that should
+give some improvements in run time. However, that has not yet been
+implemented in the master FWEB sources.)
+
+   Several significant difficulties were encountered while attempting to
+make FWEB work on the IBM-PC:
+
+	(1) memory limitations;
+
+	(2) pointer problems;
+
+	(3) compiler bugs.
+
+Most likely, any gross difficulties you encounter with bootstrapping FWEB
+will be related to one of these three areas. That doesn't mean that you
+won't encounter bugs with FWEB itself, but remember that FWEB does run
+successfully on a variety of machines, so suspect one of the three areas above
+first. 
+
+(1) MEMORY LIMITATIONS.
+
+   FWEB is a large, sophisticated program. Therefore, when you first
+attempt to compile and link the bootstrap code supplied in this directory,
+STRIP DOWN YOUR SYSTEM AS MUCH AS YOU CAN so that maximum memory is available
+to the compiler. Try to make CHKDSK report about 600K of main memory
+available. Of course, the compiler will complain if it can't find enough
+memory, but I've encountered situations in which the compiler ran through
+to the end without complaining but produced faulty code that was corrected
+when the available memory was enlarged. If the Borland compiler finishes
+with ``Available memory 0'', don't trust the result.
+
+   At present, FWEB should compile successfully with either the Borland
+Turbo C compiler or the Microsoft C compiler. (To select which compiler to
+use, you must either use the make file or define certain macros
+from the compiler's command line; see below.)  To accomplish even this
+much, a relatively major restructuring had to be done to reduce the size of
+the various object modules. Nevertheless, you may find that some other
+compilers choke on individual functions that are too large; for example,
+there are a few extremely large switch statements. You may be able to tell
+your compiler to increase the size of its internal tables by some sort of
+command-line option. If not, if there's enough demand I will eventually try
+to figure out how to subdivide things up further.
+
+   A different sort of memory problem arises when you have obtained a
+working FWEB, but IT complains about running out of memory when working on
+some particularly large source code. In round numbers, FTANGLE.EXE and
+FWEAVE.EXE are each about 200K. That leaves you probably 300K to 400K of
+memory, which is enough to handle fairly sizable codes (including FTANGLE
+and FWEAVE themselves). However, if FWEB complains you may need to change
+the default allocation sizes for the various internal tables. This is done
+via the -y... command-line option (which can be put into FWEB.INI); see the
+user manual.
+
+(2) POINTER PROBLEMS.
+
+   FWEB allocates almost all of its memory dynamically (at run time). In
+particular, it can allocate blocks of memory that are longer than 64K
+bytes. This means that pointers must be able to point anywhere and that
+pointer arithmetic must be the most general possible. On the pc, pointers
+are 32 bits long, but they are divided into segment:offset parts, where
+each of segment and offset are 16 bits long. Generally by default, the
+compilers implement pointer arithmetic only on the offset portion; this
+speeds things up. It is, however, not satisfactory.  For Borland,
+Microsoft, and almost certainly for the other compilers as well, YOU MUST
+EXPLICITLY USE THE ***HUGE*** MEMORY MODEL. This not only ensures that
+arithmetic is done on the full 32 bit pointers, it also ensures that the
+pointers have unique, normalized representations so that inequalities
+involving pointers can be tested correctly. Although maintaining the
+normalized form slows things down, it seems to be a price one has to pay.
+
+   Some compilers make a distinction between ``far'' pointers and ``huge''
+pointers. Both of these are 32 bits, but only the huge pointer is
+normalized. Peculiarly, sometimes even in the huge memory model pointers
+are far by default, not huge. If you want them to be huge, you have to
+declare them explicitly. Thus, almost all FWEB pointers had to be
+explicitly declared huge, a tedious and annoying exercise. It's quite
+conceivable that I didn't get that entirely correct, since in a few cases
+the pointers dare not be huge; there may be some residual bugs lurking
+here. If you are using some other compiler, you must make sure that the
+memory model and pointer declarations allow for the full range of
+operations on 32 bit pointers.
+
+(3) COMPILER and other BUGS
+
+   I've encountered compiler bugs using both the Microsoft and Borland
+compilers. I originally switched from Microsoft to Borland partly because
+an older version of Microsoft crashed when generating the huge memory model
+(and partly because Borland seemed to be able to handle larger functions).
+Microsoft 6.0 seems to work OK.
+
+
+--- COMPILING FWEB ---
+
+   As explained in INSTALL_FWEB.tex, the compile and link information is
+all contained in the Unix-style make file MAKEFILE.  MAKEFILE includes a
+default file, DEFAULTS.MK, in order to define certain macros.
+
+If you look into DEFAULTS.MK, you will find that the compile and
+link lines are defined by macros, so they can be easily changed. Note, in
+particular, that the macro "ibmpc" must be defined from the compiler's
+command line. Also note the use of compiler-command-line options to
+suppress or turn on various kinds of compiler warning messages. You may
+still get a few warnings, for example about unused variables (I'll clean
+this up in the future), but as long as they're warnings, not errors,
+they're probably harmless. If you get an error that isn't immediately
+apparent, check with me.  Although it is costly in terms of both space and
+speed, you should for awhile generate code that checks for stack overflow.
+This is done with the option settings as supplied.  Note also the
+constructions involving /Dpart=1, /Dpart=2, or /Dpart=3.  These define
+preprocessor 
+macros that are used to split FTANGLE.C and FWEAVE.C into three parts so the
+compiler doesn't run out of heap space.  The splitting is simply done by
+commenting out two-thirds of the code at a time. This seems not to be necessary
+with Borland with maximum memory, so you might be able disable this if you
+want. 
+
+   To bootstrap with BORLAND, say
+
+	MAKE boot
+
+To bootstrap with MICROSOFT (I've tested with version 6.0; previous version
+may or may not work), say
+
+	NMAKE boot
+
+The bootstrap entry to the make file requires the TOUCH facility in order to
+ensure that the *.c and *.h files are the newest. Microsoft doesn't provide
+a separate TOUCH utility, but if you don't have a TOUCH of your own,
+instead of saying ``NMAKE boot, say
+
+	NMAKE -t *.c *.h
+	NMAKE all
+
+   If you run out of heap space during the compile, try executing the
+offending compile line by itself, rather than via NMAKE.  (For version
+1.23, I had this problem with part 1 of fweave.)
+
+   Once you get the bootstrap code compiled and linked successfully, you
+may be tempted to say ``NMAKE'' (or ``NMAKE all''), which should now
+recreate the *.c and *.h files by tangling the web sources. Unfortunately,
+you may find that the FTANGLE you have created attempts to allocate too
+much memory to coexist with NMAKE. You may have to run FTANGLE directly, or
+from a simple batch file.  [If you will only be tangling small jobs, you
+can reduce the amount of memory FTANGLE allocates by inserting appropriate
+``-y...'' commands in the style file. (Read about memory allocation in the
+user manual.) However, if you wish to make FTANGLE do itself and FWEAVE,
+then it needs to be essentially as big as it is configured by default.]
+
+   I make no promises to debug something that's not compiled with Borland or
+Microsoft, but I'll probably be able to recognize where the difficulty
+lies.
+
+--- RUNNING FWEB ---
+
+   Various test/demo files are provided to help you debug your new
+processors. See INSTALL_FWEB.tex for details.
+
+   Finally, let it be noted that the IBM-PC version of FWEB hasn't been
+tested very thoroughly. Consider yourself a pioneer, and good luck!
+(Many thanks to Arnold Kritz and Thorsten Ohl, the first pioneers.)
+
+

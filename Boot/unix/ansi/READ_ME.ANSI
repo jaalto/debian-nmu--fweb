@@ -1,0 +1,31 @@
+		       --- The ANSI-C BOOTSTRAP ---
+			       Version 1.30
+			       May 15, 1993
+
+   (Before trying to bootstrap ``by hand'', consider whether you can use
+the new ./configure installation procedure.  See READ_ME.FWEB for details.)
+
+   This is (almost) fully ANSI code that SHOULD BE USED WHENEVER POSSIBLE.
+Compilers for which this code has been tested include
+
+	CRAY: scc
+	IBM-RS/6000: cc
+	Silicon Graphics Personal Iris: cc
+	NeXT: gcc
+
+If you are an IBM-PC user, please refer to boot/ibm/pc/READ_ME.PC for
+further information.
+
+   Presently, FWEB departs from the ANSI standard in that 
+
+	(1) not all external names are unique when truncated to six characters;
+
+	(2) some user routines begin with underscores.
+
+These will be fixed someday.  Meanwhile, my apologies. Try the gnu gcc
+compiler if you have trouble.
+
+   To bootstrap, please see the instructions in READ_ME.FWEB.
+
+   I am very interested in ensuring that this code is really ANSI-compatible,
+so please let me know about any compiler problems you encounter.  Thanks.

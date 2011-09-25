@@ -1,0 +1,90 @@
+@z --- stacks.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@* STACKS for OUTPUT.  The output process uses a stack to keep track
+of what is going on at different ``levels'' as the modules are being
+written out.  Entries on this stack have a number of parts:
+
+\yskip\hang |end_field| is the |tok_mem| location where the replacement
+text of a particular level will end;
+
+\hang |byte_field| is the |tok_mem| location from which the next token
+on a particular level will be read;
+
+\hang |name_field| points to the name corresponding to a particular level;
+
+\hang |repl_field| points to the replacement text currently being read
+at a particular level.
+
+\hang |mod_field| is the module number, or zero if this is a macro.
+
+\hang |global_Language| is the overriding language for the module and its
+extensions. 
+
+\hang |Language| is the current language for the module. It will differ
+from |global_Language| if a language command was encountered in the middle
+of the module.
+
+\hang |macro_buf| is the current scratch space for the macro processor;
+|macro_buf_end| is its end.
+
+\yskip\noindent The current values of these nine quantities are referred
+to quite frequently, so they are stored in a separate place (|cur_state|)
+instead of in the |stack| array. We call the current values |cur_end|,
+|cur_byte|, |cur_name|, |cur_repl|, |cur_mod|, |cur_global_language|, and
+|cur_language|.
+
+The global variable |stack_ptr| tells how many levels of output are
+currently in progress. The end of all output occurs when the stack is
+empty, i.e., when |stack_ptr=stack|.
+
+@<Typed...@>=
+
+typedef struct {
+  eight_bits HUGE *end_field; // Ending location of replacement text.
+  eight_bits HUGE *byte_field; // Present location within replacement text.
+  name_pointer name_field; // |byte_start| index for text being output.
+  text_pointer repl_field; // |tok_start| index for text being output.
+  sixteen_bits mod_field; // Module number, or zero if not a module.
+  PARAMS global_params,params; // Various flags.
+  eight_bits HUGE *macro_buf, HUGE *mp, HUGE *macro_buf_end; 
+	// Current macro buffer.
+} output_state;
+
+typedef output_state HUGE *stack_pointer;
+
+@ Here are the synonyms for the current values of the stack.
+
+@d cur_end cur_state.end_field // Current ending location in |tok_mem|.
+@d cur_byte cur_state.byte_field // Location of next output byte in |tok_mem|.
+@d cur_name cur_state.name_field // Pointer to current name being expanded.
+@d cur_repl cur_state.repl_field // Pointer to current replacement text.
+@d cur_mod cur_state.mod_field // Current module number being expanded.
+
+@d cur_language cur_state.language // Current language.
+@d cur_global_language cur_state.global_params.Language 
+	// Global language for this level.
+
+/* Current flags. */
+@d cur_params cur_state.params //  Local flags.
+@d cur_global_params cur_state.global_params //  Global flags.
+
+/* Current macro buffer params. */
+@d macrobuf cur_state.macro_buf
+@d cur_mp cur_state.mp
+@d macrobuf_end cur_state.macro_buf_end
+
+@<Global...@>=
+
+EXTERN output_state cur_state; /* |cur_end|, |cur_byte|, |cur_name|,
+	|cur_repl|, |cur_mod|, |cur_global_language|, and |cur_language|. */
+
+EXTERN long stck_size; // Number of simultaneous levels of macro expansion.
+EXTERN output_state HUGE *stack; // Dynamic array: Info for non-current levels.
+EXTERN stack_pointer stck_end; // End of |stack|.
+EXTERN stack_pointer stck_ptr; // First unused loc.\ in the output state stack.

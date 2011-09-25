@@ -1,0 +1,19 @@
+@z --- os.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@I formats.hweb
+
+@i sfile.hweb // Web macros for file includes.
+
+@ This file takes care of stuff that is somewhat compiler- or
+operating-system-dependent.  Bootstrapping is taken care of by editing the
+file \.{custom.h}.
+
+@<Include files@>=
+
+#include "os.h" // Allegedly all system-specific stuff.

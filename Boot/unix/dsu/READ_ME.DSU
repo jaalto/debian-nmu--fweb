@@ -1,0 +1,15 @@
+	       --- BOOTSTRAPPING FWEB on the DECSTATION ---
+			       Version 1.30
+			       May 15, 1993
+
+   Before trying this bootstrap, try ./configure.  See READ_ME.FWEB for
+details.
+
+   This subdirectory contains bootstrap files for the DECstation/ULTRIX.
+The MIPS compiler seemed to have trouble with function prototyping and
+var_args, so they were turned off.  Because of turning off var_args, I
+can't be sure that all error messages will work correctly. If they do not,
+please let me know.  In any event, I do have a DECstation available, so I
+should be able to emulate any problems people may run into.
+
+

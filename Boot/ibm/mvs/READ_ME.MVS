@@ -1,0 +1,10 @@
+		    --- BOOTSTRAPPING FWEB with MVS ---
+			       Version 1.30
+			       May 15, 1993
+
+   This directory is intended to handle non-ASCII machines, specifically
+IBM EBCDIC machines.  The bootstrap has been tested so far only with the
+MVS operating system.  You may have to make some changes in custom.h for
+your system.  If you do so, please let me know.
+
+   Version 1.30 hasn't yet been test for MVS.  Sorry.

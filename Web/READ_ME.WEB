@@ -1,0 +1,11 @@
+			--- FWEB SOURCE CODE ---
+
+This subdirectory Fweb/Web contains the source code for the FWEB
+processors, both the original web sources and the tangled results *.c and
+*.h.  Please refer to INSTALL_FWEB.tex for descriptions of the files,
+although that should not be necessary for usual installations.
+
+To compile these files, use the Makefile if possible.
+
+To install FWEB, Unix users should run ./configure.  Please refer to
+../READ_ME.FWEB for further instructions.

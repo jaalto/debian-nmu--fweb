@@ -1,0 +1,126 @@
+@z --- proto.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ In this header we handle stuff related to function prototypes.
+
+@ The |PROTO| macro is used in \.{?\_type.hweb}.
+
+@f PROTO $_EXPR
+
+@<Operating system-specific...@>=
+
+#if OLD_PROTOTYPES
+	#define PROTO(args) () // Old-style.
+#else
+	#define PROTO(args) args // New-style.
+#endif // |PROTOTYPES|
+
+@ Here we deal with variable arguments.
+
+@f ELLIPSIS $_EXPR
+@f VA_ARGS $_EXPR
+@f VA_LIST int
+
+@<Operating system...@>=
+
+#if(0)
+/* Sun's system is hopeless. */
+#if(NUM_VA_ARGS == 1)
+	#undef NUM_VA_ARGS
+	#define NUM_VA_ARGS 2
+#endif
+#endif
+
+#if VARIABLE_ARGUMENTS
+	#define ELLIPSIS ,... /* ANSI standard; VAX allows for old-style
+declarations. */ 
+	#define VA_ARGS
+	#define VA_start
+	#if(NUM_VA_ARGS == 1)
+		#define VA_ALIST(args) (va_alist) // Sun's way.
+		#define VA_DCL(args) va_dcl
+		#define VA_START(a,n) va_start(a)
+	#else
+		#define VA_ALIST(args) args // ANSI way.
+		#define VA_DCL(args) args
+		#define VA_START(a,n) va_start(a,n)
+	#endif
+	#define VA_LIST(a) va_list a;
+#else
+	#define ELLIPSIS /* Not permitted by \.{gcc} for old-style
+declarations. */ 
+	#define VA_ARGS ,arg_ptr
+	#define arg_ptr arg1,arg2,arg3,arg4,arg5,arg6,\
+arg7,arg8,arg9,arg10,arg11,arg12,arg13
+	#define VA_start outer_char *arg1,*arg2,*arg3,*arg4,*arg5,*arg6,\
+*arg7,*arg8,*arg9,*arg10,*arg11,*arg12,*arg13;
+	#define VA_ALIST(args) args
+	#define VA_DCL(args) args
+	#define VA_LIST(a) 
+	#define VA_START(a,n)
+	#ifdef va_arg
+		#undef va_arg
+		#define va_arg(a,type) (type)"KLUDGE for va_arg"
+	#endif
+	#define va_end(a)
+	#define vprintf printf
+	#define vsprintf sprintf
+#endif /* ANSI variable arguments. */
+
+@ The compilers have various understandings of |void| and |const|.
+
+@f SRTN void /* Identifies functions that return |void|. */
+@f CONST static /* Identifies things that aren't changed by function calls,
+			or that can be placed in read-only memory. */
+
+@<Operating system...@>=
+
+#if !NO_VOID  /* \.{Machine-dependent}: For machines
+that understand about |void *| or |void fcn()|. */ 
+	#define VOID void
+	#define SRTN void
+#else
+	#define VOID /* For use in function declarations. */
+	#define void char
+	#define SRTN int
+#endif /* |void| stuff. */
+
+#if KEEP_CONST
+	#define CONST const
+#else
+	#define CONST
+#endif
+
+@ The following macros make either old- or new-style function declarations.
+
+@f FCN $_EXPR
+@f C0 $_EXPR
+@f C1 $_EXPR
+@f C2 $_EXPR
+@f RPAR $_EXPR
+
+@<Operating system...@>=
+
+#if OLD_PROTOTYPES 
+/* Old-style declarations. */
+	#define FCN(args) args
+	#define C0(cmnt) ;
+	#define C1(cmnt) ;
+	#define C2(cmnt) ;VA_start
+#else
+/* New-style declarations.  To use these macros, function declarations
+should have form |main FCN((num_args,args))|.  See one of the \FWEB\
+sources for examples of the use of~|C0|, |C1|, and~|C2|. */
+	#define FCN(args) (
+
+	#define C0(cmnt) , /* Intermediate comments. */
+
+	#define C1(cmnt) ) /* Comment on last argument. */
+
+	#define C2(cmnt) ,...) /* Variable args. */
+#endif // |PROTOTYPES|

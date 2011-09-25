@@ -1,0 +1,53 @@
+@z --- tokens.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ A third large area of memory is used for sixteen-bit `tokens', which
+appear in short lists similar to the strings of characters in |byte_mem|.
+Token lists are used to contain the result of \cee\ code translated into
+\TeX\ form; further details about them will be explained later. A
+\&{text\_pointer} variable is an index into |tok_start|.
+
+@D app(a) *(tok_ptr++)=a /* Ordinary token */
+@m APP_FLAG(type,top,base) app(type##_flag + PTR_DIFF(sixteen_bits,top,base))
+@d APP_ID APP_FLAG(id,id_lookup(id_first,id_loc,normal),name_dir)
+@D app1(a) APP_FLAG(tok,(a)->trans,tok_start) /* Store translation
+		as token list; should translate to the following: */
+@#if 0
+@d app1(a) *(tok_ptr++)=tok_flag+(a)->trans-tok_start 
+@#endif
+
+@f token_pointer int
+@f text_pointer int
+
+@<Typed...@>=
+
+typedef sixteen_bits Token;
+typedef Token HUGE *token_pointer;
+typedef token_pointer HUGE *text_pointer;
+
+@ The first position of |tok_mem| that is unoccupied by replacement text is
+called |tok_ptr|, and the first unused location of |tok_start| is called
+|text_ptr|.  Thus, we usually have |tok_start[text_ptr]=tok_ptr|.
+
+@<Global...@>=
+
+EXTERN long max_toks; /* number of symbols in \cee\ texts being parsed;
+  must be less than |@r 65536 == 2^16|. */
+EXTERN Token HUGE *tok_mem; // Dynamic array of tokens.
+EXTERN token_pointer tok_m_end; // End of |tok_mem|.
+
+EXTERN long max_texts; /* number of phrases in \cee\ texts being parsed;
+  must be less than |ID_FLAG|. */
+EXTERN token_pointer HUGE *tok_start; // Dynamic directory into |tok_mem|.
+EXTERN text_pointer tok_end; // End of |tok_start|.
+
+EXTERN token_pointer tok_ptr; // First unused position in |tok_mem|.
+EXTERN text_pointer text_ptr; // First unused position in |tok_start|.
+
+EXTERN token_pointer mx_tok_ptr; // Largest value of |tok_ptr|.
+EXTERN text_pointer mx_text_ptr; // Largest value of |text_ptr|.

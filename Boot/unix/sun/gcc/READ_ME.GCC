@@ -1,0 +1,6 @@
+		    --- BOOTSTRAPPING FWEB with gcc ---
+
+  The GNU gcc compiler is PREFERRED.  Please use it if possible.
+ 
+  For bootstrapping instructions, please see READ_ME.FWEB.
+

@@ -1,0 +1,1051 @@
+@z --- map.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@c
+
+@ Here is the layout of the style file map structure that relates the
+keyword in the style file to the argument that it sets.
+
+@a
+#ifdef _STYLE_h
+	#define YSET(stuff) = stuff
+#else
+	#define YSET(stuff)
+#endif
+
+@<Typedefs@>@;
+#include "c_type.h"
+#include "s_type.h"
+@<Globals@>@;
+
+@ We need a flag to say whether to print the defaults style-file
+parameters.  This is set to |YES| with ``\.{-Z}''m, to |NO| with ``\.{--Z}''.
+
+@a
+IN_STYLE boolean prn_style_defaults;
+
+@
+
+@f S_MAP int
+@f STY_TYPE int
+
+@<Typedef...@>=
+
+typedef enum {S_DONE,S_CMNT,S_KEYWORD,S_STRING,S_CHAR,S_INT,S_LONG,S_CLR,
+	S_MODIFIED = 128,
+	S_CMNT_MOD,S_KEYWORD_MOD,S_STRING_MOD,
+	S_CHAR_MOD,S_INT_MOD,S_LONG_MOD,S_CLR_MOD} STY_TYPE;
+
+IN_STYLE outer_char *s_type_name[8]
+#ifdef _STYLE_h
+= {OC("?"), OC("?"), OC("?"), 
+	OC("double-quoted string"),
+	OC("single-quoted character"),
+	OC("integer"),
+	OC("long integer"),
+	OC("?")}
+#endif
+;
+
+typedef struct s_map
+	{ 
+	outer_char *keyword; /* Style keyword. */
+	STY_TYPE type; /* Type of argument. */
+	void *ptr; /* Where to put the argument. This is a generic pointer,
+so it can be explicitly cast depending on the argument type. */
+	SRTN (*init)PROTO((struct s_map HUGE *)); /* Initialization
+routine. */
+	} S_MAP;
+	
+@ Here are the addresses of any control code characters that have been
+overridden by the style file.
+
+@<Typedef...@>=
+
+typedef char *CODES;
+
+typedef struct
+	{
+	CODES Ascii_constant,
+		Begin_bp,
+		Begin_C,
+		Begin_FORTRAN,
+		Begin_meta,
+		Begin_RATFOR,
+		Begin_code,
+		Begin_nuweb,
+		Big_line_break,
+		Compiler_directive,
+		Defd_at,
+		Definition,
+		End_meta,
+		Force_line,
+		Formatt,
+		Implicit_reserved,
+		Insert_bp,
+		Invisible_cmnt,
+		Join,
+		Keyword_name,
+		Limbo_text,
+		Macro_def,
+		Math_break,
+		Module_name,
+		New_module,
+		New_output_file,
+		No_index,
+		No_line_break,
+		No_mac_expand,
+		Op_def,
+		Pseudo_colon,
+		Pseudo_expr,
+		Pseudo_semi,
+		Set_line_info,
+		Switch_math_flag,
+		TeX_String,
+		Thin_space,
+		Trace,
+		Undefinition,
+		Underline,
+		Verbatim,
+		WEB_Definition,
+		Xref_roman,
+		Xref_typewriter,
+		Xref_wildcard,
+		Yes_index;
+	} C_STYLE;
+
+IN_STYLE C_STYLE c_style;
+
+@ Here are the mappings for the control-code keywords. These are shared by
+both \FTANGLE\ and \FWEAVE.
+
+@m CMAP(code,Code) {OC(#code),S_STRING,(void *)&c_style.Code,set_str}
+
+@<Mappings for the \FWEB\ control codes@>=
+
+CMAP(ascii_constant,Ascii_constant),
+CMAP(begin_bp,Begin_bp),
+CMAP(begin_C,Begin_C),
+CMAP(begin_FORTRAN,Begin_FORTRAN),
+CMAP(begin_meta,Begin_meta),
+CMAP(begin_RATFOR,Begin_RATFOR),
+CMAP(begin_code,Begin_code),
+CMAP(begin_nweb,Begin_nuweb),
+CMAP(big_line_break,Big_line_break),
+CMAP(compiler_directive,Compiler_directive),
+CMAP(defd_at,Defd_at),
+CMAP(definition,Definition),
+CMAP(end_meta,End_meta),
+CMAP(force_line,Force_line),
+CMAP(format,Formatt),
+CMAP(explicit_reserved,Implicit_reserved),
+CMAP(insert_bp,Insert_bp),
+CMAP(invisible_cmnt,Invisible_cmnt),
+CMAP(join,Join),
+CMAP(keyword_name, Keyword_name),
+CMAP(limbo_text,Limbo_text),
+CMAP(math_break,Math_break),
+CMAP(module_name,Module_name),
+CMAP(new_module,New_module),
+CMAP(new_output_file,New_output_file),
+CMAP(no_index,No_index),
+CMAP(no_line_break,No_line_break),
+CMAP(no_mac_expand,No_mac_expand),
+CMAP(pseudo_colon,Pseudo_colon),
+CMAP(pseudo_expr,Pseudo_expr),
+CMAP(pseudo_semi,Pseudo_semi),
+CMAP(set_line_info,Set_line_info),
+CMAP(switch_math_flag,Switch_math_flag),
+CMAP(TeX_string,TeX_String),
+CMAP(thin_space,Thin_space),
+CMAP(trace,Trace),
+CMAP(undefinition,Undefinition),
+CMAP(underline,Underline),
+CMAP(verbatim,Verbatim),
+CMAP(WEB_definition,WEB_Definition),
+CMAP(xref_roman,Xref_roman),
+CMAP(xref_typewriter,Xref_typewriter),
+CMAP(xref_wildcard,Xref_wildcard),
+CMAP(yes_index,Yes_index)
+
+@ The style file layout for \.{FWEAVE}.  These are the actual value fields,
+and are initialized to default values.  They are linked to vocabulary
+intries via |S_MAP| entries below.
+
+@<Typedef...@>=
+
+typedef struct
+	{
+   outer_char *name; /* Title for index. */
+   outer_char *preamble, *m_preamble; /* \TeX\ string to start the index.
+(``\.{\\Winx}'') */
+   outer_char *postamble, *m_postamble; /* \TeX\ string to end the index.
+(``\.{\\Wfin}'') */
+   outer_char *group_skip, *m_group_skip; 
+	/* \TeX\ string to insert between letter groups. */
+   outer_char *lethead_prefix, *m_heading_prefix; 
+	/* \TeX\ string to begin identifying letter at start of group. */
+   outer_char *lethead_suffix; /* \TeX\ string to insert after identifying
+letter. */
+   int lethead_flag, m_headings_flag; 
+	/* If~0, insert no letter. If~$> 0$, insert
+		uppercase letter. If~$< 0$, insert lowercase letter. */
+   outer_char *item_0, *m_item_0; 
+	/* \TeX\ command to begin an index entry.  (``\.{\\:}'') */
+   outer_char *m_item_1, *m_item_2; 
+   outer_char *m_item_01, *m_item_x1;
+   outer_char *m_item_12, *m_item_x2;
+   outer_char *delim_0, *m_delim_0;
+   outer_char *m_delim_1, *m_delim_2; 
+	/* String to insert after identifier. */
+   outer_char *delim_n, *m_delim_n;
+   outer_char *m_delim_r, *m_delim_t; 
+	/* String to insert between two module numbers. */
+   outer_char *encap_prefix, *m_encap_prefix; 
+	/* TeX command to begin a page number. */
+   outer_char *encap_infix, *m_encap_infix; 
+	/* Left delimiter for encapsulation. */
+   outer_char *encap_suffix, *m_encap_suffix; 
+	/* Right delimiter for encapsulation. */
+   outer_char *underline_prefix, *underline_suffix, *m_underline; 
+	/* Bracket underlined entry with these. (``\.{\\[}''), (``\.]'') */
+   outer_char *language_prefix, *language_suffix; /* Bracket language entry
+with these. (``\.{\\(}''), (``\.)'') */
+   outer_char *tex, *m_out, *m_sty; /* Name of \TeX\ output file for index.
+(``\.{INDEX.tex}'') */
+   ASCII *collate; /* Collation order. */
+   outer_char *keyword, *m_keyword;
+   outer_char m_arg_open, m_arg_close;
+   outer_char m_range_open, m_range_close;
+   outer_char m_level;
+   outer_char m_actual;
+   outer_char m_encap;
+   outer_char m_quote, m_escape;
+   outer_char *m_setpage_prefix, *m_setpage_suffix;
+   outer_char *m_symhead_positive, *m_symhead_negative;
+   outer_char *m_numhead_positive, *m_numhead_negative;
+   int m_line_max;
+   outer_char *m_indent_space;
+   int m_indent_length;
+   outer_char *m_page;	
+   } INDEX;
+
+typedef struct
+	{
+   outer_char *preamble; /* \TeX\ string to start the module list.
+(``\.{\\Wmods}'') */ 
+   outer_char *postamble; /* \TeX\ string to end the module list. (empty) */
+   outer_char *tex; /* Name of \TeX\ output file for module names.
+(``\.{MODULES.tex}'') */
+   outer_char *info; /* The \.{\\Winfo} macro. */
+   outer_char *kwd; /* The \.{\\Wkwd} macro. */
+	} MODULES;
+
+typedef struct
+	{
+   outer_char *tex; /* Name of \TeX\ output file for table of contents.
+(``\.{CONTENTS.tex}'') */
+   outer_char *preamble;  /* Start the table of contents.
+(``\.{\\n\\Wcon}''). */
+   outer_char *postamble; /* Optional string after above. (\It{Empty}). */
+	} CONTENTS;
+
+typedef struct
+	{
+	outer_char *begin,*end;
+	} STR_INSERT;
+
+typedef struct
+	{
+	STR_INSERT TeX,code;
+	} W_META;  /* For \FWEAVE. */
+
+typedef struct
+	{
+	outer_char *def; /* Begin an \.{@@d}. */
+	outer_char *undef; /* Begin an \.{@@u}. */
+	} T_OUTER;
+
+typedef struct
+	{
+	outer_char *top; /* Start the meta-comment. */
+	outer_char *prefx; /* Generalization of comment char. */
+	outer_char *bottom; /* Finish the meta-comment. */
+	} T_META0;
+
+typedef struct
+	{
+	T_META0 hdr; /* For bracketing the header info at top of file. */
+	T_META0 msg; /* For everything else. */
+	} T_META; /* For \FTANGLE. */
+
+typedef struct
+	{
+	size_t num, nest, len; /* Is the |size_t| approriate? */
+	} PAREN;
+
+typedef struct
+	{
+   outer_char *macros; /* Name of the macro package. (``\.{fwebmac.sty}'') */
+   FORMAT format;
+   outer_char *doc_preamble; /* Precedes \.{\\begin\{\\document\}} or limbo
+section. */
+   outer_char *doc_postamble; /* Precedes \.{\\end\{\\document\}} */
+   outer_char *limbo_begin, *limbo_end; /* Default limbo material. */
+   outer_char *unnamed_preamble,*named_preamble; /* Default stuff at mod
+start. */
+   MARK_DEFINED mark;
+   outer_char *TeXindent,*codeindent;
+   W_META meta;
+   LATEX LaTeX;
+   outer_char *include_ext;
+	} W_MISC;
+
+typedef union
+	{
+	outer_char *name;
+	COLOR value;
+	} ACOLOR;
+
+typedef struct
+	{
+	ACOLOR ordinary;
+	ACOLOR program_name, md_name;
+	ACOLOR info,warning,error,fatal;
+	ACOLOR module_num,line_num;
+	ACOLOR in_file,out_file,include_file;
+	ACOLOR timing,character;
+/* These are initially either set to abbreviation strings for escape
+sequences, which are later changed to actual escape sequences; or set to
+raw ANSI escape sequences. */ 
+	outer_char HUGE *_NORMAL;
+	outer_char HUGE *_BLACK, HUGE *_RED, HUGE *_GREEN, HUGE *_YELLOW,
+		HUGE *_BLUE, HUGE *_MAGENTA, HUGE *_CYAN, HUGE *_WHITE;
+	} COLORS;
+
+/* Parameters common to both \FTANGLE\ and \FWEAVE. */
+typedef struct
+	{ /* Allowable input file extensions. */
+   outer_char HUGE *web, HUGE *change, HUGE *hweb, HUGE *hchange; 
+	} INPUT_EXT;
+
+typedef struct
+	{ /* Default output file extensions. */
+   outer_char HUGE *C_,HUGE *Cpp_,HUGE *V_,HUGE *N_,HUGE *N90_,
+		HUGE *R_,HUGE *R90_,HUGE *X_;
+	} OUTPUT_EXT;
+
+typedef struct
+	{ /* Delimiters for dot constants. */
+	ASCII begin,end;
+	} DOT_DELIMITER;
+
+typedef struct
+	{
+	outer_char *xchr; /* Translation table for scrambling |ASCII|. */
+	outer_char ext_delimiter; /* Delimiter for file extensions. */
+	INPUT_EXT input_ext; /* Default input file extensions. */
+	OUTPUT_EXT output_ext; /* Default output file extensions.	 */
+	outer_char *null_file_name; /* Name of the null file. */
+	outer_char *Idir; /* Standard directory to search after \.{-I}. */
+	DOT_DELIMITER dot_delimiter; /* Delimiters for dot constants. */
+	COLORS color;	/* Output colors. */
+	} COMMON_PRMS;
+
+typedef struct
+	{
+	INDEX indx; 		/* Index-related parameters. */
+	MODULES modules; 	/* Stuff for module name printout. */
+	CONTENTS contents; 	/* Stuff for table of contents. */
+	W_MISC misc; 		/* Miscellaneous parameters. */
+	} W_STYLE;
+
+typedef struct
+	{
+   outer_char cchar; /* Continuation character for \Fortran. */
+   int output_line_length[NUM_LANGUAGES]; /* Length of \Fortran's output line. */
+   outer_char *cdir_start[NUM_LANGUAGES]; /* Insert at the beginning of
+compiler directive. */
+   ASCII *ASCII_fcn; /* \.{@@"\dots"} is replaced by ``|ASCII_fcn|(\dots)''.
+(``\.{ASCIIstr}'') */
+   T_OUTER outer_start[NUM_LANGUAGES]; /* Start an outer definition. */
+   T_META meta[NUM_LANGUAGES]; /* Handle meta-comments. */
+   outer_char *protect_chars[NUM_LANGUAGES]; /* When |protect == YES|. */
+   outer_char line_char[NUM_LANGUAGES]; /* Begin \.{line} command. */
+   PAREN paren;
+	} T_STYLE;
+
+@ The default definitions.
+
+@f YSET $_EXPR
+
+@d MAX_OUTPUT_LINE_LENGTH 132
+@d STANDARD_OUTPUT_LINE_LENGTH 72
+@d MIN_OUTPUT_LINE_LENGTH 60
+
+@d DEFAULT_PAREN_NEST 10
+@d DEFAULT_PAREN_NUM 10
+@d DEFAULT_PAREN_LEN 100
+
+@<Glob...@>=
+
+IN_STYLE W_STYLE w_style
+#ifdef _STYLE_h
+	= {
+	{OC("INDEX"),		/* Title */
+	OC("\\Winx"), OC("\\begin{theindex}\n\\topofindex\n"), /* Preamble */
+	OC("\n\\Wfin"), OC("\n\n\\botofindex\n\\end{theindex}\n"),
+		/* Postamble */
+	OC("\n\\Windexspace\n"), OC("\n\n  \\indexspace\n"), /* Group-skip */
+	OC(""), OC(""),		/* Lethead-prefix */
+	OC(""),			/* Leadhead-suffix */
+	0, 0,		 	/* Lethead-flag */
+	OC("\\:"), OC("\n  \\item "), /* item-0:  Begin index entry */
+	OC("\n     \\subitem "), OC("\n       \\subsubitem "), /* item-1, -2 */
+	OC("\n    \\subitem "), OC("\n    \\subitem "), 
+		/* item-01, item-x1 */
+	OC("\n    \\subsubitem "), OC("\n    \\subsubitem "), 
+		/* item-12, item-x2 */
+	OC(", "), OC(", "),	/* Delim-0 */
+	OC(", "), OC(", "),	/* Delim-1, delim-2 */
+	OC(", "), OC(", "),	/* Delim-n */
+	OC("--"), OC(""),	/* Delim-r, delim-t */
+	OC(""), OC("\\"),	/* Encap-prefix */
+	OC(""), OC("{"),	/* Encap-infix */
+	OC(""),	OC("}"),	/* Encap-suffix */
+	OC("\\["), OC("]"), OC("underline"), 
+		/* Underline-prefix, underline-suffix, underline */
+	OC("\\("), OC(")"), 	/* Language-prefix, language-suffix */
+	OC("INDEX.tex"), OC("#.idx"), OC("#.sty"), /* Index-out */
+	(ASCII *)" \1\2\3\4\5\6\7\10\11\12\13\14\15\16\17\
+\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37\
+!\42#$%&'()*+,-./:;<=>?@@[\\]^`{|}~_\
+abcdefghijklmnopqrstuvwxyz0123456789", /* Collation order. */
+	OC("\\:"), OC("\\indexentry"), /* Keyword */
+	'{', '}',		/* Arg-open, arg-close */
+	'(', ')',		/* Range-open, range-close */
+	'!',			/* Level */
+	':',			/* Actual */
+	'|',			/* Encap */
+	'"', '\\',		/* Quote, escape */
+	OC("\n  \\setcounter{page}{"), OC("}\n"), /* Setpage-prefix, suffix */
+	OC("Symbols"), OC("symbols"), /* Symhead-positive, negative */
+	OC("Numbers"), OC("numbers"), /* Numhead-positive, negative */
+	72,			/* Line-max */
+	OC("\t\t"),		/* Indent-space */
+	16,			/* Indent-length */
+	OC("pg")		/* Page */
+	}, 
+	{OC("\\Wmods"),OC(""),OC("MODULES.tex"),OC("\\Winfo"),OC("\\Wkwd")}, 
+		/*|MODULES|. */
+	{OC("CONTENTS.tex"),OC("\n\\Wcon"),OC("")}, /* |CONTENTS|. */
+	{OC("fwebmac.sty"), /* Macro package */
+	{OC("\\&"), OC("\\&"), /* |reserved| */
+		OC("\\|"), /* |short_id| */
+		OC("\\\\"),OC("\\\\"), /* |id| */
+		OC("\\\\"), OC("\\\\"), /* |id_outer| */
+		OC("\\\\"), OC("\\\\"), /* |id_inner| */
+		OC("\\@@"), /* |intrinsic| */
+		OC("\\."), OC("\\."), /* |keyword| */
+		OC("\\."), /* |typewritr| */
+		OC("\\9") /* |wildcrd| */
+		},
+	OC(""), OC(""), /* |doc_preamble|, |doc_postamble| */
+	OC(""), OC("\\FWEBtoc"), /* |limbo_begin|, |limbo_end| */
+	OC(""), OC(""), /* |unnamed_preamble|, |named_preamble| */
+	{YES,NO,NO,NO,YES,NO}, /* |MARK_DEFINED| */
+	OC("1em"),OC("1em"),	/* |TeXindent|, |codeindent| */
+	{{OC("\\Begintt"),OC("\\Endtt")},
+	 {OC("\\WBM\\Begintt\n"),OC("\\Endtt\\WEM")}}, /* |W_META| */
+	{{OC(""),OC("article")}, {OC(""),OC("")}},	/* |LaTeX| */
+	OC("H")	/* |include_ext| */
+	} /* |W_MISC|. */
+	}
+#endif
+;
+
+IN_STYLE FORMAT *pfrmt YSET(&w_style.misc.format);
+
+/* --- Parameters common to both \FWEAVE\ and \FTANGLE. --- */
+
+@#if 0 /* The identity map; a template for filling in scrambled character
+set. */
+"\000\001\002\003\004\005\006\007\
+\010\011\012\013\014\015\016\017\
+\020\021\022\023\024\025\026\027\
+\030\031\032\033\034\035\036\037\
+\040\041\042\043\044\045\046\047\
+\050\051\052\053\054\055\056\057\
+\060\061\062\063\064\065\066\067\
+\070\071\072\073\074\075\076\077\
+\100\101\102\103\104\105\106\107\
+\110\111\112\113\114\115\116\117\
+\120\121\122\123\124\125\126\127\
+\130\131\132\133\134\135\136\137\
+\140\141\142\143\144\145\146\147\
+\150\151\152\153\154\155\156\157\
+\160\161\162\163\164\165\166\167\
+\170\171\172\173\174\175\176\177\
+\200\201\202\203\204\205\206\207\
+\210\211\212\213\214\215\216\217\
+\220\221\222\223\224\225\226\227\
+\230\231\232\233\234\235\236\237\
+\240\241\242\243\244\245\246\247\
+\250\251\252\253\254\255\256\257\
+\260\261\262\263\264\265\266\267\
+\270\271\272\273\274\275\276\277\
+\300\301\302\303\304\305\306\307\
+\310\311\312\313\314\315\316\317\
+\320\321\322\323\324\325\326\327\
+\330\331\332\333\334\335\336\337\
+\340\341\342\343\344\345\346\347\
+\350\351\352\353\354\355\356\357\
+\360\361\362\363\364\365\366\367\
+\370\371\372\373\374\375\376\377"
+@#endif
+
+@#if 0
+"\000\001\003\004\005\006\007\
+\010\011\012\013\014\015\016\017\
+\020\021\022\023\024\025\026\027\
+\030\031\032\033\034\035\036\037\
+\040\041\042\043\044\045\046\047\
+\050\051\052\053\054\055\056\057\
+\060\061\062\063\064\065\066\067\
+\070\071\072\073\074\075\076\077\
+\100\101\102\103\104\105\106\107\
+\110\111\112\113\114\115\116\117\
+\120\121\122\123\124\125\126\127\
+\130\131\132\133\134\135\136\137\
+\140\141\142\143\144\145\146\147\
+\150\151\152\153\154\155\156\157\
+\160\161\162\163\164\165\166\167\
+\170\171\172\173\174\175\176\002\177\
+\200\201\202\203\204\205\206\207\
+\210\211\212\213\214\215\216\217\
+\220\221\222\223\224\225\226\227\
+\230\231\232\233\234\235\236\237\
+\240\241\242\243\244\245\246\247\
+\250\251\252\253\254\255\256\257\
+\260\261\262\263\264\265\266\267\
+\270\271\272\273\274\275\276\277\
+\300\301\302\303\304\305\306\307\
+\310\311\312\313\314\315\316\317\
+\320\321\322\323\324\325\326\327\
+\330\331\332\333\334\335\336\337\
+\340\341\342\343\344\345\346\347\
+\350\351\352\353\354\355\356\357\
+\360\361\362\363\364\365\366\367\
+\370\371\372\373\374\375\376\377"
+@#endif
+
+IN_STYLE COMMON_PRMS wt_style 
+#ifdef _STYLE_h
+= {
+OC("\000\001\003\004\005\006\007\
+\010\011\012\013\014\015\016\017\
+\020\021\022\023\024\025\026\027\
+\030\031\032\033\034\035\036\037\
+\040\041\042\043\044\045\046\047\
+\050\051\052\053\054\055\056\057\
+\060\061\062\063\064\065\066\067\
+\070\071\072\073\074\075\076\077\
+\100\101\102\103\104\105\106\107\
+\110\111\112\113\114\115\116\117\
+\120\121\122\123\124\125\126\127\
+\130\131\132\133\134\135\136\137\
+\140\141\142\143\144\145\146\147\
+\150\151\152\153\154\155\156\157\
+\160\161\162\163\164\165\166\167\
+\170\171\172\173\174\175\176\002\177\
+\200\201\202\203\204\205\206\207\
+\210\211\212\213\214\215\216\217\
+\220\221\222\223\224\225\226\227\
+\230\231\232\233\234\235\236\237\
+\240\241\242\243\244\245\246\247\
+\250\251\252\253\254\255\256\257\
+\260\261\262\263\264\265\266\267\
+\270\271\272\273\274\275\276\277\
+\300\301\302\303\304\305\306\307\
+\310\311\312\313\314\315\316\317\
+\320\321\322\323\324\325\326\327\
+\330\331\332\333\334\335\336\337\
+\340\341\342\343\344\345\346\347\
+\350\351\352\353\354\355\356\357\
+\360\361\362\363\364\365\366\367\
+\370\371\372\373\374\375\376\377"
+), /* Scrambled |xchr|. */
+	'.',	/* Usual delimiter for file extensions. */
+	{OC("web"),OC("ch"),OC("hweb"),OC("hch")}, /* Input file
+extensions. */
+	{OC(C_EXT),OC(Cpp_EXT),OC(M_EXT),OC(N_EXT),OC(N90_EXT),OC(R_EXT),
+		OC(R90_EXT),OC(X_EXT)}, /* Output file extensions. */
+	OC(NULL_FILE_NAME), /* Name of the null file. */
+	OC(""),		/* |Idir|. */
+	{'.','.'},	/* Delimiters for dot constants. */
+	}
+#endif
+;
+
+IN_STYLE T_STYLE t_style 
+#ifdef _STYLE_h
+	= {
+	CCHAR,		/* Continuation character for \Fortran. */
+	{STANDARD_OUTPUT_LINE_LENGTH,	/* C */
+	STANDARD_OUTPUT_LINE_LENGTH,	/* \Ratfor-77 */
+	STANDARD_OUTPUT_LINE_LENGTH,	/* \Fortran-77 */
+	STANDARD_OUTPUT_LINE_LENGTH,	/* \TeX */
+	STANDARD_OUTPUT_LINE_LENGTH,	/* Verbatim */
+	STANDARD_OUTPUT_LINE_LENGTH,	/* \Cpp */
+	STANDARD_OUTPUT_LINE_LENGTH+1,	/* \Ratfor-90 */
+	STANDARD_OUTPUT_LINE_LENGTH+1	/* \Fortran-90 */
+	}, /* Length of \Fortran's output line. */
+	{OC("#pragma "),OC("C"),OC("C"),OC(""),OC(""),
+	 OC("#pragma "),OC("C"),OC("C")}, 
+		/* Compiler directive prefixes.  */
+	(ASCII *)"ASCIIstr",	/* For \.{@@"\dots"} in \Fortran\ or
+\Ratfor. */
+/* |outer_start| */
+	{{OC("#define "),OC("#undef ")},	/* |C| */
+	 {OC("define"),OC("undef")},	/* |RATFOR| */
+	 {OC("define"),OC("undef")},	/* |FORTRAN| */
+	 {OC("\\def"),OC("\\undef")},	/* |TEX| */
+	 {OC("#define"),OC("#undef")},	/* |LITERAL| */
+	 {OC("#define "),OC("#undef ")},/* |C_PLUS_PLUS| */
+	 {OC("define"),OC("undef")},	/* |RATFOR_90| */
+	 {OC("define"),OC("undef")}},	/* |FORTRAN_90| */
+/*  |T_META|:  |hdr| and |msg| on subsequent lines. */
+	{{{OC("#if(0)"),OC(""),OC("\n#endif")},
+		{OC("/*"),OC(""),OC("*/")}}, 	/* |C| */
+	 {{OC(""),OC("C"),OC("\n")},
+		{OC(""),OC("C"),OC("")}},	/* |RATFOR| */
+	 {{OC(""),OC("C"),OC("\n")},
+		{OC(""),OC("C"),OC("")}},	/* |FORTRAN| */
+	 {{OC(""),OC("%"),OC("\n")},
+		{OC(""),OC("%"),OC("")}},	/* |TEX| */
+	 {{OC("#if(0)"),OC(""),OC("\n#endif")},
+		{OC("/*"),OC("  "),OC("\n*/")}},/* |LITERAL| */
+	 {{OC("#if(0)"),OC(""),OC("\n#endif")},
+		{OC("/*"),OC(""),OC("*/")}},	/* |C_PLUS_PLUS| */
+	 {{OC(""),OC("!"),OC("\n")},
+		{OC(""),OC("!"),OC("")}},	/* |RATFOR_90| */
+	 {{OC(""),OC("!"),OC("\n")},
+		{OC(""),OC("!"),OC("")}}}, 	/* |FORTRAN_90| */
+	{OC("\\"),OC(""),OC(""),OC(""),OC("\\"),OC("\\"),OC(""),OC("")},
+		/* |protect_chars| */
+	{'#', '*', '*', '%', '%', '#', '!', '!'}, /* |line_char| */
+	{DEFAULT_PAREN_NUM, DEFAULT_PAREN_NEST, DEFAULT_PAREN_LEN}
+		 /* |paren| */
+	}
+#endif
+;
+
+@ It's convenient to use a macro to relate the keywords to the parameters
+by creating |S_MAP| entries.  For example, the first entry associates
+|w_style.indx.preamble| with the keyword ``\.{index\_preamble}'', so one
+can say in the style file ``\.{index.preamble = "..."}''.  (Dots in a
+keyword are replaced by underscores by the style-file parser.)
+
+@m WMAP(keyword,type,var,field,init) 
+	{OC(#keyword),S_##type,(void *)&w_style.var.field,init}
+
+@m IMAP(keyword,type,field,init) WMAP(keyword,type,indx,field,init)
+
+@<Mappings for \FWEAVE's index@>=
+
+IMAP(makeindex_keyword, STRING, m_keyword, set_str), 
+IMAP(makeindex_arg_open, CHAR, m_arg_open, set_char), 
+IMAP(makeindex_arg_close, CHAR, m_arg_close, set_char), 
+IMAP(makeindex_range_open, CHAR, m_range_open, set_char), 
+IMAP(makeindex_range_close, CHAR, m_range_close, set_char), 
+IMAP(makeindex_level, CHAR, m_level, set_char), 
+IMAP(makeindex_actual, CHAR, m_actual, set_char), 
+IMAP(makeindex_encap, CHAR, m_encap, set_char), 
+IMAP(makeindex_quote, CHAR, m_quote, set_char), 
+IMAP(makeindex_escape, CHAR, m_escape, set_char), 
+
+IMAP(makeindex_preamble, STRING, m_preamble, set_str), 
+IMAP(makeindex_postamble, STRING, m_postamble, set_str), 
+
+IMAP(index_name, STRING, name, set_str),
+IMAP(index_preamble, STRING, preamble, set_str),
+IMAP(index_postamble, STRING, postamble, set_str),
+
+IMAP(makeindex_setpage_prefix, STRING, m_setpage_prefix, set_str), 
+IMAP(makeindex_setpage_suffix, STRING, m_setpage_suffix, set_str), 
+
+IMAP(makeindex_group_skip, STRING, m_group_skip, set_str), 
+IMAP(index_group_skip, STRING, group_skip, set_str),
+IMAP(group_skip, STRING, group_skip, set_str),
+
+IMAP(makeindex_headings_flag, INT, m_headings_flag, set_int), 
+IMAP(makeindex_heading_prefix, STRING, m_heading_prefix, set_str), 
+	
+IMAP(makeindex_symhead_positive, STRING, m_symhead_positive, set_str), 
+IMAP(makeindex_symhead_negative, STRING, m_symhead_negative, set_str), 
+IMAP(makeindex_numhead_positive, STRING, m_numhead_positive, set_str), 
+IMAP(makeindex_numhead_negative, STRING, m_numhead_negative, set_str), 
+
+IMAP(index_lethead_prefix, STRING, lethead_prefix, set_str),
+IMAP(lethead_prefix, STRING, lethead_prefix, set_str),
+IMAP(index_lethead_suffix, STRING, lethead_suffix, set_str),
+IMAP(lethead_suffix, STRING, lethead_suffix, set_str),
+IMAP(index_lethead_flag, INT, lethead_flag, set_int),
+IMAP(lethead_flag, INT, lethead_flag, set_int),
+
+IMAP(makeindex_item_0, STRING, m_item_0, set_str),
+IMAP(index_item_0, STRING, item_0, set_str), 
+IMAP(item_0, STRING, item_0, set_str), 
+
+IMAP(makeindex_item_1, STRING, m_item_1, set_str), 
+IMAP(makeindex_item_2, STRING, m_item_2, set_str), 
+IMAP(makeindex_item_01, STRING, m_item_01, set_str), 
+IMAP(makeindex_item_x1, STRING, m_item_x1, set_str), 
+IMAP(makeindex_item_12, STRING, m_item_12, set_str), 
+IMAP(makeindex_item_x2, STRING, m_item_x2, set_str), 
+
+IMAP(makeindex_delim_0, STRING, m_delim_0, set_str), 
+IMAP(index_delim_0, STRING, delim_0, set_str), 
+IMAP(delim_0, STRING, delim_0, set_str), 
+
+IMAP(makeindex_delim_1, STRING, m_delim_1, set_str), 
+IMAP(makeindex_delim_2, STRING, m_delim_2, set_str), 
+
+IMAP(makeindex_delim_n, STRING, m_delim_n, set_str), 
+IMAP(index_delim_n, STRING, delim_n, set_str), 
+IMAP(delim_n, STRING, delim_n, set_str), 
+
+IMAP(makeindex_delim_r, STRING, m_delim_r, set_str), 
+IMAP(makeindex_delim_t, STRING, m_delim_t, set_str), 
+
+IMAP(makeindex_encap_prefix, STRING, m_encap_prefix, set_str), 
+IMAP(index_encap_prefix, STRING, encap_prefix, set_str),
+IMAP(encap_prefix, STRING, encap_prefix, set_str),
+
+IMAP(makeindex_encap_infix, STRING, m_encap_infix, set_str), 
+IMAP(index_encap_infix, STRING, encap_infix, set_str),
+IMAP(encap_infix, STRING, encap_infix, set_str),
+
+IMAP(makeindex_encap_suffix, STRING, m_encap_suffix, set_str), 
+IMAP(index_encap_suffix,STRING,encap_suffix,set_str), 
+IMAP(encap_suffix,STRING,encap_suffix,set_str), 
+
+IMAP(makeindex_line_max, INT, m_line_max, set_int), 
+IMAP(makeindex_indent_space, STRING, m_indent_space, set_str), 
+IMAP(makeindex_indent_length, INT, m_indent_length, set_int), 
+
+IMAP(index_underline_prefix, STRING, underline_prefix, set_str),
+IMAP(underline_prefix, STRING, underline_prefix, set_str),
+IMAP(index_underline_suffix, STRING, underline_suffix, set_str),
+IMAP(underline_suffix, STRING, underline_suffix, set_str),
+IMAP(makeindex_underline, STRING, m_underline, set_str),
+
+IMAP(index_language_prefix, STRING, language_prefix, set_str),
+IMAP(language_prefix, STRING, language_prefix, set_str),
+IMAP(index_language_suffix,STRING,language_suffix,set_str),
+IMAP(language_suffix,STRING,language_suffix,set_str),
+
+IMAP(makeindex_page, STRING, m_page, set_str),
+
+IMAP(makeindex_out, STRING, m_out, set_str),
+IMAP(index_tex, STRING, tex, set_str),
+IMAP(index_out, STRING, tex, set_str),
+IMAP(makeindex_sty, STRING, m_sty, set_str),
+
+IMAP(index_collate, STRING, collate, set_str),
+IMAP(collate, STRING, collate, set_str)
+
+@
+@m DMAP(keyword,type,field,init) WMAP(keyword,type,modules,field,init)
+
+@<Mappings for \FWEAVE's module list@>=
+
+DMAP(modules_preamble,STRING,preamble,set_str),
+DMAP(modules_postamble,STRING,postamble,set_str),
+DMAP(modules_tex,STRING,tex,set_str),
+DMAP(info,STRING,info,set_str),
+DMAP(kwd,STRING,kwd,set_str)
+
+@
+@m OMAP(keyword,type,field,init) WMAP(keyword,type,contents,field,init)
+
+@<Mappings for \FWEAVE's table of contents@>=
+
+OMAP(contents_tex,STRING,tex,set_str),
+OMAP(contents_TeX,STRING,tex,set_str),
+OMAP(contents_preamble,STRING,preamble,set_str),
+OMAP(contents_postamble,STRING,postamble,set_str)
+
+@
+
+@m MMAP(keyword,type,field,init) WMAP(keyword,type,misc,field,init)
+
+@<Mappings for miscellaneous \FWEAVE\ parameters@>=
+
+MMAP(macros,STRING,macros,set_str),
+
+MMAP(format_reserved,STRING,format.reserved,set_str),
+MMAP(format_RESERVED,STRING,format.RESERVED,set_str),
+MMAP(format_identifier,STRING,format.id,set_str),
+MMAP(format_id,STRING,format.id,set_str),
+MMAP(format_IDENTIFIER,STRING,format.ID,set_str),
+MMAP(format_ID,STRING,format.ID,set_str),
+MMAP(format_short_identifier,STRING,format.short_id,set_str),
+MMAP(format_short_id,STRING,format.short_id,set_str),
+MMAP(format_outer_macro,STRING,format.id_outer,set_str),
+MMAP(format_OUTER_MACRO,STRING,format.ID_OUTER,set_str),
+MMAP(format_WEB_macro,STRING,format.id_inner,set_str),
+MMAP(format_WEB_MACRO,STRING,format.ID_INNER,set_str),
+MMAP(format_intrinsic,STRING,format.intrinsic,set_str),
+MMAP(format_keyword,STRING,format.keyword,set_str),
+MMAP(format_KEYWORD,STRING,format.KEYWORD,set_str),
+MMAP(format_typewriter,STRING,format.typewritr,set_str),
+MMAP(format_wildcard,STRING,format.wildcrd,set_str),
+
+MMAP(doc_preamble,STRING,doc_preamble,set_str),
+MMAP(doc_postamble,STRING,doc_postamble,set_str),
+MMAP(preamble_doc,STRING,doc_preamble,set_str),
+MMAP(postamble_doc,STRING,doc_postamble,set_str),
+
+MMAP(unnamed_preamble,STRING,unnamed_preamble,set_str),
+MMAP(preamble_unnamed,STRING,unnamed_preamble,set_str),
+MMAP(named_preamble,STRING,named_preamble,set_str),
+MMAP(preamble_named,STRING,named_preamble,set_str),
+
+MMAP(limbo,STRING,limbo_begin,add_str),
+MMAP(limbo_begin,STRING,limbo_begin,add_str),
+MMAP(limbo_end,STRING,limbo_end,add_str),
+
+MMAP(mark_defined_generic_name,INT,mark.generic_name,set_int),
+MMAP(mark_defined_fcn_name,INT,mark.fcn_name,set_int),
+MMAP(mark_defined_WEB_macro,INT,mark.WEB_macro,set_int),
+MMAP(mark_defined_outer_macro,INT,mark.outer_macro,set_int),
+MMAP(mark_defined_exp_type,INT,mark.imp_reserved_name,set_int),
+MMAP(mark_defined_typedef_name,INT,mark.typedef_name,set_int),
+
+MMAP(indent_TeX,STRING,TeXindent,set_str),
+MMAP(indent_code,STRING,codeindent,set_str),
+
+MMAP(meta_TeX_begin,STRING,meta.TeX.begin,set_str),
+MMAP(meta_TeX_end,STRING,meta.TeX.end,set_str),
+MMAP(meta_code_begin,STRING,meta.code.begin,set_str),
+MMAP(meta_code_end,STRING,meta.code.end,set_str),
+
+MMAP(LaTeX_options,STRING,LaTeX.class.options,set_str),
+MMAP(LaTeX_class_options,STRING,LaTeX.class.options,set_str),
+
+MMAP(LaTeX_style,STRING,LaTeX.class.file,set_str),
+MMAP(LaTeX_class,STRING,LaTeX.class.file,set_str),
+
+MMAP(LaTeX_package_options,STRING,LaTeX.package.options,set_str),
+MMAP(LaTeX_package,STRING,LaTeX.package.file,set_str),
+
+MMAP(include_ext, STRING, include_ext, set_str)@/
+
+@ Some parameters apply exclusively to \FTANGLE.
+
+@m TMAP(keyword,type,field,init) 
+	{OC(#keyword),S_##type,(void *)&t_style.field,init} 
+
+@<Mappings for miscellaneous \FTANGLE\ parameters@>=
+
+TMAP(cchar,CHAR,cchar,ini_cchar),
+
+TMAP(line_length_C,INT,output_line_length[0],ini_output_line_length),@/
+TMAP(line_length_R,INT,output_line_length[1],ini_output_line_length),@/
+TMAP(line_length_N,INT,output_line_length[2],ini_output_line_length),@/
+TMAP(line_length_X,INT,output_line_length[3],ini_output_line_length),@/
+TMAP(line_length_V,INT,output_line_length[4],ini_output_line_length),@/
+TMAP(line_length_Cpp,INT,output_line_length[5],ini_output_line_length),@/
+TMAP(line_length_R90,INT,output_line_length[6],ini_output_line_length),@/
+TMAP(line_length_N90,INT,output_line_length[7],ini_output_line_length),@/
+
+TMAP(ASCII_fcn,STRING,ASCII_fcn,set_str),
+
+TMAP(cdir_start_C,STRING,cdir_start[0],set_str),
+TMAP(cdir_start_R,STRING,cdir_start[1],set_str),
+TMAP(cdir_start_N,STRING,cdir_start[2],set_str),
+TMAP(cdir_start_X,STRING,cdir_start[3],set_str),
+TMAP(cdir_start_V,STRING,cdir_start[4],set_str),
+TMAP(cdir_start_Cpp,STRING,cdir_start[5],set_str),
+TMAP(cdir_start_R90,STRING,cdir_start[6],set_str),
+TMAP(cdir_start_N90,STRING,cdir_start[7],set_str),
+
+TMAP(outer_def_C,STRING,outer_start[0].def,set_str),
+TMAP(outer_def_R,STRING,outer_start[1].def,set_str),
+TMAP(outer_def_N,STRING,outer_start[2].def,set_str),
+TMAP(outer_def_X,STRING,outer_start[3].def,set_str),
+TMAP(outer_def_V,STRING,outer_start[4].def,set_str),
+TMAP(outer_def_Cpp,STRING,outer_start[5].def,set_str),
+TMAP(outer_def_R90,STRING,outer_start[6].def,set_str),
+TMAP(outer_def_N90,STRING,outer_start[7].def,set_str),
+
+TMAP(outer_undef_C,STRING,outer_start[0].undef,set_str),
+TMAP(outer_undef_R,STRING,outer_start[1].undef,set_str),
+TMAP(outer_undef_N,STRING,outer_start[2].undef,set_str),
+TMAP(outer_undef_X,STRING,outer_start[3].undef,set_str),
+TMAP(outer_undef_V,STRING,outer_start[4].undef,set_str),
+TMAP(outer_undef_Cpp,STRING,outer_start[5].undef,set_str),
+TMAP(outer_undef_R90,STRING,outer_start[6].undef,set_str),
+TMAP(outer_undef_N90,STRING,outer_start[7].undef,set_str),
+
+TMAP(meta_top_C,STRING,meta[0].msg.top,set_str),
+TMAP(meta_top_R,STRING,meta[1].msg.top,set_str),
+TMAP(meta_top_N,STRING,meta[2].msg.top,set_str),
+TMAP(meta_top_X,STRING,meta[3].msg.top,set_str),
+TMAP(meta_top_V,STRING,meta[4].msg.top,set_str),
+TMAP(meta_top_Cpp,STRING,meta[5].msg.top,set_str),
+TMAP(meta_top_R90,STRING,meta[6].msg.top,set_str),
+TMAP(meta_top_N90,STRING,meta[7].msg.top,set_str),
+
+TMAP(meta_prefix_C,STRING,meta[0].msg.prefx,set_str),
+TMAP(meta_prefix_R,STRING,meta[1].msg.prefx,set_str),
+TMAP(meta_prefix_N,STRING,meta[2].msg.prefx,set_str),
+TMAP(meta_prefix_X,STRING,meta[3].msg.prefx,set_str),
+TMAP(meta_prefix_V,STRING,meta[4].msg.prefx,set_str),
+TMAP(meta_prefix_Cpp,STRING,meta[5].msg.prefx,set_str),
+TMAP(meta_prefix_R90,STRING,meta[6].msg.prefx,set_str),
+TMAP(meta_prefix_N90,STRING,meta[7].msg.prefx,set_str),
+
+TMAP(meta_bottom_C,STRING,meta[0].msg.bottom,set_str),
+TMAP(meta_bottom_R,STRING,meta[1].msg.bottom,set_str),
+TMAP(meta_bottom_N,STRING,meta[2].msg.bottom,set_str),
+TMAP(meta_bottom_X,STRING,meta[3].msg.bottom,set_str),
+TMAP(meta_bottom_V,STRING,meta[4].msg.bottom,set_str),
+TMAP(meta_bottom_Cpp,STRING,meta[5].msg.bottom,set_str),
+TMAP(meta_bottom_R90,STRING,meta[6].msg.bottom,set_str),
+TMAP(meta_bottom_N90,STRING,meta[7].msg.bottom,set_str),
+
+TMAP(meta_top_hdr_C,STRING,meta[0].hdr.top,set_str),
+TMAP(meta_top_hdr_R,STRING,meta[1].hdr.top,set_str),
+TMAP(meta_top_hdr_N,STRING,meta[2].hdr.top,set_str),
+TMAP(meta_top_hdr_X,STRING,meta[3].hdr.top,set_str),
+TMAP(meta_top_hdr_V,STRING,meta[4].hdr.top,set_str),
+TMAP(meta_top_hdr_Cpp,STRING,meta[5].hdr.top,set_str),
+TMAP(meta_top_hdr_R90,STRING,meta[6].hdr.top,set_str),
+TMAP(meta_top_hdr_N90,STRING,meta[7].hdr.top,set_str),
+
+TMAP(meta_prefix_hdr_C,STRING,meta[0].hdr.prefx,set_str),
+TMAP(meta_prefix_hdr_R,STRING,meta[1].hdr.prefx,set_str),
+TMAP(meta_prefix_hdr_N,STRING,meta[2].hdr.prefx,set_str),
+TMAP(meta_prefix_hdr_X,STRING,meta[3].hdr.prefx,set_str),
+TMAP(meta_prefix_hdr_V,STRING,meta[4].hdr.prefx,set_str),
+TMAP(meta_prefix_hdr_Cpp,STRING,meta[5].hdr.prefx,set_str),
+TMAP(meta_prefix_hdr_R90,STRING,meta[6].hdr.prefx,set_str),
+TMAP(meta_prefix_hdr_N90,STRING,meta[7].hdr.prefx,set_str),
+
+TMAP(meta_bottom_hdr_C,STRING,meta[0].hdr.bottom,set_str),
+TMAP(meta_bottom_hdr_R,STRING,meta[1].hdr.bottom,set_str),
+TMAP(meta_bottom_hdr_N,STRING,meta[2].hdr.bottom,set_str),
+TMAP(meta_bottom_hdr_X,STRING,meta[3].hdr.bottom,set_str),
+TMAP(meta_bottom_hdr_V,STRING,meta[4].hdr.bottom,set_str),
+TMAP(meta_bottom_hdr_Cpp,STRING,meta[5].hdr.bottom,set_str),
+TMAP(meta_bottom_hdr_R90,STRING,meta[6].hdr.bottom,set_str),
+TMAP(meta_bottom_hdr_N90,STRING,meta[7].hdr.bottom,set_str),
+
+TMAP(protect_C,STRING,protect_chars[0],set_str),
+TMAP(protect_R,STRING,protect_chars[1],set_str),
+TMAP(protect_N,STRING,protect_chars[2],set_str),
+TMAP(protect_X,STRING,protect_chars[3],set_str),
+TMAP(protect_V,STRING,protect_chars[4],set_str),
+TMAP(protect_Cpp,STRING,protect_chars[5],set_str),
+TMAP(protect_R90,STRING,protect_chars[6],set_str),
+TMAP(protect_N90,STRING,protect_chars[7],set_str),
+
+TMAP(line_char_C,CHAR,line_char[0],set_char),
+TMAP(line_char_R,CHAR,line_char[1],set_char),
+TMAP(line_char_N,CHAR,line_char[2],set_char),
+TMAP(line_char_X,CHAR,line_char[3],set_char),
+TMAP(line_char_V,CHAR,line_char[4],set_char),
+TMAP(line_char_Cpp,CHAR,line_char[5],set_char),
+TMAP(line_char_R90,CHAR,line_char[6],set_char),
+TMAP(line_char_N90,CHAR,line_char[7],set_char),
+
+TMAP(paren_num, INT, paren.num, set_int),
+TMAP(paren_nest, INT, paren.nest, set_int),
+TMAP(paren_len, INT, paren.len, set_int)@/
+
+@ When a field such as |program_name| is set via ``\.{program.name =
+"red"}'', the initialization routine |ini_aclr| is run to convert the
+string to the value~|RED|.
+
+@m PMAP(keyword,type,field,init) 
+	{OC(#keyword),S_##type,(void *)&wt_style.field,init}
+
+@m CLR_MAP(keyword,field) PMAP(keyword,STRING,color.field.name,ini_aclr)
+
+@m CLINK(keyword,field) PMAP(keyword,STRING,color._##field,ini_bilevel)
+
+@<Mappings for parameters common to \FWEAVE\ and \FTANGLE@>=
+
+PMAP(xchr,STRING,xchr,set_str),
+PMAP(Ext_delimiter,CHAR,ext_delimiter,set_char),
+PMAP(ext_web,STRING,input_ext.web,ini_ext),
+PMAP(ext_ch,STRING,input_ext.change,ini_ext),
+PMAP(ext_hweb,STRING,input_ext.hweb,ini_ext),
+PMAP(ext_hch,STRING,input_ext.hchange,ini_ext),@/
+PMAP(suffix_C,STRING,output_ext.C_,set_str),
+PMAP(suffix_Cpp,STRING,output_ext.Cpp_,set_str),
+PMAP(suffix_V,STRING,output_ext.V_,set_str),
+PMAP(suffix_FORTRAN,STRING,output_ext.N_,set_str),
+PMAP(suffix_N,STRING,output_ext.N_,set_str),
+PMAP(suffix_FORTRAN90,STRING,output_ext.N90_,set_str),
+PMAP(suffix_N90,STRING,output_ext.N90_,set_str),
+PMAP(suffix_RATFOR,STRING,output_ext.R_,set_str),
+PMAP(suffix_R,STRING,output_ext.R_,set_str),
+PMAP(suffix_RATFOR90,STRING,output_ext.R90_,set_str),
+PMAP(suffix_R90,STRING,output_ext.R90_,set_str),
+PMAP(suffix_TEX,STRING,output_ext.X_,set_str),
+PMAP(suffix_X,STRING,output_ext.X_,set_str),
+PMAP(null_file,STRING,null_file_name,set_str),
+PMAP(Idir, STRING, Idir, set_str),
+PMAP(dot_constant_begin,CHAR,dot_delimiter.begin,ini_dot),
+PMAP(dot_constant_end,CHAR,dot_delimiter.end,ini_dot),
+CLR_MAP(color_ordinary,ordinary),
+CLR_MAP(color_program,program_name),
+CLR_MAP(color_mod_name,md_name),
+CLR_MAP(color_info,info),
+CLR_MAP(color_warning,warning),
+CLR_MAP(color_error,error),
+CLR_MAP(color_fatal,fatal),
+CLR_MAP(color_mod_num,module_num),
+CLR_MAP(color_line_num,line_num),
+CLR_MAP(color_input_file,in_file),
+CLR_MAP(color_include_file,include_file),
+CLR_MAP(color_output_file,out_file),
+CLR_MAP(color_timing,timing),
+CLR_MAP(color_char,character),@/
+CLINK(Color_default, NORMAL),
+CLINK(Color_black, BLACK),
+CLINK(Color_red, RED),
+CLINK(Color_green, GREEN),
+CLINK(Color_yellow, YELLOW),
+CLINK(Color_blue, BLUE),
+CLINK(Color_magenta, MAGENTA),
+CLINK(Color_cyan, CYAN),
+CLINK(Color_white, WHITE)
+
+@ Here are the actual mappings that relate the keywords to the parameter
+structures. 
+@<Glob...@>=
+
+IN_STYLE S_MAP fweb_map[] 
+#ifdef _STYLE_h
+ = {
+	@<Mappings for \FWEAVE's index@>,@/
+	@<Mappings for \FWEAVE's module list@>,@/
+	@<Mappings for \FWEAVE's table of contents@>,@/
+	@<Mappings for miscellaneous \FWEAVE\ parameters@>,@/
+	@<Mappings for miscellaneous \FTANGLE\ parameters@>,@/
+	@<Mappings for parameters common to \FWEAVE\ and \FTANGLE@>,@/
+	@<Mappings for the \FWEB\ control codes@>,@/
+	{OC("")}
+   }
+#endif /* |_STYLE_h| */
+;
+

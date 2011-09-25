@@ -1,0 +1,76 @@
+% This file is a LaTeX2e package.  One may select it in a LaTeX document by
+% the command 
+%
+%	\usepackage{fwebinsert}
+%
+
+% The package sets things up so that one can include TeX output from FWEAVE
+% into a LaTeX document.  
+
+% J. A. Krommes, April 12, 1996
+
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{fwebinsert}[1996/04/12]
+
+\DeclareOption{FWEBstandalone}{\input{fwebmac.sty}\FWEBstandalonetrue}
+\DeclareOption{FWEBinsert}{\input{fwebmac.sty}\FWEBstandalonefalse}
+
+\ExecuteOptions{FWEBinsert} % Set up default.
+\ProcessOptions
+
+\makeatletter
+
+% The optional argument to \FWEBinput is zero or more letters from the list
+% 0,1,2,3 (fweb levels), h (headers),  or c (table of contents).
+\newcommand\FWEBinput[2][]{\begingroup\W@read{#1}{#2}\endgroup}
+
+\global\let\fwebinput\FWEBinput
+%\newcommand\fwebinput[2][]{\W@read{#1}{#2}}% No surrounding group; dangerous.
+
+\gdef\W@read#1#2{%
+	\toks0={#1}%
+	\ifW@intoks{\toks0}0{\FWEBlevel{0}}{}%
+	\ifW@intoks{\toks0}1{\FWEBlevel{1}}{}%
+	\ifW@intoks{\toks0}2{\FWEBlevel{2}}{}%
+	\ifW@intoks{\toks0}3{\FWEBlevel{3}}{}%
+	\ifW@intoks{\toks0}h{\W@headerstrue}{\W@headersfalse}%
+	\ifW@intoks{\toks0}c{}{\def\Wcon##1{\W@onecolumn}}%
+	\def\jobname{#2}% For reading the aux file in \Wbegin.
+	\def\@writefile##1##2{}% Don't mess with input-file toc.
+	\edef\Wb@se{\the\c@section}% Starting section number.
+	\input{#2.tex}% Read the TeX'd output from fweave.
+	}
+
+\gdef\FWEBlevel#1{\def\W@ssmin{#1}}
+\global\let\fweblevel\FWEBlevel
+
+\gdef\W@preface#1{\W@getsection{#1}}
+
+\newif\ifW@inlist
+
+\gdef\ifW@intoks#1#2#3#4{\let\W@tsttoken#2%
+	\expandafter\W@listcheck\the#1\relax
+	\ifW@inlist#3\else#4\fi
+}
+
+\gdef\W@listcheck#1\relax{%
+	\W@inlistfalse
+	\def\test{#1}%
+	\ifx\test\empty
+	\else
+		\W@tokscheck#1\relax
+	\fi
+	}
+
+\gdef\W@tokscheck#1#2\relax{%
+	\if\W@tsttoken#1
+		\W@inlisttrue
+		\let\next\relax
+	\else
+		\def\next{\W@listcheck#2\relax}%
+	\fi
+	\next
+	}
+
+\makeatother

@@ -1,0 +1,481 @@
+.TH FWEB 1 "September 23, 1998"
+.UC 4
+.SH NAME
+ftangle,fweave \- WEB processors for C, C++, Fortran, Ratfor, and TeX
+.SH SYNOPSIS
+.B ftangle 
+-|
+.br 
+         | [[\-option] ...] src_file[.web] [change_file[.ch]]
+.br
+.B fweave 
+--|
+.br
+.SH DESCRIPTION
+(This man page is obsolete and is no longer maintained; please see `info
+fweb' for up-to-date and detailed tree-structured information.)
+
+.B FWEB
+is an extension of Knuth's
+.B WEB
+system to handle the languages C, C++, Fortran (both Fortran-77 and Fortran-90),
+Ratfor, and TeX.  The philosophy of
+.B WEB
+and all details about using FWEB may be found in the user manual
+.B fweb.tex,
+available on-line as the
+.B texinfo
+(GNU hypertext system) entry
+.B `info FWEB'.
+See also
+
+.RS
+.B http://w3.pppl.gov/~krommes/fweb_toc.html.
+.RE
+
+An \fIinitialization file \fRnamed
+.B .fweb
+(Unix sytems) or
+.B fweb.ini
+(personal computers) may be placed in your home directory.  (For Unix
+systems, that is the value of
+.B $HOME.
+The name can be overridden by the environment variable
+.B FWEB_INI.)
+In this file can be placed any option that is allowed on the command line
+(one option per line).  If the option begins with a hyphen, it is processed
+before the command line; if it begins with an ampersand, it is processed
+after the command line (rarely necessary); if it begins with neither, it is
+interpreted as a file name and processed after the command line.
+
+A \fIstyle file\fR patterned after the utility
+.B makeindex
+and named
+.B fweb.sty
+may be placed in your current directory.  (The directory can be overridden
+by the environment variable 
+.B FWEB_STYLE_DIR.)
+This file is used to customize the appearance of the index and many other
+parameters controlling the operation of the processors.  See the 
+documentation for detailed discussion.
+
+The following list just provides a very brief summary of
+the command-line options.  Please refer to the texinfo entry for more details.
+
+.SM FWEB Options
+.PP
+.TP 8
+.B filename
+The first file name identifies the 
+.B FWEB
+source file.  (If the name does not contain a period, the extension
+.B .web
+is added automatically.)  If a second file name is present, it identifies
+the change file.  (If that name does not contain a period, the extension
+.B .ch
+is added automatically.)  For an alternative approach to processing
+extensions, see the \-e option.
+.TP
+.B \-1
+Turn on brief debugging mode for
+.B FWEAVE.
+.TP
+.B \-2
+Turn on verbose debugging mode for 
+.B FWEAVE.
+.TP
+.B \-@
+Display information about control codes.
+.TP
+.B \-A
+Turn on ASCII translations.
+.TP
+.B \-B
+Turn off audible beeps.
+.TP
+.B \-b
+Number
+.B do
+and
+.B if
+blocks in woven Fortran and Ratfor output.
+.TP
+.B \-C\fIn
+Set the color mode to \fIn\fR,
+where \fIn\fR
+is 0 (no color), 1 (ANSI color), 2 (bilevel), 3 (trilevel), or 4
+(user-defined).
+.TP
+.B \-c
+Set the global language to C.
+.TP
+.B \-c++
+Set the global language to C++.
+.TP
+.B \-D\fI[letters]
+Display information about reserved words of the current language (beginning
+with \fI[letters]
+if present). 
+.TP
+.B \-d\fI[nnnnn]
+Convert unnumbered 
+.B do...enddo
+constructions to standard Fortran.
+.TP
+.B \-E\fIc
+Change the delimiter of a file-name extension to \fIc.
+.TP
+.B \-e
+Turn on automatic file-name completion, using the style-file parameters
+.B ext.web, ext.ch, ext.hweb,
+and
+.B ext.hch.
+.TP
+.B \-F
+Compare output files with old versions.
+.TP
+.B \-f
+Turn off module references for functions, macro names, etc.
+.TP
+.B \-H
+Scan #include files for typedef and/or class declarations.
+.TP
+.B \-h
+A brief message about where to get help.
+.TP
+.B \-I\fIdirectory
+Append a directory to the list of directories to be searched for include files.
+.TP
+.B \-i
+Read include files named by the 
+.B @I
+command, but don't print contents.
+.TP
+.B \-i!
+Don't even read include files named by the
+.B @I
+command.
+.TP
+.B \-j
+Inhibit multiple includes of the same file.
+.TP
+.B \-k
+Recognize lower-case versions of Fortran/Ratfor I/O keywords such as BLOCKSIZE.
+.TP
+.B \-L\fIl
+Select language \fIl.
+.TP
+.B -l\fI[mmm[:nnn]]
+Echo the input lines between
+.I mmm
+and
+.I nnn.
+.TP
+.B \-m\fIid[=text]
+Define an
+.B FWEB
+macro.
+.TP
+.B \-m4
+Understand (for formatting purposes) the commands of the 
+.B m4
+preprocessor.
+.TP
+.B \-m;
+Automatically append pseudo-semicolons to the end of 
+.B WEB
+macro definitions. \fI(Not recommended.)
+.TP
+.B \-n
+Set the global language to Fortran-77.
+.TP
+.B \-n9
+Set the global language to Fortran-90.
+.TP
+.B \-n;
+For Fortran-77, supply semicolons automatically (default).
+.TP
+.B \-n:
+In Fortran, place statement labels on separate lines.
+.TP
+.B \-nb
+Number the
+.B do\fR's
+and 
+.B if\fR's
+in Fortran.
+.TP
+.B \-nC
+Throw away all commet lines.
+.TP
+.B \-np
+Print semicolons in woven Fortran output.
+.TP
+.B \-n\e
+Use free-form syntax for Fortran-90; continue lines with backslashes.
+.TP
+.B \-n&
+As above, but continue lines with ampersands.
+.TP
+.B \-n/
+In Fortran, make
+.B '//'
+denote the start of a short comment instead of concatenation.  (Use
+.B '\\/'
+for concatenation.)
+.TP
+.B \-n!
+In Fortran, make
+.B '!'
+denote the start of a short comment instead of the logical negation.
+.TP
+.B \-n)
+In Fortran, reverse array indices.
+.TP
+.B \-o
+Turn off 
+.B FWEAVE's
+mechanisms for overloading operators.
+.TP
+.B \-P\fIletter
+Select the TeX processor, where 
+.I letter
+is either 
+.B 'T' 
+for 
+.B TeX
+or 
+.B 'L'
+for
+.B LaTeX.
+The default is LaTeX.  \fINote well that Plain TeX is no longer supported!
+.TP
+.B \-p\fIstyleentry
+Buffer up a style-file entry, to be processed just before the local style
+file is read.
+.TP
+.B \-r 
+Set the global language to Ratfor-77.
+.TP
+.B \-r9
+Set the global language to Ratfor-90.
+.TP
+.B \-rb
+Number the
+.B do\fR's
+and
+.B if\fR's
+in Ratfor.
+.TP
+.B \-rk\fI[letters]
+Suppress comments about particular Ratfor statement expansions.
+.TP
+.B \-rK\fI[letters]
+Include comments about particular Ratfor statement expansions.
+.TP
+.B \-r;
+For Ratfor, turn on the auto-semi mode and assume the ``obviously
+continued'' syntax. \fI(Not recommended.)
+.TP
+.B \-r/
+In Ratfor, make
+.B '//'
+denote the start of a short comment instead of concatenation.  (Use
+.B '\\/'
+for concatenation.)
+.TP
+.B \-r!
+In Ratfor, make
+.B '!'
+denote the start of a short comment instead of the logical negation.
+.TP
+.B \-r)
+In Ratfor, reverse array indices.
+.TP
+.B \-s
+Print statistics about memory usage.
+.TP
+.B \-sm\fI[nnn]
+As above, but also display the dynamic memory allocations as they occur.
+.TP
+.B \-T
+Miscellaneous flag-setting commands for 
+.B ftangle;
+see texinfo entry.
+.TP
+.B \-t\fIln[{...}]
+Truncate identifiers of language
+.I l
+to be of length
+.I n,
+after optionally filtering out the characters listed between the braces.
+.TP
+.B \-U
+Convert reserved output tokens to lower case.
+.TP
+.B \-u\fIid
+Undefine a predefined or command-line macro.
+.TP
+.B \-v
+Make all comments verbatim.
+.TP
+.B \-W@\fIflag
+Set module warning flag [0 for no warnings, or the logical OR of 1 (never
+used) and/or 2 (multiple uses)].
+.TP
+.B \-W1
+Completely cross-reference single-character identifiers.
+.TP
+.B \-W[ 
+Turn on special processing of bracketed array indices.
+.TP
+.B \-WH
+Turn on processing of bracketed array indices.
+.TP
+.B \-Wd
+Don't print @d or @D statements in woven output.
+.TP
+.B \-Wf
+Don't print @f statements in woven output.
+.TP
+.B \-WF
+Don't print @F statements in woven output.
+.TP
+.B \-Wl
+Don't print @l statements in woven output.
+.TP
+.B \-Wm
+Don't print @m or @M statements in woven output.
+.TP
+.B \-Wv
+Don't print @v statements in woven output.
+.TP
+.B \-Ww
+Don't print @w or @W statements in woven output.
+.TP
+.B \-w\fI[file_name]
+Print 
+.B `\\input file_name'
+instead of
+.B `\\input fwebmac.sty'
+at beginning of
+.B tex
+output file.  With no argument, print nothing.
+.TP
+.B \-X\fI[letters]
+Print selected cross-reference information; the opposite of
+.B '-x'.
+.TP
+.B \-x\fI[letters]
+Reduce or eliminate cross-reference information. The optional letters can
+be one of
+.B 'c', 'i', 'm', 
+or
+.B '*',
+referring respectively to the table of contents, index, module list, or all
+cross-reference information.
+.TP
+.B \-y\fIa[a][nnnn]
+Override default for dynamic memory allocation. If 
+.I nnnn
+is omitted, then simply query the default.  The command 
+.B '-y'
+with no argument queries everything.
+.TP
+.B \-Z\fI[letters]
+Display default values of style-file parameters (starting with 
+.I letters
+if present).
+.TP
+.B \-z\fI[file_name]
+Override default style-file name.
+.TP
+.B \-.
+Don't recognize dot constants in Fortran and Ratfor.
+.TP
+.B \-\e
+Explicitly escape continued strings.
+.TP
+.B \-(
+Continue parenthesized strings with backslashes.
+.TP
+.B \-:\fI[nnnnn]
+Set the starting automatic statement number for \Fortran\ and \Ratfor.
+.TP
+.B \->\fI[l=][name]
+Redirect output.
+.TP
+.B \-=
+Same as above (and easier to type).
+.TP
+.B \-#
+Turn off comments about line numbers and modules in woven output.
+.TP
+.B \-+ 
+Don't interpret the compound assignment operators in Fortran and Ratfor.
+.TP
+.B \-/
+In Fortran and Ratfor, make 
+.B '//'
+denote the start of a short comment instead of concatenation.  (Use
+.B '\\/'
+for concatenation.)
+.TP
+.B \-!
+In Fortran and Ratfor, make
+.B '!'
+denote the start of a short comment instead of  logical negation.
+
+.SH MANUAL
+Further documentation can be obtained from texinfo, available online
+through the info browser, either via emacs or stand-alone (menu item
+.B fweb),
+by saying
+.B `ftangle -h'
+or in printed form by saying (from the top-level 
+.B FWEB
+installation directory, if it is available)
+.B `lpr Manual/fweb.ps'
+or
+.B `texi2dvi Manual/fweb.texinfo'.
+.PP
+
+.SH FILES
+.TP
+.B $HOME/.fweb 
+\- Optional initialization file (supplied by user).
+.TP
+.B ./fweb.sty
+\- Optional style file for configuring the style of an individual document
+(supplied by user).
+
+
+.SH ENVIRONMENT VARIABLES
+.TP
+.B FWEB_INCLUDES
+\- Colon-delimited list of directories to be searched for include files.
+.TP
+.B FWEB_INI
+\- Name of the initialization file in user's home directory.
+.TP
+.B FWEB_STYLE_DIR
+\- Directory in which the style file resides.
+
+.SH BUGS
+Please send bug reports and suggestions to
+.B krommes@princeton.edu.  
+FWEB is a spare-time activity, so response may be slow and messages may not
+be acknowledged individually.  However, your input is very useful and much
+appreciated. 
+
+.PP
+.SH AUTHORS
+.PP
+.B FWEB
+was written by John A. Krommes, Princeton University.  It
+is a substantial revision and update (more than 50% new) of version 0.5 of
+Silvio Levy's  
+.B CWEB,
+which in turn was based on Donald Knuth's original Pascal 
+.B WEB.
+The latter was designed for documenting and maintaining TeX.

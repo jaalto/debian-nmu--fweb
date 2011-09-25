@@ -1,0 +1,44 @@
+@z --- val.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ Here are declarations needed for \.{eval.web}.
+
+@<Typedef declarations@>=
+
+/* Precedence of the various operators. */
+typedef enum {BAD_TOKEN,OR_OR,AND_AND,BIT_OR,BIT_XOR,BIT_AND,LOG_EQ,LOG_LT,
+	BIT_SHIFT,PLUS_MINUS,TIMES,EXP,UNARY,HIGHEST_UNARY} @]PRECEDENCE;
+
+/* An operator, together with its precedence. */
+typedef struct
+	{
+	eight_bits token;
+	PRECEDENCE precedence;
+	} @]OP;
+
+/* The actual data value. */
+typedef union
+	{
+	long i; // All integers are long, to humor the pc people.
+	double d; // We handle just one floating-point type.
+	sixteen_bits id; // An identifier token.
+	OP op;
+	} @]VALUE;
+
+/* Type of the data value. The relative order must be preserved here,
+because it is used in the type promotion routine |promote|. */
+typedef enum {Int,Double,Id,Op} @]TYPE;
+
+/* Complete data structure for the token; includes links to the next and
+last |VAL| structures. */
+typedef struct val
+	{
+	VALUE value; // The actual data value or operator token.
+	TYPE type;	// The type of value stored in |value|.
+	struct val HUGE *last, HUGE *next;// Link to the last and next values. 
+	} @]VAL;

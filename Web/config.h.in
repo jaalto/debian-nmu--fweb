@@ -1,0 +1,84 @@
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define if the <ctype.h> header file is ANSI-compliant. */
+#define ANSI_CTYPE_H 0
+
+/* Define if the |sprintf| function is ANSI-compliant (returns number of
+   characters written). */
+#define ANSI_SPRINTF 0
+
+/* Define if the |sscanf| function is ANSI-compliant (in particular,
+   handles scansets correctly. */
+#define ANSI_SSCANF 0
+
+/* Define if |clock_t| isn't defined/typedefed. */
+#undef clock_t
+
+/* Define if backslash continuations don't work correctly. */
+#define FANCY_SPLIT 0
+
+/* Define if you have the |getenv| function.  */
+#define HAVE_GETENV 0
+
+#define HAVE_GETTIMEOFDAY 0
+
+/* Define if you have the |strerror| function.  */
+#define HAVE_STRERROR 0
+
+/* Define if you have the |tempnam| function.  */
+#define HAVE_TEMPNAM 0
+
+/* Define if you have the |tmpnam| function.  */
+#define HAVE_TMPNAM 0
+
+/* Define if you have the <float.h> header file.  */
+#define HAVE_FLOAT_H 0
+
+/* Define if you have the <limits.h> header file.  */
+#define HAVE_LIMITS_H 0
+
+/* Define if you have the <memory.h> header file.  */
+#define HAVE_MEMORY_H 0
+
+/* Define if you have the <stdarg.h> header file.  */
+#define HAVE_STDARG_H 0
+
+/* Define if you have the <stddef.h> header file.  */
+#define HAVE_STDDEF_H 0
+
+/* Define if you have the <stdlib.h> header file.  */
+#define HAVE_STDLIB_H 0
+
+/* Define if common <stdio.h> prototypes are included. */
+#define HAVE_STD_PROTOTYPES 0
+
+/* Define if you have the <string.h> header file.  */
+#define HAVE_STRING_H 0
+
+/* Define if you have the <sys/timeb.h> header file.  */
+#define HAVE_SYS_TIMEB_H 0
+
+/* Define if you have the <values.h> header file.  */
+#define HAVE_VALUES_H 0
+
+/* Define if |void| isn't understood. */
+#define NO_VOID 0
+
+/* Define if the new-style prototypes are not accepted. */
+#define OLD_PROTOTYPES 0
+
+/* Define if |size_t| isn't typedefed. */
+#undef size_t
+
+/* Define if you have the ANSI C header files.  */
+#define STDC_HEADERS 0
+
+/* Define if the info program is installed. */
+#define HAVE_INFO 0
+
+/* How to run the C preprocessor. */
+#define RUN_CPP 0
+
+

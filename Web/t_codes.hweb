@@ -1,0 +1,230 @@
+@z --- t_codes.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ If the first byte of a token is less than $|0200| \equiv |ID0|$, the
+token occupies a single byte. Another way of saying this is that codes less
+than $|0200| \equiv |0x80| \equiv |0177| \equiv 128 \equiv 2^7$ are 7-bit
+ASCII codes that represent themselves.  In particular, a single-character
+identifier like~`|x|' will be a one-byte token, while all longer
+identifiers will occupy two bytes.  We shall use the macro |TOKEN1| to help
+us test for such a token, as in `|if(TOKEN1(a))@;|\dots'.
+
+Some of the 7-bit ASCII codes will not be present, however, so we can
+use them for special purposes. The following symbolic names are used:
+
+\yskip \hang |join| denotes the concatenation of adjacent items with no
+space or line breaks allowed between them (the \.{@@\&} operation of \.{WEB}).
+
+\hang |stringg| denotes the beginning or end of a string or verbatim
+construction;
+
+\hang |constant| denotes the beginning or end of a numerical constant.
+@^ASCII code@>
+
+@D stringg OCTAL(2) /* Extended ASCII alpha should not appear. (The funny
+	spelling is to avoid conflict with the VAX' \.{stdlib}.) */
+@D constant OCTAL(3) // Numerical constant.
+@D begin_Xmeta or_or
+@D end_Xmeta star_star
+@D cdir OCTAL(6) // Brackets compiler directive..
+@D colon_colon OCTAL(11) // \Cpp\ and \Fortran--90: `$\WCF$'.
+
+@D join OCTAL(177) // |ASCII| delete will not appear.
+
+@d ID0 0200 // $128 =$ end of the 7-bit ASCII codes.
+@d TOKEN1(a) ((a) < ID0) // Is |a|~a single-byte token?
+
+@ Otherwise we make a sixteen-bit token by combining two consecutive
+bytes~|a| and~|b|. If $|0200| <= a < |0250| \equiv |MOD0|$, then
+$(a-|0200|) \times 2^8 + |b|$ corresponds to an identifier; we shall
+introduce the macro |IDENTIFIER(a,b)| to perform this construction. (This
+means that there must be fewer than 10,240 identifiers, since $|050|\times
+2^8 = 10,240$.) If
+$|0250<=a<0320| \equiv |MOD1|$, then $(a-|0250|) \times 2^8 +|b|$ points to a
+module name. 
+(Thus, there must be fewer than 10,240 module names.)
+Otherwise, i.e., if |0320<=a<0400|, then $(a-|0320|) \times 2^8 +|b|$ is
+the number of the module in which the current replacement text appears.  If
+that number is~0 (i.e., if $|a| \equiv |MOD1|$ and $|b| \equiv 0$, we have
+the |LINE_NUM| identifier, which signifies four more bytes of line-number
+info upcoming.
+
+Notice that these conventions allow more module numbers than module
+names. Thus, we can use the tokens between~|0370| and~|0377| for other
+purposes. For example, see the definition of |MACRO_ARGUMENT|.
+
+@m MOD0 0250 
+@m MOD1 0320
+
+@d MACRO_ARGUMENT 0377 /* See the related definition and discussion of
+				|MOD0|. */  
+@d BASE2 0400 /* |0xFF + 1 = 0x100 = 256| */
+
+@d MODULE_NAME $EVAL((MOD0-0200)<<8) /* |024000= 10240 = (0250-0200)*0400| */
+@d MODULE_NUM $EVAL((MOD1-0200)<<8) /* |050000 = 20480 = (0320-0200)*0400| */
+@d LINE_NUM $EVAL(MOD1<<8)@&L /* |0150000==0320*0400| */
+
+@d IDENTIFIER(left,right) 
+	((sixteen_bits)( ((left)-ID0)*BASE2 + (sixteen_bits)(right) ))
+	 /* Construct two-byte token out of its constituents. */
+
+@d LEFT(a,id) ((eight_bits)(((a)/BASE2 + (id)))) /* Make left-hand byte out of
+					|sixteen_bits|. */ 
+@d RIGHT(a) ((eight_bits)(((a) % BASE2))) /* Make right-hand byte. */
+
+@ Control codes in \.{WEB} begin with `\.{@@}', and the next character
+identifies the code. Some of these are of interest only to \.{WEAVE},
+so \.{TANGLE} ignores them; the others are converted by \.{TANGLE} into
+internal code numbers by the |control_code| table below. The ordering
+of these internal code numbers has been chosen to simplify the program logic;
+larger numbers are given to the control codes that denote more significant
+milestones.
+
+The following table shows the assignments:
+$$\def\:{\char\count255\global\advance\count255 by 1}
+\def\Hrule{\noalign{\hrule}}\def\HHrule{\noalign{\hrule height2pt}}
+\def\Width{60pt}
+\count255='40
+\vbox{
+\hbox{\hbox to \Width{\it\hfill0\/\hfill}%
+\hbox to \Width{\it\hfill1\/\hfill}%
+\hbox to \Width{\it\hfill2\/\hfill}%
+\hbox to \Width{\it\hfill3\/\hfill}%
+\hbox to \Width{\it\hfill4\/\hfill}%
+\hbox to \Width{\it\hfill5\/\hfill}%
+\hbox to \Width{\it\hfill6\/\hfill}%
+\hbox to \Width{\it\hfill7\/\hfill}}
+\vskip 4pt
+\hrule
+\def\!{\vrule height 10.5pt depth 4.5pt}
+\halign{\hbox to 0pt{\hskip -24pt\WO{\~#}\hfill}&\!
+\hbox to \Width{\hfill$#$\hfill\!}&
+&\hbox to \Width{\hfill$#$\hfill\!}\cr
+00&\\{ignore}&\WMM &\\{verbatim}&\\{force\_line}&\WW    &**     &\WCC    &\\{bell}\cr\Hrule
+01&\dots  &\\{begin\_cmnt}&\\{lf} &\WPP    &\\{ff} &\\{cr}
+	&\\{begin\_lang}       &\\{begin\_meta}        \cr\Hrule
+02&\WGG    &\WLS    &\WLL    &\.{.DOT.}&;    &\WSR    &\WSlSl  &\\{end\_meta}
+\cr\Hrule 
+03&\\{stmt\_label}&\WMG   &\WI    &\WL    &\WNN    &\WG    &\WS    &\WV     \cr\HHrule
+04&       &\WR    &       &\#     &       &\WMOD   &\amp   &        \cr\Hrule
+05&       &       &\ast   &+      &       &-      &       &/       \cr\Hrule
+06&       &       &       &       &       &       &       &        \cr\Hrule
+07&       &       &       &       &<      &=      &>      &?       \cr\Hrule
+10&\Wcp   &\Wcm   &\Wcs   &\Wcv   &\Wcd   &\Wcx   &\Wca   &\Wco    \cr\Hrule
+11&\Wcg   &\Wcl   &       &       &       &       &       &        \cr\Hrule
+12&       &       &       &       &       &       &       &        \cr\Hrule
+13&       &       &       &       &       &       &\^     &        \cr\Hrule
+14&       &       &       &       &       &       &       &        \cr\Hrule
+15&       &       &       &       &       &       &       &        \cr\Hrule
+16&       &       &       &       &       &       &       &        \cr\Hrule
+17&       &       &       &       &\WOR    &\.{@@\$}&\.{@@\_},\WTL&\\{join}\cr\HHrule
+20&\.{L$l$}&\.{C} &\.{R}  &\.{N}  &\.{M}  &\.{X}  &       &        \cr\Hrule
+21&\WNP    &\WNC    &\.{\#<}&\WPtr  &\WCC    &       &       &
+\cr\Hrule
+22&       &       &       &       &       &       &       &        \cr\Hrule
+23&\\{constant}&\\{stringg}&\\{identifier}&\.{@@\^}&\.{@@9} &\.{@@.} &\.{@@t} &\.{@@'}  \cr\Hrule
+24&\.{@@\&}&\.{@@,} &\.{@@\char'174}&\.{@@/} &\.{@@\#} &\.{@@+} &\.{@@;}& \cr\Hrule
+25&\.{@@(} &\.{@@)} &\.{\ } &\\{copy\_mode}&\\{toggle\_output}&\.{@@e}&\.{@@:}&
+\cr\Hrule
+26&       &       &\.{@@!} &       &       &\.{@@0} &\.{@@1} &\.{@@2}  \cr\Hrule
+27&\.{@@f} &\.{@@\%}&       &       &\.{@@l} &\.{@@o} &\.{@@d} &\.{@@m}  \cr\Hrule
+30&\.{@@\#ifdef}&\.{@@\#ifndef}&\.{@@\#if}&\.{@@\#else}&\.{@@\#elif}&\.{@@\#endif}
+&\.{@@\#pragma}       &\.{@@\#undef}\cr\Hrule
+31&\.{@@a} &\.{@@<} &\.{@@\ }&       &       &       &       &        \cr\Hrule
+32&       &       &       &       &       &       &       &        \cr\Hrule
+33&       &       &       &       &       &       &       &        \cr\Hrule
+34&       &       &       &       &       &       &       &
+\cr\Hrule
+35&       &       &       &       &       &       &       &
+\cr\Hrule
+36&       &       &       &       &       &       &       &
+\cr\Hrule
+37&       &       &       &       &       &       &\\{begin\_cmnt0}&        \cr}
+\hrule width 480pt}$$
+
+@D ignore 0 // Control code of no interest to \.{TANGLE}.
+
+@d begin_comment0 HEX(FE) // Sent from |input_ln|; marker for long comment.
+@d begin_comment1 HEX(FD) // As above; marker for short comment.
+
+@D module_number OCTAL(201) // Code returned by |get_output| for mod.\ numbers.
+@D identifier OCTAL(202) // Code returned by |get_output| for identifiers.
+@D id_keyword OCTAL(203) // As above, but for expandable keyword.
+
+@D L_switch OCTAL(257) // Control code for `\.{@@L}'.
+@D begin_FORTRAN OCTAL(260)
+@D begin_RATFOR OCTAL(261)
+@D begin_C OCTAL(262)
+@D begin_LITERAL OCTAL(263)
+
+@D verbatim OCTAL(264)  /* Can't be~|02| as for \.{fweave}, because
+				|stringg| is defined to be that. */
+
+@D invisible_cmnt OCTAL(265) // Control code for `\.{@@\%}'.
+@D compiler_directive OCTAL(266) // No longer used.
+@D Compiler_Directive OCTAL(267) // Control code for `\.{@@?}'.
+
+@D keyword_name OCTAL(270) // Control code for `\.{@@k}'.
+
+@D no_index OCTAL(300)	// Control code for `\.{@@-}'.
+@D yes_index OCTAL(301) // Control code for `\.{@@+}'.
+
+@D ascii_constant OCTAL(302) // Control code for `\.{@@'}'.
+@D begin_vcmnt OCTAL(303) // Control code for `\.{@@\slashstar}'.
+@D big_line_break OCTAL(304) // Control code for `\.{@@\#}'.
+
+@D begin_bp OCTAL(305)
+@D insert_bp OCTAL(306)
+
+@D begin_meta OCTAL(17) // Control code for |"@@("|.
+@D end_meta OCTAL(27)
+
+@D TeX_string OCTAL(307)
+@D xref_roman OCTAL(310)
+@D xref_typewriter OCTAL(311)
+@D xref_wildcard OCTAL(312)
+
+@D control_text OCTAL(313) // Control code for `\.{@@t}', `\.{@@\^}', etc.
+
+@D begin_nuweb OCTAL(314)
+@D no_mac_expand OCTAL(315) // Control code for `\.{@@\~}'
+@D set_line_info OCTAL(316) // Expt'l control code for `\.{@@Q}'. 
+@D short_fcn OCTAL(317) // Control code for `\.{@@\lb}'.
+
+@D formatt OCTAL(320) // Control code for `\.{@@f}'.
+
+@D limbo_text OCTAL(323) // Control code for `\.{@@l}'.
+@D op_def OCTAL(324)	// Control code for `\.{@@v}'.
+@D macro_def OCTAL(325)	// Control code for `\.{@@W}'.
+
+@D ignore_defn OCTAL(327)// Stuff to here should be ignored when scanning defn.
+
+@D new_output_file OCTAL(331) // Control code for `\.{@@o}'.
+
+@D definition OCTAL(332) // Control code for `\.{@@d}'.
+@D undefinition OCTAL(333) // Control code for `\.{@@u}'.
+@D WEB_definition OCTAL(334) // Control code for `\.{@@m}'.
+
+@D m_ifdef OCTAL(335)
+@D m_ifndef OCTAL(336)
+@D m_if OCTAL(337)
+@D m_else OCTAL(340)
+@D m_elif OCTAL(341)
+@D m_endif OCTAL(342)
+@D m_for OCTAL(343)
+@D m_endfor OCTAL(344)
+@D m_line OCTAL(345)
+@D m_undef OCTAL(346)
+
+@D end_of_buffer OCTAL(347)
+
+@D begin_code OCTAL(350) // Control code for `\.{@@a}'.
+@D module_name OCTAL(351) // Control code for `\.{@@<}'.
+
+@D new_module OCTAL(352) // Control code for `\.{@@\ }' and `\.{@@*}'.
+

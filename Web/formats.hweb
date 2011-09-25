@@ -1,0 +1,66 @@
+@z --- formats.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ Here are \FWEB\ formats to help out the header files.
+
+@f ASCII char
+@f BP int
+@f BUF_SIZE int
+@f BUILT_IN int
+@f C0 $_EXPR
+@f C1 $_EXPR
+@f C2 $_EXPR
+@f CASE int
+@f CASE_TYPE int
+@f CC_BUF int
+@f CMD int
+@f COLOR int
+@f CONST static
+@f CUR_PRMS int
+@f DOTS int
+@f FCN $_EXPR
+@f GOTO_CODE int
+@f HUGE huge
+@f INPUT_PRMS int
+@f INPUT_PRMS0 int
+@f LANGUAGE int
+@f LEXI int
+@f LINE_NUMBER int
+@f MEM int
+@f NAME_INFO int
+@f NAME_TYPE int
+@f OPEN_FILE int
+@f PARAMS int
+@f PARGS int
+@f PARSE_PARAMS int
+@f PARSING_MODE int
+@f PART int
+@f PRECEDENCE int
+@f PROGRAM int
+@f RESERVED_WORD int
+@f S_MAP int
+@f SEQUENCES int
+@f SRTN void
+@f SPEC int
+@f STMT_LBL int
+@f STY_TYPE int
+@f TRUNC int
+@f TYPE int
+@f VAL int
+@f WORD_TYPE int
+@f X_FCN int
+@f XIDS int
+@f boolean char
+@f eight_bits char
+@f name_pointer char
+@f outer_char char
+@f scrap_pointer int
+@f sixteen_bits char
+@f stack_pointer int
+@f text_pointer char
+@f Token char

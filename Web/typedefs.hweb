@@ -1,0 +1,444 @@
+
+
+@I formats.hweb
+
+@ The actual names of the processors.
+
+@m TANGLE "FTANGLE"
+@m WEAVE "FWEAVE"
+
+
+@ Some compilers can't handle files as large as \.{ftangle} or \.{fweave}.
+Therefore, if the C~preprocessor macros |part| are defined from the
+compiler's command line to have the value~1, 2, or~3, the other parts of
+those files are commented out.
+
+@<Possibly split into parts@>=
+
+#ifndef part
+	#define part 0 /* Standard value, when the files aren't split. */
+#else
+	#if(part != 1 && part != 2 && part != 3)
+		#define part 1 /* Should issue error message here. */
+	#endif
+#endif /* |part| */
+
+
+@
+@F EXTERN extern
+
+@f IN_TANGLE extern
+@f IN_COMMON extern
+@f IN_RATFOR extern
+@f IN_EVAL extern
+@f IN_MACS extern
+@f IN_PROD extern
+@f IN_STYLE extern
+
+
+@f SET $_EXPR
+@f CSET $_EXPR
+
+@<Possibly split...@>=
+
+#if(part == 0 || part == 1)
+	#define part1_or_extern
+	#define SET1(stuff) @e = stuff
+	#define TSET1(stuff) @e = stuff
+#else
+	#define part1_or_extern extern
+	#define SET1(stuff)
+	#define TSET1(stuff)
+#endif
+
+
+@ Here's a somewhat sophisticated use of \WEB\ macros.
+@f WHILE while
+@f ptr_equals $EXPR_
+@m OCTAL0(n) $ASCII(#'n) /* Single-quote the argument and send to
+				\.{\$ASCII}. */
+@m OCTAL(n) (eight_bits)OCTAL0(\@&n) /* Make octal constant. */
+@m HEX(n) (eight_bits)OCTAL0(\@&x##n) /* Make hex constant. */
+
+
+@
+@m IS_NEXT(c0,keyword)
+{
+eight_bits c;
+
+if((c=next_byte()) != c0)
+	{
+	didnt_expand(c0,c,#*keyword);
+	return;
+	}
+}
+
+@m IS_NEXT_PAREN(keyword) IS_NEXT('(',keyword)
+
+
+@
+@<Specific language cases@>=
+
+case begin_C:
+case begin_RATFOR:
+case begin_FORTRAN:
+case begin_LITERAL@: @;
+
+
+
+@
+@f @<|ASCII| cases for |C|@> case
+@f @<|ASCII| cases for |RATFOR|@> case
+@f @<|ASCII| cases for |FORTRAN|@> case
+@f @<|ASCII| cases for |TEX|@> case
+@f @<|ASCII| cases for |LITERAL|@> case
+@<|ASCII| cases for |C|@>=
+case @'c'@: @;
+
+@ @<|ASCII| cases for |RATFOR|@>=
+case @'r'@: @;
+
+@ @<|ASCII| cases for |FORTRAN|@>=
+case @'n'@: @;
+
+@ @<|ASCII| cases for |TEX|@>=
+case @'x'@: @;
+
+@ @<|ASCII| cases for |LITERAL|@>=
+case @'v'@: @;
+
+
+
+@
+@f @<|outer_char| cases for |C|@> case
+@f @<|outer_char| cases for |RATFOR|@> case
+@f @<|outer_char| cases for |FORTRAN|@> case
+@f @<|outer_char| cases for |TEX|@> case
+@f @<|outer_char| cases for |LITERAL|@> case
+@<|outer_char| cases for |C|@>=
+case 'c'@:  @;
+
+@ @<|outer_char| cases for |RATFOR|@>=
+case 'r'@:  @;
+
+@ @<|outer_char| cases for |FORTRAN|@>=
+case 'n'@:  @;
+
+@ @<|outer_char| cases for |TEX|@>=
+case 'x'@:  @;
+
+@ @<|outer_char| cases for |LITERAL|@>=
+case 'v'@:  @;
+
+
+
+@ Read the basic language letter and set the language.  We must check for
+dialects before we call |opt_args| because the first thing that does is
+to set the language based on the values of the dialect flags.
+
+@<Set |language|@>=
+{
+ASCII l = *loc++; /* The basic language letter. */
+
+switch(l)
+	{
+   @<|ASCII| cases for |C|@>:
+	Cpp = BOOLEAN(*loc == @'+');
+	break;
+
+   @<|ASCII| cases for |RATFOR|@>:
+   @<|ASCII| cases for |FORTRAN|@>:
+	Fortran88 = BOOLEAN(*loc == @'9');
+	break;
+
+   @<|ASCII| cases for |LITERAL|@>:
+   @<|ASCII| cases for |TEX|@>:
+	break;
+
+   default:
+	err_print(C,"! Invalid language command `@@L%c' ignored",XCHR(l));
+	break;
+	}
+
+opt_args(l); /* Set the language, and parse optional arguments after
+		language command. */
+}
+
+
+@
+@m UPPER(var) smin0(MAX_VAL(ABBREV(var))),ABBREV(var)
+
+
+@ A simple error message with no arguments is used frequently.  Error
+messages now carry an indication of their origin.
+
+@m err_print(origin,msg,...)
+	err0_print(ERR_##origin,OC(msg),#0,#.)
+@m err_print_(origin,msg,...)
+	err0_print(ERR_##origin,OC(msg),-1-#0,#.)
+@m ERR_PRINT(origin,msg) err_print(origin,msg)
+
+@m MACRO_ERR(msg,trail,...)
+	macro_err(OC(msg),trail,#.)
+
+
+@ FORTRAN uses constructions such as~|@r .true.| or~|@r .and.|, which we
+have to parse separately.
+
+@m PREDEFINED_DOTS 14 /* \# of pre-initialized entries in the |dots| table. */
+
+
+@
+@f HUGE_FCN_PTR huge
+@<Initialize |mod_info| and |Language|@>=
+{
+/* We allocate |MOD_INFO| structures only for module names, not for
+	identifiers. */
+node->mod_info = GET_MEM("mod_info",1,MOD_INFO);
+
+node->mod_info->Ilk = expr;
+node->mod_info->params = params; /* Freeze parameters at this point in time. */
+node->mod_info->params.uses = 0; /* Uses are counted in |new_mod_xref|. */
+
+node->Language = (boolean)language; /* Redundant. */
+}
+
+
+@ For initializing |ccodes|.
+
+@m INI_CCODE(defaults,code)
+	ini_ccode((outer_char *)#code,(outer_char *)defaults,code)
+		/* We use the same keyword name as the \FWEB\ code. */
+
+@m REASSIGNABLE(d,c) INI_CCODE(d,c) /* For stuff that must later be
+reassigned for 	\FTANGLE. */
+
+@m SAME_CCODE(d,c) INI_CCODE(d,c)
+
+
+@ Macros to guard against overflow during |sprintf| or |vprintf|. The function
+|nsprintf| is defined in \.{common.web} to handle non-ANSI return values from
+|sprintf|.
+
+@m NSPRINTF(buf_name,fmt,...)
+	nsprintf(buf_name,OC(fmt),#0,#.)
+@m NVSPRINTF(buf_name,fmt,...)
+	nvsprintf(buf_name,OC(fmt),#0,#.)
+
+@m SPRINTF(nmax,buf_name,args)
+	if(NSPRINTF(buf_name,args) >= (int)(nmax)) OVERFLW(#buf_name,"")@;
+
+@m VSPRINTF(nmax,buf_name,args)
+	if(NVSPRINTF(buf_name,args) >= (int)(nmax)) OVERFLW(#buf_name,"")@;
+
+@m vsprintf_(out,fmt,arg_ptr)
+	$P if(NUM_VA_ARGS == 1)
+		{
+		char *fmt0 = va_arg(arg_ptr,char *);
+
+		va_arg(arg_ptr,int); /* Skip over~$n$. */
+		vsprintf((char *)out,fmt0,arg_ptr);
+		}
+	$P else
+		vsprintf(out,fmt,arg_ptr);
+	$P endif
+
+@m vprintf_(fmt,arg_ptr)
+	$P if(NUM_VA_ARGS == 1)
+		{
+		char *fmt0 = va_arg(arg_ptr,char *);
+
+		va_arg(arg_ptr,int);
+		vprintf(out,fmt0,arg_ptr);
+		}
+	$P else
+		vprintf(fmt,arg_ptr);
+	$P endif
+
+@f VA_ARGS $_EXPR
+@f VA_DECL int
+@f VA_LIST int
+
+
+@ Abbreviations for buffer allocations.
+
+@m ABBREV(name) V_##name
+
+@m V_buf_size "bs"
+@m V_C_buf_size "cb"
+@m V_cmd_fsize "cf"
+@m V_cmd_size "cg"
+@m V_delta_dots "d"
+@m V_line_length "ll"
+@m V_longest_name "ln"
+@m V_max_bytes "b"
+@m V_dtexts_max "dx"
+@m V_max_dtoks "dt"
+@m V_max_expr_chars "lx"
+@m V_max_lbls "lb"
+@m V_max_margs "ma"
+@m V_max_ifiles "if"
+@m V_max_include_depth "id"
+@m V_max_keywords "rk"
+@m V_max_modules "m"
+@m V_max_names "n"
+@m V_max_refs "r"
+@m V_max_scraps "s"
+@m V_max_texts "x"
+@m V_max_toks_t "tt"
+@m V_max_toks_w "tw"
+@m V_mbuf_size "mb"
+@m V_op_entries "op"
+@m V_num_files "nf"
+@m V_sbuf_len "sb"
+@m V_stck_size_t "kt"
+@m V_stck_size_w "kw"
+@m V_X_buf_size "xb"
+
+
+@
+@f X_FCN void
+@m RAT_ERROR(err_type, msg, n, ...)
+	RAT_error(err_type, OC(msg), n, #.)
+@m CONFUSION(where, fmt0, ...)
+	confusion(OC(where), OC(fmt0), #.)
+@m FATAL(origin, msg1, fmt, ...)
+	fatal(ERR_##origin, OC(msg1), OC(fmt), #.)
+
+
+@ For~C, getting an identifier is simple. For FORTRAN, we treat \&{format}
+statements much like C's preprocessor statement. However, there's no
+special character to start a \&{format} line; we have to actually check the
+identifier. Furthermore, it looks nicer if constructions such as \\{f6.2}
+are treated as one identifier, so when we're inside a \&{format} statement
+we allow the period to be an acceptable (internal) character for an
+identifier.
+
+@<Get an identifier@>=
+{
+IN_COMMON ASCII HUGE *pformat, HUGE *pdata;
+
+get_identifier:
+	@<Make |id_first| and |id_loc| point to the identifier@>@;
+
+if(FORTRAN_LIKE(language))
+	{
+	if(web_strcmp(pformat,pformat+6,id_first,id_loc) == EQUAL)
+		{ /* Raise special flag to say we're inside a |@r format|
+statement. */
+		in_format = YES;
+		return begin_format_stmt;
+		}
+	else if(program==weave)
+		{
+		if(web_strcmp(pdata,pdata+4,id_first,id_loc) == EQUAL)
+			{ /* Inside a |@r data| statement. */
+			in_data = YES;
+			return identifier;
+			}
+		else if(at_beginning && *loc==':' &&
+				!is_in(non_labels,id_first,id_loc))
+			return stmt_label;
+		}
+	}
+
+if(is_include_like())
+	sharp_include_line = YES;
+
+return identifier;
+}
+
+
+@
+@<Make |id_first|...@>=
+{
+id_first = --loc;
+
+/* Scan over subsequent elements of an identifier. */
+for(++loc; isAlpha(*loc) || isDigit(*loc)
+	|| *loc==@'_' || *loc==@'$' || (in_format && *loc==@'.'); loc++)
+		;
+
+upcoming_kind = BOOLEAN(Fortran88 && (*loc == '"' || *loc == '\'')
+		&& loc[-1] == '_');
+
+id_loc = loc - upcoming_kind;  /* End plus one of the identifier.  If a
+	kind subscript is coming up, don't include the underscore. */
+}
+
+
+@ Here we obtain the file name after an \.{@@o}~command.
+@<Scan the output file name@>=
+{
+while(*loc == ' ' || *loc == tab_mark)
+	{
+	loc++;
+	if(loc > limit) return ignore;
+	}
+
+id_first = loc;
+while(*loc != ' ' && *loc != tab_mark) loc++; /* Absorb file name. */
+id_loc = loc;
+if(*id_first == '"') id_first++;
+if(*(id_loc-1) == '"') id_loc--;
+if(id_loc - id_first >= MAX_FILE_NAME_LENGTH)
+	{
+	err_print(T,"Output file name too long; allowed only %d characters",
+		MAX_FILE_NAME_LENGTH - 1);
+	id_loc = id_first + MAX_FILE_NAME_LENGTH - 1;
+	}
+}
+
+
+@ The preprocessor commands are piggy-backed on the \.{@@\#} command. If
+there's text after that command, then we hunt through the above table.
+If we find a processor command, any subsequent white space is skipped.
+(This was added for nuweb mode, which otherwise takes each blank one at a
+time.)  Otherwise, it's a |big_line_break|.
+
+@<Process possible preprocessor command@>=
+{
+boolean mcode;
+
+*limit = ' '; /* Terminator for identifier search. */
+id_first = loc;
+
+while(isAlpha(*loc))
+	loc++; /* Find end of identifier. */
+
+if((mcode=is_mcmd(mcmds,id_first,loc)) != 0)
+	{
+	while(loc < limit && (*loc == @' ' || *loc == tab_mark))
+		loc++;
+
+	#ifdef _FWEAVE_h
+		defd_switch = NO; /* Don't let \.{@@[} propagate. */
+	#endif
+
+	return mcode;
+	}
+
+loc = id_first; /* Failed to recognize preprocessor command. */
+}
+
+
+@
+@<Glob...@>=
+
+/* The shorter length here is primarily to keep the stack under control.
+Now that |N_MSGBUF| is used  dynamically, maybe this statement isn't
+necessary. */
+#ifdef SMALL_MEMORY
+	#define N_MSGBUF 2000
+#else
+	#define N_MSGBUF 10000
+#endif
+
+
+
+@
+@<Include...@>=
+#include "typedefs.h"
+
+
+

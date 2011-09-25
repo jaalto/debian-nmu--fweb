@@ -1,0 +1,124 @@
+@z --- ccodes.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ Here is a list of the category codes that scraps can have.
+
+@U expr
+@D expr 1 // An expression, including perhaps a single identifier.
+
+@U unop
+@D unop 2 // A unary operator.
+
+@U binop
+@D binop 3 // A binary operator.
+
+@D unorbinop 4
+  // An operator that can be unary or binary, depending on context.
+@D cast 5 // A cast.
+@D question 6 // A question mark and possibly the expressions flanking it.
+@D lbrace 7 // A left brace.
+@D rbrace 8 // A right brace.
+@D decl_hd 9 // An incomplete declaration.
+@D comma 10 // A comma.
+@D lpar 11 // A left parenthesis.
+@D rpar 12 // A right parenthesis.
+@D lbracket 13 // A left bracket.
+@D rbracket 14 // A right bracket.
+@D new_like 17 // \Cpp: |new|, |delete|.
+@D exp_op 18 // Exponentiation.
+
+@D max_math 19 
+	// Category codes less than this can only be printed in math mode.
+
+@D struct_hd 21 // The beginning of a structure specifier.
+@D decl 20 // A complete declaration.
+@D label 22 // Fortran statement label.
+@D stmt 23 // A complete statement.
+@D functn 24 // A complete function.
+@D fn_decl 25 // A function declarator.
+@D else_like 26 // The beginning of a conditional.
+@D semi 27 // A semicolon.
+@D colon 28 // A colon.
+@D tag 29 // A statement label.
+@D if_hd 30 // The beginning of a conditional.
+@D common_hd 31
+@D read_hd 32
+@D slashes 33
+@D implicit_hd 34
+@D lproc 35 // Begins a preprocessor command.
+@D rproc 36 // Ends a preprocessor command.
+@D ignore_scrap 37 // A full preprocessor command.
+@D for_hd 38
+@D newline 39
+@D language_scrap 40 // So we can change languages during translation.
+
+@D do_like 55 // \&{do}.
+@D for_like 56 // \&{for}, \&{switch}.
+@D if_like 57 // \&{if}, \&{while},  \&{ifdef}, \&{ifndef}, \&{endif}.
+@D int_like 58 // \&{int}, \&{char}, \&{extern}, \dots.
+@D case_like 59 // \&{return}, \&{goto}, \&{break}, \&{continue}.
+@D sizeof_like 60 // \&{sizeof}.
+@D struct_like 61 // \&{struct}.
+@D typedef_like 62 // \&{typedef}.
+@D define_like 63 // \&{define}.
+@D common_like 64 // \&{common}, \&{save}, \&{namelist} . 
+@D read_like 65 /* \&{read}, \&{write}, \&{print}, \&{backspace},
+	\&{rewind}, \&{open}, \&{close}, \&{endfile}, \&{inquire}, \&{decode},
+	\&{encode}.  */
+@D entry_like 66 // \&{entry} .
+@D implicit_like 67 // \&{implicit}.
+@D assign_like 68 // \&{assign}.
+@D built_in 69 /* \&{changequote}, \&{define}, \&{divert}, \&{eval},
+	\&{ifdef}, \&{ifdef}, \&{incr}, \&{len}, \&{undefine}, \&{undivert}. */
+@D Rdo_like 70 // \Ratfor\ \&{do}.
+@D endif_like 71 // \&{endif}, \&{enddo}.
+@D end_like 72 // \&{end}.
+@D END_like 73
+@D go_like 74 // \&{go}.
+@D no_order 75 // \&{include}.
+@D until_like 76 // \&{until}.
+@D IF_like 77 
+@D IF_top 78
+@D else_hd 79
+@D ELSE_like 80
+@D space 81 // For C~preprocessor.
+@D LPROC 82
+@D UNOP 83 // ``\.{{\it unop}\ }''.
+@D BINOP 84 // ``\.{\ {\it binop}\ }''.
+@D COMMA 85 // ``\.{\ {\it comma}\ }''.
+@D _EXPR 86 // ``\.{\ {\it expr}}''.
+@D _EXPR_ 87 // ``\.{\ {\it expr}\ }''.
+@D EXPR_ 88 // ''\.{{\it expr}\ }''.
+@D Decl_hd 89
+@D key_wd 90 // May be unused now.
+@D program_like 91 // |@r program|, |@r subroutine|, |@r function|.
+@D CASE_like 92
+@D modifier 93 // |const|, |volatile|.
+@D class_like 94 // \Cpp: |class|.
+@D op_like 95 // \Cpp: |operator|.
+@D proc_like 97 // \Fortran-90: |@r procedure|.
+@D private_like 98 // \Fortran-90: |@r private|, |@r public|, |@r sequence|.
+@D slash_like 99 // \Fortran: slash in |@r data| statement.
+@D fcn_hd 100 // \Fortran: Beginning of function.
+@D END_stmt 101 // \Fortran: |@r end;|.
+@D huge_like 102 // For |huge|.
+@D imp_reserved 103 // The result of~\.{@@`}.
+@D extern_like 104 // |extern|.
+@D while_do 105 // |while| after |do|.
+@D template 106 // |@c++ template|
+@D langle 107 // A '\.<'.
+@D tstart 108 // The '\.<' beginning a template list.
+@D tlist 109 // |@c++ int<int, int>|
+@D rangle 110 // A '\.>'.
+@D namespace 111 // |@c++ namespace|
+@D virtual 112 // |@c++ virtual|
+@D reference 113 // |@c++ int& ref;|
+@D kill_newlines 114 // \.{@@s}
+
+@A
+@e@;

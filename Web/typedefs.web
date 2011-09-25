@@ -1,0 +1,2443 @@
+@z --- typedefs.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@Lv[-Tv] @% This file can't be processed by \FWEAVE\ in it's present form!
+
+@* COMMON DEFINITIONS and TYPEDEFS. Here are definitions and typedefs
+common to all of \.{common.web}, \.{tangle.web}, and \.{weave.web}.
+
+@a
+@o typedefs.hweb
+@<Macro definitions@>@;
+
+@ Write a header at the top of \.{typedefs.h}.
+@a
+/* Created automatically from typedefs.web. */
+#include "os.h"
+
+@ The debug mode includes some extra code, but it probably doesn't slow
+things down too much.
+
+@d DEBUG 1
+
+@<Mac...@>=
+@@I formats.hweb
+
+@@ The actual names of the processors.
+
+@@m TANGLE "FTANGLE"
+@@m WEAVE "FWEAVE"
+
+@ 
+@<Mac...@>=
+@@ Some compilers can't handle files as large as \.{ftangle} or \.{fweave}.
+Therefore, if the C~preprocessor macros |part| are defined from the
+compiler's command line to have the value~1, 2, or~3, the other parts of
+those files are commented out.
+
+@@<Possibly split into parts@@>=
+
+#ifndef part
+	#define part 0 /* Standard value, when the files aren't split. */
+#else
+	#if(part != 1 && part != 2 && part != 3)
+		#define part 1 /* Should issue error message here. */
+	#endif
+#endif /* |part| */
+
+@ Now we have macros that ensure that stuff needed for \FTANGLE\ or \FWEAVE\
+is defined and allocated in only one place.
+
+@f EXTERN extern
+
+@f com $_COMMA_
+@D com ,
+
+@a
+
+#ifdef _FWEB_h
+	#define EXTERN part1_or_extern /* This is further redefined below,
+				depending on the setting of |part|. */
+	#define SET SET1
+#else
+	#define EXTERN extern
+	#define SET(stuff)
+#endif
+
+@
+@<Mac...@>=
+@@
+@@F EXTERN extern
+
+@@f IN_TANGLE extern
+@@f IN_COMMON extern
+@@f IN_RATFOR extern
+@@f IN_EVAL extern
+@@f IN_MACS extern
+@@f IN_PROD extern
+@@f IN_STYLE extern
+
+
+@@f SET $_EXPR
+@@f CSET $_EXPR
+
+@@<Possibly split...@@>=
+
+#if(part == 0 || part == 1)
+	#define part1_or_extern 
+	#define SET1(stuff) @@e = stuff
+	#define TSET1(stuff) @@e = stuff
+#else 
+	#define part1_or_extern extern
+	#define SET1(stuff)
+	#define TSET1(stuff)
+#endif
+
+@ Next, we have some macros to help us allocate and define stuff in just one
+place. The philosophy here is that there should be no explicit |extern|
+statements; they should be replaced by something like |IN_COMMON| to remind
+one exactly where that variable is defined.
+
+@f IN_TANGLE extern
+@f IN_COMMON extern
+@f IN_RATFOR extern
+@f IN_EVAL extern
+@f IN_MACS extern
+@f IN_PROD extern
+@f IN_STYLE extern
+
+@f SET $_EXPR
+@f CSET $_EXPR
+
+@a
+
+#ifdef _FTANGLE_h
+	#define IN_TANGLE part1_or_extern
+	#define TSET TSET1
+#else
+	#define IN_TANGLE extern
+	#define TSET(stuff)
+#endif /* |_TANGLE_h| */
+
+#ifdef _COMMON_h
+	#define IN_COMMON part1_or_extern
+	#define CSET SET1
+#else
+	#define IN_COMMON extern
+	#define CSET(stuff)
+#endif /* |_COMMON_h| */
+
+#ifdef _PROD_h
+	#define IN_PROD part1_or_extern
+	#define PSET SET1
+#else
+	#define IN_PROD extern
+	#define PSET(stuff)
+#endif /* |_PROD_h| */
+
+#ifdef _RATFOR_h
+	#define IN_RATFOR part1_or_extern
+	#define RSET SET1
+#else
+	#define IN_RATFOR extern
+	#define RSET(stuff)
+#endif /* |_RATFOR_h| */
+
+#ifdef _EVAL_h
+	#define IN_EVAL
+	#define ESET(stuff) = stuff
+#else
+	#define IN_EVAL extern
+	#define ESET(stuff)
+#endif /* |_EVAL_h| */
+
+#ifdef _MACS_h
+	#define IN_MACS
+#else
+	#define IN_MACS extern
+#endif /* |_MACS_h| */
+
+#ifdef _STYLE_h
+	#define IN_STYLE
+	#define SSET(stuff) = stuff
+#else
+	#define IN_STYLE extern
+	#define SSET(stuff)
+#endif /* |_STYLE_h| */
+
+@ We have an enumerated type for the kind of machine.
+
+@<Unused@>=
+
+@#if 0
+typedef enum{Unknown,Apollo,Dsu,IBMPc,Mac,Misc,Sgi,Sun,Vax} MACHINE;
+
+IN_COMMON MACHINE Machine
+@#ifdef _COMMON_
+  =
+	@#if APOLLO
+		Apollo	/* Apollo/UNIX */
+	@#elif DSU
+		Dsu	/* DECstation/ULTRIX */
+	@#elif IBMPC
+		IBMPc	/* IBM-PC/DOS */
+	@#elif MAC
+		Mac	/* Macintosh */
+	@#elif MISC
+		Misc	/* Vanilla */
+	@#elif SGI
+		Sgi	/* Silicon Graphics/IRIX */
+	@#elif SUN
+		Sun	/* SunOS/UNIX */
+	@#elif VAX
+		Vax	/* VAX/VMS */
+	@#else
+		Unknown
+	@#endif /* |APOLLO| */
+@#endif /* |_COMMON_| */
+;
+@#endif
+
+@ Various miscellaneous definitions, and the fundamental typedefs.
+
+/* True and false. */
+@D YES 1
+@D NO 0
+
+/* Infinite loop. */
+@D WHILE() for(;;) /* Use ``|for(;;)|'' instead of ``|while(1)|'' to avoid
+			warnings from Microsoft compiler. */
+@f WHILE while
+
+/* Minima and maxima. */
+@D MAX(a,b) ((a)>(b) ? (a) : (b))
+@D MIN(a,b) ((a)<(b) ? (a) : (b))
+
+@d SAVE_MACRO(text) save_macro(OC("m!"),(outer_char *)text)
+	/* Note that this protects the macros against redefinition. */
+@d CHK_ARGS(name,num) chk_args(OC(name),num,n,pargs) 
+	/* Right \# of arguments? */
+
+@D tab_mark @'\t' /* The |ASCII| tab. */
+
+/* Subtraction of huge pointers; needed for pc's. We first cast to |long|,
+then to the final target type. */
+@d PTR_DIFF(type,p,q) ((type)(long)((p) - (q)))
+@d SUB_PTRS(p,q) PTR_DIFF(unsigned long,p,q) /* Used in the statistics
+						output. */
+
+/* Here are some macros to determine the identifier number in the name
+directory. */ 
+@d ID_NUM_ptr(ptr,start,end) ID_NUM0(ptr = @e,start,end) /* Set a
+	pointer as well as the number. */
+@d ID_NUM(start,end) ID_NUM0(DUMMY,start,end) /* Just the number. */
+@d DUMMY /* This kludge for an empty argument shouldn't be necessary, but
+	Microsoft didn't like the construction |ID_NUM0(,start,end)|. */
+
+/* Set both a pointer and the number. */
+@f ptr_equals $EXPR_
+@d ID_NUM0(ptr_equals,start,end) PTR_DIFF(sixteen_bits,
+	(ptr_equals id_lookup(start,end,0)),name_dir)
+
+/* Terminate a string. */
+@d TERMINATE(p,offset) *(p+offset) = '\0'
+
+@d BOOLEAN(b) ((boolean)(b)) /* Explicit cast to make some compilers happy. */
+
+@d CHOICE(flag,yes,no) (((int)(flag)) ? yes : no)
+
+@
+
+@m OCTAL0(n)$ASCII(#'n) 
+@m OCTAL(n)(eight_bits)OCTAL0(\@&n) /* Make octal constant. */
+
+@<Mac...@>=
+@@ Here's a somewhat sophisticated use of \WEB\ macros.
+@@f WHILE while
+@@f ptr_equals $EXPR_
+@@m @!OCTAL0(n) @!$ASCII(#'n) /* Single-quote the argument and send to
+				\.{\@!$ASCII}. */ 
+@@m @!OCTAL(n) (eight_bits)@!OCTAL0(\@@&n) /* Make octal constant. */
+@@m @!HEX(n) (eight_bits)@!OCTAL0(\@@&x##n) /* Make hex constant. */
+
+@
+@a
+
+typedef unsigned char eight_bits; /* The fundamental single-byte token. If
+	your machine does not support |unsigned char| you should change 
+	the definition of |eight_bits| to |unsigned short|. */ 
+@^system dependencies@>
+
+typedef unsigned short sixteen_bits; /* Identifiers and similar things take
+					up two bytes. */
+
+typedef unsigned char outer_char; /* Type of characters outside \.{WEB}. */
+
+typedef eight_bits boolean; /* The logical type. (\CWEB\ had |short| here.
+	Indeed, some compilers give warnings about type conversions because the
+	result of logical operations is an |int|, not a |char|.) */
+
+typedef unsigned long BUF_SIZE; /* Size of dynamic arrays. */
+
+typedef long STMT_LBL; /* \Fortran\ statement label.  (Negative is allowed.) */
+
+typedef unsigned short LINE_NUMBER; /* Line number of \WEB\ source or output.*/
+
+typedef long CASE_TYPE; /* The type for |case| values in \Ratfor.  */
+
+/* For |web_strcmp|. {\bfit Web's convention differs from C's}!
+	If you don't pay attention to this, you'll get bugs that are
+	hard to track down. */
+typedef enum {LESS=0, /* first name is lexicographically less than the second*/
+	EQUAL=1, /* the first name is equal to the second */
+	GREATER=2, /* first name is lexicographically greater than the
+second */
+	PREFIX=3, /* the first name is a proper prefix of the second */
+	EXTENSION=4} LEXI; /* first name is a proper extension of the
+second. */
+
+@ In certain cases \.{TANGLE} and \.{WEAVE} should do almost, but not
+quite, the same thing.  In these case we've written common code for
+both, differentiating between the two by means of the global variable
+|program|.
+
+@a
+typedef enum {tangle=0,weave=1} PROGRAM; /* The two processors. */
+
+IN_COMMON PROGRAM program;
+
+@ The \FWEB\ version number, and the system name.
+
+@a
+
+IN_COMMON outer_char version[] CSET(VERSION); /* \FWEB\ version number. */
+IN_COMMON outer_char release_date[] CSET(RELEASE_DATE); 
+	/* Release date for this version. */
+IN_COMMON outer_char *the_system, *local_banner; /* Name of the
+	machine/operating system; and a possible additional local banner. */
+
+@ \.{WEAVE} operates in three phases: first it inputs the source file and
+stores cross-reference data, then it inputs the source once again and
+produces the \TeX\ output file, and finally it sorts and outputs the index.
+Similarly, \.{TANGLE} operates in two phases.  The global variable |phase|
+tells which phase we are in.
+
+@a
+
+IN_COMMON short phase CSET(0); /* Which phase are we in? */
+
+@ Especially in \RATFOR, we distinguish between warning and error messages.
+
+@d EAT_AUTO_SEMI {if(auto_semi && next_byte() != @';') BACK_UP@;}
+@d BACK_UP {saved_token = NO; cur_byte -= last_bytes;}
+
+@d NOT_BEFORE OCTAL(177)
+@d NOT_AFTER NOT_BEFORE
+
+@d SAVE_BEFORE(pp,nmax,r_before) save_out(pp,nmax,r_before,NOT_AFTER)
+@d SAVE_AFTER(pp,nmax,r_after) save_out(pp,nmax,NOT_BEFORE,r_after)
+
+@<Mac...@>=
+@@
+@@m IS_NEXT(c0,keyword)
+{
+eight_bits c;
+
+if((c=next_byte()) != c0)
+	{
+	didnt_expand(c0,c,#*keyword);
+	return;
+	}
+}
+
+@@m IS_NEXT_PAREN(keyword) IS_NEXT(@'(',keyword)
+
+@
+@a
+typedef enum {OK,WARNING,ERROR} ERR_TYPE;
+
+@ A major extension to \.{CWEB} is support for the syntaxes of several
+languages. We need to know what language we're dealing with at the moment.
+
+@d NUM_LANGUAGES 8 /* |C|, |RATFOR|, |FORTRAN|, |TEX|, |LITERAL|,
+		|C_PLUS_PLUS|, |RATFOR_90|, |FORTRAN_90| */
+@d NUM_DISTINCT_LANGUAGES (NUM_LANGUAGES-2)
+
+@d GLOBAL_LANGUAGE FORTRAN
+@d global_language global_params.Language /* The language in force at the
+					beginning of each module. */
+
+@d is_C_(Language) (Language==C)
+@d is_RATFOR_(Language) (Language==RATFOR || Language==RATFOR_90)
+@d is_FORTRAN_(Language) (Language==FORTRAN || Language==FORTRAN_90)
+
+@d FORTRAN_LIKE(Language) (is_RATFOR_(Language) || is_FORTRAN_(Language))
+@d FORTRAN90_LIKE(Language) (Language==FORTRAN_90 || Language==RATFOR_90)
+@d C_LIKE(Language) (Language==C || Language==C_PLUS_PLUS)
+
+@d R66 (is_RATFOR_(language) && !Ratfor77) /* Non-expandable \Ratfor;
+obsolete. */
+@d R77 (Ratfor77 && is_RATFOR_(language) && xpn_Ratfor) /* Expandable
+\Ratfor. */
+@d R77_or_F (R77 || is_FORTRAN_(language)) /* Expandable \Ratfor\ or
+\Fortran. */
+
+@d IS_WHITE(a) ((a) == @' ' || (a) == tab_mark)
+
+@d LANGUAGE_CODE(l) OC(lang_codes[lan_num(l)]) /*  String
+	abbreviation for the language name. */
+
+@a
+
+ /* The highest bit sets the basic language. */
+typedef enum
+	{
+	NO_LANGUAGE = 	0,
+
+	C = 		0x1,
+	RATFOR =	0x2,
+	FORTRAN = 	0x4,
+	TEX = 		0x8,
+	LITERAL =	0x10,
+
+	C_PLUS_PLUS =	0x20,
+	RATFOR_90 =	0x40,
+	FORTRAN_90 =	0x80,
+
+	NUWEB_OFF =	0xF0, /* Not a language, but used in |send_single|. */
+	NUWEB_ON =	0xF1
+	} LANGUAGE;
+
+IN_COMMON LANGUAGE cmd_language CSET(NO_LANGUAGE);/* To check against
+override. */
+IN_COMMON boolean column_mode CSET(NO);
+
+/* These names are used for error messages from the processors. */
+IN_COMMON CONST char HUGE *languages[NUM_LANGUAGES] 
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {"C","RATFOR","FORTRAN","TEX","VERBATIM",
+	  "C++","RATFOR--90","FORTRAN--90"}
+#endif /* |part == 1| */
+#endif /* |defined _COMMON_h| */
+;
+
+/* The following are used with \.{\\Winfo}. */
+IN_COMMON CONST char HUGE *Xlanguages[NUM_LANGUAGES] 
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {"C","\\Ratfor","\\Fortran","\\TeX","VERBATIM",
+	  "\\Cpp","\\Ratfor--90","\\Fortran--90"}
+#endif /* |part == 1| */
+#endif /* |defined _COMMON_h| */
+;
+
+/* These abbreviations are short-hands for the language---they are used,
+for example, in the index. */
+IN_COMMON CONST char HUGE *lang_codes[NUM_LANGUAGES] 
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {"C","R","N","X","V","C++","R90","N90"}
+#endif
+#endif
+;
+
+@ The following sets the delimiters for the module number stuff in the
+code output.
+
+@a
+
+IN_COMMON outer_char begin_comment_char[NUM_LANGUAGES]
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+ 	= {'/','#','C','%','/', '/','#','C'}
+#endif
+#endif
+; /* |C|, |RATFOR|, |FORTRAN|, |TEX|, |LITERAL|, \dots. */
+
+IN_COMMON CONST outer_char end_comment_char[NUM_LANGUAGES]
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {'/',' ',' ',' ','/', '/',' ',' '}
+#endif
+#endif
+;
+
+@
+@<Mac...@>=
+@@
+@@<Specific language cases@@>=
+
+case begin_C:
+case begin_RATFOR:
+case begin_FORTRAN:
+case begin_LITERAL@@: @@;
+
+@ The following readably abbreviate the control letters for language
+switches.  These are just the basic languages; dialects are set by the
+optional arguments.  We need to worry about the distinction between |ASCII|
+and |outer_char|.
+
+@<Mac...@>=
+
+@@ 
+@@f @@<|ASCII| cases for |C|@@> case
+@@f @@<|ASCII| cases for |RATFOR|@@> case
+@@f @@<|ASCII| cases for |FORTRAN|@@> case
+@@f @@<|ASCII| cases for |TEX|@@> case
+@@f @@<|ASCII| cases for |LITERAL|@@> case
+@@<|ASCII| cases for |C|@@>=
+case @@'c'@@: @@;
+
+@@ @@<|ASCII| cases for |RATFOR|@@>=
+case @@'r'@@: @@;
+
+@@ @@<|ASCII| cases for |FORTRAN|@@>=
+case @@'n'@@: @@;
+
+@@ @@<|ASCII| cases for |TEX|@@>=
+case @@'x'@@: @@;
+
+@@ @@<|ASCII| cases for |LITERAL|@@>=
+case @@'v'@@: @@;
+
+@ Same stuff for |outer_char|.
+
+@<Mac...@>=
+
+@@ 
+@@f @@<|outer_char| cases for |C|@@> case
+@@f @@<|outer_char| cases for |RATFOR|@@> case
+@@f @@<|outer_char| cases for |FORTRAN|@@> case
+@@f @@<|outer_char| cases for |TEX|@@> case
+@@f @@<|outer_char| cases for |LITERAL|@@> case
+@@<|outer_char| cases for |C|@@>=
+case 'c'@@:  @@;
+
+@@ @@<|outer_char| cases for |RATFOR|@@>=
+case 'r'@@:  @@;
+
+@@ @@<|outer_char| cases for |FORTRAN|@@>=
+case 'n'@@:  @@;
+
+@@ @@<|outer_char| cases for |TEX|@@>=
+case 'x'@@:  @@;
+
+@@ @@<|outer_char| cases for |LITERAL|@@>=
+case 'v'@@:  @@;
+
+@ 
+
+@<Mac...@>=
+
+@@ Read the basic language letter and set the language.  We must check for
+dialects before we call |opt_args| because the first thing that does is
+to set the language based on the values of the dialect flags. 
+
+@@<Set |language|@@>=
+{
+ASCII l = *loc++; /* The basic language letter. */
+
+switch(l)
+	{
+   @@<|ASCII| cases for |C|@@>:
+	Cpp = BOOLEAN(*loc == @@'+');
+	break;
+
+   @@<|ASCII| cases for |RATFOR|@@>:
+   @@<|ASCII| cases for |FORTRAN|@@>:
+	Fortran88 = BOOLEAN(*loc == @@'9');
+	break;
+
+   @@<|ASCII| cases for |LITERAL|@@>:
+   @@<|ASCII| cases for |TEX|@@>:
+	break;
+
+   default:
+	err_print(C,"! Invalid language command `@@@@L%c' ignored",XCHR(l));
+	break;
+	}
+
+opt_args(l); /* Set the language, and parse optional arguments after
+		language command. */ 
+}
+
+@ Dynamic memory allocation.
+
+@d SET_VAL(val,abbrev) val = find_abbrev((outer_char *)abbrev)->nunits
+@d MAX_VAL(abbrev) find_abbrev((outer_char *)abbrev)->max
+
+@
+@<Mac...@>=
+@@ 
+@@m UPPER(var) smin0(MAX_VAL(ABBREV(var))),ABBREV(var)
+
+@
+@a
+
+typedef struct
+	{
+	outer_char abbrev[3]; /* Two-character abbreviation for the
+variable. */
+	short bytes;	/* Number of bytes in one unit. */
+	BUF_SIZE min,	/* Minimum possible value. */
+		nunits, /* How many units to allocate, or the default
+value. */
+		max; 	/* Maximum possible value. */
+	} MEM;
+
+@ Masks for \FWEAVE\ stuff that may not want to be printed.
+
+@a
+
+typedef struct
+	{
+	unsigned@/
+		formats:1, Formats:1, /* Print \.{@@f}, \.{@@F}. */
+		limbo:1, /* Print \.{@@l}. */
+		macros:1, /* Print \.{@@m}. */
+		outer_macros:1, /* Print \.{@@d}. */
+		v:1, /* Print \.{@@v}. */
+		w:1 /* Print \.{@@w}. */
+		;
+	} DEFN_MASK;
+
+@ A number of unrelated parameters need to be saved simultaneously at
+various points. Thus, we collect them into a structure, |params|. Since we
+also need to be able to refer to them effectively, we use macro definitions
+to help us.
+
+@d LN lan_num
+
+@D language params.Language
+@D language_index params.Language_index
+@D language_num params.Language_num
+
+@D in_format params.In_format
+@D in_data params.In_data
+@D intermingle params.Intermingle
+@%@D sharp_include_line params.Include_line
+
+@D active_brackets params.Active_brackets
+@D all_cmnts_verbatim params.All_cmnts_verbatim
+@D all_includes params.All_includes
+@D auto_app_semi params.Auto_app_semi
+@D auto_semi params.Auto_semi[language_num]
+@D auto_line params.Auto_line
+@D auto_pseudo_semis params.Auto_pseudo_semis[language_num]
+@D beeps params.Beeps
+@D block_nums params.Block_nums[language_num]
+@D bslash_continued_strings params.Bslash_continued_strings
+@D color_mode params.Color_mode
+@D chk_ifelse params.Chk_ifelse
+@D chk_stmts params.Chk_stmts
+@D compare_outfiles params.Compare_outfiles
+@D compound_assignments params.Compound_assignments
+@D Cpp params.CPP
+@D Cpp_comments params.CPP_comments[language_num]
+@D dbg_output params.Dbg_output
+@D deferred_macros params.Deferred_macros
+@D defn_mask params.Defn_mask
+@D dot_constants params.Dot_constants
+@D Fortran88 params.ForTran88
+@D Fortran_label params.Fortran_Label
+@D free_form_input params.Free_form_input[language_num]
+@D ignore_C params.Ignore_C
+@D in_escape params.In_escape[language_num]
+@D index_hidden params.Index_hidden
+@D index_one params.Index_one
+@D input_macros params.Input_macros
+@D keep_trailing_comments params.Keep_trailing_comments
+@D lc_keywords params.Lc_keywords
+@D line_info params.Line_info
+@D lowercase_tokens params.Lowercase_tokens
+@D m4 params.M4
+@D makeindex params.Makeindex
+@D no_xref params.No_xref
+@D number_dos params.Number_dos
+@D nuweb_mode params.Nuweb_mode
+@D overload_ops params.Overload_ops
+@D point_comments params.Point_comments[language_num]
+@D prn_input_lines params.Prn_input_lines
+@D prn_input_addresses params.Prn_input_addresses
+@D prn_contents params.Prn_contents
+@D prn_index params.Prn_index
+@D prn_modules params.Prn_modules
+@D prn_semis params.Prn_semis
+@D prn_version params.Prn_version
+@D quoted_includes params.Quoted_includes
+@D Ratfor77 params.RatFor77
+@D read_iformats params.Read_iformats
+@D redefine_builtins params.Redefine_builtins
+@D redefine_macros params.Redefine_macros
+@D reverse_indices params.Reverse_indices[language_num]
+@D rmv_files params.Rmv_files
+@D skip_ifiles params.Skip_ifiles
+@D skip_includes params.Skip_includes
+@D statistics params.Statistics
+@D subscript_fcns params.Subscript_fcns
+@D suppress_cmds params.Suppress_cmds
+@D TeX_processor params.TeX_Processor
+@D toggle_includes params.Toggle_includes
+@D top_version params.Top_version
+@D translate_ASCII params.Translate_ASCII
+@D translate_brackets params.Translate_brackets
+@D truncate_ids params.Truncate_ids
+@D try_extensions params.Try_extensions
+@D xref_unnamed params.Xref_unnamed
+
+@a
+
+typedef enum {TeX_p,LaTeX_p} TeX_PROCESSOR; /* What to use with \FWEAVE. */
+
+typedef enum
+	{
+	NO_COLOR, ANSI_COLOR, BILEVEL, TRILEVEL, USER_COLORS
+	} COLOR_MODE;
+
+typedef struct
+	{
+	LANGUAGE Language; /* The current language. May be set by encountering
+a module name, or by explicit \.{@@n}, \.{@@r}, or \.{@@c} commands. */
+	short Language_num,Language_index; /* These are set by
+|ini_language|. */
+	short uses; /* Number of times module is used.  Incremented by
+			\FWEAVE\ in \.{@@<Append a module name@@>}. */
+
+boolean@/
+/* Flags for really current state. */
+	In_format, /* Inside a |@@r format| statement. */
+	In_data, /* Inside a |@@r data| statement. */
+	Intermingle, /* Inside something like a |@@r data|
+statement. */
+	Include_line, /* Inside an \&{include} line. */
+/* Options flags.  Some of these apply to all languages, others differ from
+language to language and are thus arrays. */
+	Active_brackets, /* Special array handling? */
+	All_cmnts_verbatim, /* Should \.{TANGLE} copy all comments? . */
+	All_includes, /* Cross-reference all include files? */
+	Auto_app_semi, /* For \.{WEAVE}, automatically
+append a pseudo-semi to the end of \.{WEB} macro definitions? */
+	Auto_semi[NUM_LANGUAGES], /* Fill in semicolon at end of source line? */
+	Auto_line, /* Auto-insert line number after \.{@@\%}? */
+	Auto_pseudo_semis[NUM_LANGUAGES], 
+		/* F90 code:  append pseudo-semis, not semis. */
+	Beeps, /* Do we beep the terminal for certain errors? */
+	Block_nums[NUM_LANGUAGES], /* */
+	Bslash_continued_strings, /* Do the continuations of
+strings require a starting backslash? */ 
+	Chk_ifelse, /* Protect parenthesized strings? */
+	Chk_stmts, /* Check statement syntax in \Ratfor? */
+	Compare_outfiles, /* Check new (temporary) vs.\ old output? */
+	Compound_assignments, /* Do we allow things like \.{+=}? */
+	CPP, /* Do we recognize \.{C++}? */
+	CPP_comments[NUM_LANGUAGES], /* Allow short comments? */
+	Dbg_output, /* Print each character fired at output? */
+	Deferred_macros, /* Allow deferred macros? */
+	Dot_constants, /* Recognize dot constants like `\.{.eq.}'? */
+	ForTran88, /* Turn on stuff for Fortran-88? */
+	Fortran_Label, /* Label on same line? */
+	Free_form_input[NUM_LANGUAGES], /* Free-form syntax. */
+	Ignore_C, /* Throw away single \Fortran\ comment lines. */
+	In_escape[NUM_LANGUAGES], /* (|outer_char|) continuation character
+for end-of-lines. */
+	Index_hidden, /* Index skipped include files. */
+	Index_one, /* Index single-character identifiers? */
+	Input_macros, /* Generate the default ``\.{\\input fwebmac}'' line? */
+	Keep_trailing_comments, /* For \TeX, retain comments that don't
+start a line. */
+	Lc_keywords, /* Lower-case \Fortran\ and \Ratfor\ I/O keywords? */
+	Line_info, /* Should \FTANGLE\ print out line information? */ 
+	Lowercase_tokens, /* Output lower-case tokens (\Ratfor). */
+	M4, /* Recognize \.{M4} preprocessor commands? */
+	Makeindex, /* Output \.{makeindex} file? */
+	No_xref, /* Should \.{WEAVE} print an index? */
+	Number_dos, /* */
+	Nuweb_mode, /* Emulate \.{nuweb}? */
+	Overload_ops, /* Is operator overloading allowed? */
+	Point_comments[NUM_LANGUAGES], /* Does \.! signify a \Fortran\ or
+\Ratfor\ comment? */
+	Prn_contents, /* Print table of contents? */
+	Prn_index, /* Print index? */
+	Prn_input_lines, /* Used in |input_ln| to print out the lines sent
+back. */ 
+	Prn_input_addresses, /* Print out the buffer addresses. */
+	Prn_modules, /* Print module list? */
+	Prn_semis, /* Print semicolons in \Fortran\ output. */
+	Prn_version, /* Print the \FWEB\ version? */
+	Quoted_includes, /* Cross-reference quoted include files? */
+	RatFor77, /* Expand \Ratfor\ code directly to \Fortran-77? */  
+	Read_iformats, /* Read include files for formats. */
+	Redefine_builtins, /* Permit built-in functions to be redefined. */
+	Redefine_macros, /* Permit user macros to be redefined. */
+	Reverse_indices[NUM_LANGUAGES], /* C-style indexing in \Fortran? */
+	Rmv_files, /* Remove temporary files related to \.{-H}? */
+	Skip_ifiles, /* \.{-j} --- skip files already included. */
+	Skip_includes, /* For \.{WEAVE}, don't read in \.{@@I} commands.
+(Uppercase '\.{I}' only.) */ 
+	Statistics, /* Print statistics about memory usage? */
+	Subscript_fcns, /* Put module references on functions? */
+	Suppress_cmds, /* ??? */
+	Toggle_includes, /* For \.{WEAVE}, read in \.{@@I} commands, but
+don't print them out. */ 
+	Top_version, /* Header info at top of output? */
+	Translate_ASCII, /* Do we bother with the |xchr|--|xord|
+conversions? */ 
+	Translate_brackets, /* Brackets to parentheses in \Fortran? */
+	Truncate_ids, /* Shorten identifiers? */
+	Try_extensions, /* Search through list of possible file names? */
+	Xref_unnamed; /* Cross-reference unnamed references? */
+
+COLOR_MODE Color_mode; /* The color setting. */
+DEFN_MASK Defn_mask; /* What defn's to print by \FWEAVE. */
+TeX_PROCESSOR TeX_Processor; /* Processor to be used with \FWEAVE. */
+
+outer_char HUGE*outp_nm[NUM_LANGUAGES]; /* Current output file names. */
+FILE *outp_file[NUM_LANGUAGES]; /* File ptrs associated with above. */
+	} PARAMS;
+
+IN_COMMON PARAMS params,global_params;
+IN_COMMON boolean stop_the_scan;
+
+@ We need to know what kind of construction is being parsed, so the
+|get_line| routine can distinguish various input formats (for \FORTRAN). 
+
+@a
+
+typedef enum {OUTER,INNER} PARSING_MODE;
+
+IN_COMMON PARSING_MODE parsing_mode CSET(OUTER);
+
+@ More stuff related to parsing the input line.
+
+@d preprocessing parse_params.Preprocessing
+@d at_beginning parse_params.At_beginning
+@d sharp_include_line parse_params.Sharp_include_line
+@d sharp_pragma_line parse_params.Sharp_pragma_line
+
+@a
+
+typedef struct
+	{
+	boolean Preprocessing; /* Are we scanning a preprocessor command? */
+	boolean At_beginning;  /* Are we at logical beginning of line? */
+	boolean Sharp_include_line; /* Does line start with ``|#include|''? */
+	boolean Sharp_pragma_line; /* Starts with ``|#pragma|''? */
+	} PARSE_PARAMS;
+
+IN_COMMON PARSE_PARAMS parse_params 
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {NO,YES}
+#endif
+#endif
+;
+
+@ On an |ASCII| machine, we can speed things up by not bothering with the
+translations. (The flag |TRANSLATE_ASCII| is set in \.{os.hweb}.)
+
+/* |ASCII| case changes. */
+@d isAupper(c) (c<=@'Z' && c>=@'A')
+@d isAlower(c) (c<=@'z' && c>=@'a')
+
+@d SET_CASE(c) upper_case_code = BOOLEAN(isAupper(c))
+	 /* Watch out for side effects. */
+@d lower_case_code BOOLEAN(!upper_case_code)
+
+@d A_TO_LOWER(c) (ASCII)(isAupper(c) ? (int)c+040 : c)
+@d A_TO_UPPER(c) (ASCII)(isAlower(c) ? (int)c-040 : c)
+
+/* Handle the difference between |ASCII| and |outer_char|. */
+@d isAlpha(c) isalpha(XCHR(c))
+@d isDigit(c) isdigit(XCHR(c)) /* We're working on |ASCII| input. */
+@d isBdigit(c) ((c)==@'0' || (c)==@'1') /* Is it a binary numeral? */
+@d isOdigit(c) (isDigit(c) && c!=@'8' && c!=@'9') /* Octal numeral? */
+@d isXdigit(c) isxdigit(XCHR(c)) /* Hex numeral? */
+
+@a
+
+EXTERN boolean upper_case_code SET(NO);
+
+/* For debugging of target machines with a different character set than
+that of the present machine, use the |DEBUG_XCHR| flag to force the
+internal representation to be ``scrambled |ASCII|'', which replaces the
+array~|xchr| with |wt_style.xchr|. */
+#if(DEBUG_XCHR)
+	#define XCHR_ wt_style.xchr /* Scrambled mapping. */
+#else
+	#define XCHR_ xchr /* The mapping for this machine. */
+#endif /* |DEBUG_XCHR| */
+
+#if(TRANSLATE_ASCII)
+	#define XORD(outer) xord[outer]
+	#define XCHR(inner) XCHR_[inner]
+#else /* Don't bother with the translations. */
+	#define XORD(outr) (outr) /* Funny spelling from Dethier's changes. */
+	#define XCHR(innr) (innr)
+#endif /* |TRANSLATE_ASCII| */
+
+typedef unsigned char ASCII; /* Type of characters inside \.{WEB}. */
+
+@ Here is how reserved words are stored.
+
+@a
+
+typedef struct
+	{
+	CONST char HUGE *reserved_word;
+	eight_bits type;
+	} RESERVED_WORD;
+
+@ A global variable called |history| will contain one of four values
+at the end of every run: 
+\begin{itemize}
+
+\item
+|SPOTLESS| means that no unusual messages were printed; 
+
+\item
+|HARMLESS_MESSAGE| means that a message of possible interest
+was printed but no serious errors were detected; 
+
+\item
+|ERROR_MESSAGE| means that at least one error was found; 
+
+\item
+|FATAL_MESSAGE| means that the program terminated abnormally. 
+
+\end{itemize}
+
+The value of |history| does not influence the behavior of the program; it
+is simply computed for the convenience of systems that might want to use
+such information.
+
+@d mark_harmless 
+	{
+	SET_COLOR(ordinary); 
+	if (history==SPOTLESS) 
+		history = HARMLESS_MESSAGE;
+	} 
+
+@d mark_error 
+	{
+	SET_COLOR(ordinary);
+	history = ERROR_MESSAGE;
+	}
+
+
+@a
+
+typedef enum
+	{
+	SPOTLESS, /*  Normal jobs */
+	HARMLESS_MESSAGE, /*  Non-serious info was printed */ 
+	ERROR_MESSAGE, /*  An error was noted */
+	FATAL_MESSAGE /*  We had to stop prematurely */
+	} HISTORY;
+
+IN_COMMON HISTORY history CSET(SPOTLESS); /* indicates how bad this run was */
+
+typedef enum
+	{
+	ALWAYS,
+	NOTHING = 0,
+	ERRORS_ONLY,
+	WARNINGS,
+	SHORT_INFO,
+	EVERYTHING
+	} MSG_LEVEL;
+
+IN_COMMON MSG_LEVEL msg_level CSET(EVERYTHING); /* When to print. */
+
+typedef enum
+	{
+	NONE,
+	BRIEF,
+	VERBOSE
+	} TRACING_LEVEL;
+
+IN_COMMON TRACING_LEVEL tracing CSET(NONE); /* For debugging \.{WEAVE}. */
+
+@ 
+
+@<Mac...@>=
+@@ A simple error message with no arguments is used frequently.  Error
+messages now carry an indication of their origin.
+
+@@m err_print(origin,msg,...) 
+	err0_print(ERR_##origin,OC(msg),#0,#.)
+@@m err_print_(origin,msg,...) 
+	err0_print(ERR_##origin,OC(msg),-1-#0,#.)
+@@m ERR_PRINT(origin,msg) err_print(origin,msg) 
+
+@@m MACRO_ERR(msg,trail,...) 
+	macro_err(OC(msg),trail,#.)
+
+@
+@a
+
+typedef enum {ERR_NULL,ERR_C,ERR_T,ERR_W,ERR_R,ERR_M,ERR_S,ERR_F} ERR_ORIGIN;
+IN_COMMON boolean err_happened CSET(NO);
+
+
+@ Code related to file handling. The open input files are maintained on a
+stack, with the |WEB_FILE| at the top~(0).  For every input file, there is
+an associated change file.
+
+@f line x /* Make |line| an unreserved word. */
+
+@d OUTPUT_LINE outp_line[lan_num(language)]
+@d OUTPUT_FILE_NAME outp_nm[lan_num(out_language)]
+@d OUT_LANGUAGE(language)
+	(R77_or_F ? (Fortran88 ? FORTRAN_90 : FORTRAN) : language)
+@d OUT_FILE_NAME outp_nm[lan_num(OUT_LANGUAGE(language))]
+
+@D PUTC(c) 
+	{
+	CHECK_OPEN;
+	if(putc((int)(c),out_file) == EOF) 
+		out_error(OC("putc"));
+	}
+
+@d MAX_FILE_NAME_LENGTH 200
+
+@D WEB_FILE 0
+@D web_file_name prms[WEB_FILE].web.File_name /* Main source file name. */
+@D web_file prms[WEB_FILE].web.File /* Main source file. */
+
+@D CUR_FILE incl_depth
+@D cur_file_name prms[CUR_FILE].web.File_name /* Current input file name. */
+@D cur_file prms[CUR_FILE].web.File /* Current input file. */
+
+@D cur_line cur0_prms->Line /* Number of current line in current file. */
+
+@D change_file_name prms[CUR_FILE].change.File_name
+@D change_file prms[CUR_FILE].change.File
+@D change_line prms[CUR_FILE].change.Line
+
+/* --- Stuff used mostly within |input_ln| --- */
+@D num_in_buffer cur0_prms->Num_in_buffer
+@D comment_in_buffer cur0_prms->Comment_in_buffer
+@D scanning_C_cmnt cur0_prms->Scanning_C_cmnt
+@D start_C cur0_prms->Start_C
+@D last_was_empty cur0_prms->Last_was_empty
+@D continuing_line cur0_prms->Continuing_line
+@D last_was_continued cur0_prms->Last_was_continued
+
+/* The following are used as arguments to |input_ln|. */
+@D INPUT_FILE &prms[CUR_FILE].web
+@D CHANGE_FILE &prms[CUR_FILE].change
+
+/* --- Buffers --- */
+@D cur_buffer cur0_prms->Buffer
+@D buffer_end cur0_prms->Buffer_end
+@D limit cur0_prms->Limit /* points to the last character in the buffer. */
+
+@D change_buffer (cur_prms.change)->Buffer
+@D change_buffer_end (cur_prms.change)->Buffer_end
+@D change_limit (cur_prms.change)->Limit
+
+@a
+
+IN_COMMON LANGUAGE out_language; /* Current language for output file. */
+IN_COMMON FILE *out_file; /* Current output file pointer. */
+IN_COMMON int incl_depth; /* Current level of file nesting. */
+
+typedef struct
+	{
+	FILE *File;	/* Pointer to file. */
+	LINE_NUMBER Line; 	/* Line number. */
+	ASCII HUGE *Buffer; /* Input buffer. */
+	ASCII HUGE *Buffer_end;
+	ASCII HUGE *K0;
+	ASCII HUGE *Limit; /* Next unfilled position. */
+	int Num_in_buffer; /* Number remaining to be read. */
+	boolean Comment_in_buffer; 
+	boolean Found_at,At_line;
+	boolean Scanning_C_cmnt,Start_C,Last_was_empty;
+	boolean Continuing_line,Last_was_continued;
+	outer_char File_name[MAX_FILE_NAME_LENGTH]; 
+	} INPUT_PRMS0;
+
+IN_COMMON INPUT_PRMS0 HUGE *cur0_prms; /* Pointer to current parameters. */
+
+typedef struct
+	{
+	INPUT_PRMS0 HUGE *web, HUGE *change;
+	} CUR_PRMS;
+
+IN_COMMON CUR_PRMS cur_prms; /* Address of current input parameters. */
+
+typedef struct
+	{
+	LANGUAGE Language;
+	PARSING_MODE Parsing_mode;
+	boolean Column_mode;
+	} INPUT_PARAMS;
+
+typedef struct Rcs
+	{
+	ASCII HUGE *keyword, HUGE *txt;
+	struct Rcs HUGE *next;
+	} RCS;
+
+typedef struct
+	{
+	RCS HUGE *start, HUGE *end;
+	} RCS_LIST;
+
+typedef struct
+	{
+	INPUT_PRMS0 web, change;
+	INPUT_PARAMS input_params;
+	RCS_LIST rcs_list; /* RCS keywords. */
+	} INPUT_PRMS;
+
+IN_COMMON BUF_SIZE max_include_depth;
+IN_COMMON INPUT_PRMS *prms; /* Stack of |max_include_depth+1| open files. */
+
+IN_COMMON outer_char HUGE *tex_fname; /* Name of |tex_file|. */
+#define tex_file out_file /* Where output of \.{WEAVE} goes. */
+
+IN_COMMON outer_char HUGE *fwebmac; /* The default macro package. */
+
+IN_COMMON boolean input_has_ended; /* If there is no more input. */
+IN_COMMON boolean changing; /* If the current line is from |change_file|. */
+
+typedef struct
+	{
+	outer_char HUGE *name; /* The ultimate output file name. */
+	outer_char HUGE *tmp_name; /* Temporary file name, so new results
+					can be compared with old ones. */
+	FILE *ptr; /* A pointer to |tmp_name|. */
+	eight_bits previously_opened; /* Possibly opened, but now closed. */
+	eight_bits global_scope; /* To control closing at end of each sectn. */
+	} OPEN_FILE; /* Info about previously opened files. */
+
+@ Short-hand for arguments to built-in functions.
+
+@a
+typedef eight_bits HUGE *PARGS[];
+
+@
+To recognize the various built-in functions, we must search through
+a list.  
+
+@d MAX_DOT_LENGTH 31 /* Don't have to scan farther than this to see if it's
+			a dot constant. The~31 is a \FORTRAN-90 limit. */
+
+@a
+
+IN_COMMON ASCII HUGE *id_first; /* Where the current identifier begins in
+					the buffer */  
+IN_COMMON ASCII HUGE *id_loc; /* Just after the current identifier in the
+					buffer */  
+
+typedef struct
+	{
+	ASCII *name;
+	int n;
+	} BUILT_IN;
+
+IN_COMMON BUILT_IN incl_likes[]
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {
+	{(ASCII *)"changequote",11},
+	{(ASCII *)"ifelse",6},
+	{(ASCII *)"include",7},
+	{(ASCII *)"index",5},
+	{(ASCII *)"len",3},
+	{(ASCII *)"maketemp",8},
+	{(ASCII *)"sinclude",8},
+	{(ASCII *)"substr",6},
+	{(ASCII *)"syscmd",6},
+	{(ASCII *)"translit",8},
+	{(ASCII *)"",0}
+	}
+#endif
+#endif
+;
+
+IN_COMMON BUILT_IN WEB_incl_likes[]
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {
+	{(ASCII *)"@!$COMMENT",8},
+	{(ASCII *)"@!$DEFINE",7},
+	{(ASCII *)"@!$ERROR",6},
+	{(ASCII *)"@!$IF",3},
+	{(ASCII *)"@!$IFCASE",7},
+	{(ASCII *)"@!$IFELSE",7},
+	{(ASCII *)"@!$LEN",4},
+	{(ASCII *)"@!$M",2},
+	{(ASCII *)"@!_COMMENT",8},
+	{(ASCII *)"@!_DEFINE",7},
+	{(ASCII *)"@!_ERROR",6},
+	{(ASCII *)"@!_IF",3},
+	{(ASCII *)"@!_IFCASE",7},
+	{(ASCII *)"@!_IFELSE",7},
+	{(ASCII *)"@!_LEN",4},
+	{(ASCII *)"@!_M",2},
+	{(ASCII *)"",0}
+	}
+#endif
+#endif
+;
+
+@ A similar list takes care of \Ratfor-90 statements that mustn't be
+considered as statement labels.
+
+@a
+
+IN_COMMON BUILT_IN non_labels[]
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {
+	{(ASCII *)"contains",8},
+	{(ASCII *)"default",7},
+	{(ASCII *)"private",7},
+	{(ASCII *)"protected",9},
+	{(ASCII *)"public",6},
+	{(ASCII *)"sequence",8},
+	{(ASCII *)"",0}
+	}
+#endif
+#endif
+;
+
+@ 
+
+@D dot_const OCTAL(23)
+
+@<Mac...@>=
+@@ FORTRAN uses constructions such as~|@@r .true.| or~|@@r .and.|, which we
+have to parse separately.
+
+@@m PREDEFINED_DOTS 14 /* \# of pre-initialized entries in the |dots| table. */
+
+@
+@a
+
+typedef struct
+	{
+	ASCII *symbol;
+	short len;
+	eight_bits code; /* Something like |dot_const|. */
+	eight_bits cat; /* Category code for special constants and
+operators. */
+	eight_bits token; /* The tokenized meaning of this operator. */
+	} DOTS;
+
+typedef struct
+	{
+	ASCII name[MAX_DOT_LENGTH+3]; /* Holds the macro name to be
+appended. */ 
+	eight_bits cat; /* Category of the operator. */
+	eight_bits num; /* Position in the table. */
+	} DOT_OP;
+
+IN_COMMON DOT_OP dot_op 
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {"\\",0,0}
+#endif
+#endif
+;
+
+@ The |macrobuf| is a character buffer used for expanding macros, or for
+holding macros defined from the input line. The present position in the
+|macrobuf| is~|mp|.  For |macrobuf|, see \.{stacks.hweb} (\FTANGLE) or \FWEAVE.
+
+@d MAKE_RECURSIVE @'*' /* To allow a WEB macro to be recursive, preface its
+	definition by this symbol, as in `\.{@@m *R R}'.  (Recursive macros
+	are not presently implemented.) */
+
+@d AUTO_INSERT @'['
+@d END_AUTO_INSERT @']'
+
+@d PROTECTED @'!' /* A protected macro ---`\.{@@m!}'---may not be redefined. */
+
+@a
+
+IN_COMMON boolean in_macro CSET(NO);
+	
+IN_COMMON BUF_SIZE mbuf_size; /* Set dynamically. */
+IN_COMMON eight_bits HUGE *mp; /* Next available position in |macrobuf|. */
+
+IN_COMMON boolean from_buffer CSET(NO); /* Are we reading from a buffer? */
+
+@ Stuff related to command-line arguments.
+
+@a
+
+IN_COMMON int argc; /* copy of |ac| parameter to |main| */
+IN_COMMON outer_char **argv; /* copy of |av| parameter to |main| */
+IN_COMMON outer_char HUGE *pa, *pa_begin; /* Current/init value of |*argv|. */
+
+@ Defaults for |boolean| flags, etc.
+
+/* MACROS here. */
+@d ACTIVE_BRACKETS NO
+@d ALL_CMNTS_VERBATIM NO
+@d ALL_INCLUDES NO
+@d AUTO_APP_SEMI NO
+@d AUTO_LINE YES
+@d AUTO_PSEUDO_SEMIS YES
+@d BEEPS YES
+@d BLOCK_NUMS NO
+@d BSLASH_CONTINUED_STRINGS NO
+@d CHK_IFELSE NO
+@d CHK_STMTS NO
+@d COLOR_MODE0 NO_COLOR
+@d COMPARE_OUTFILES NO
+@d COMPOUND_ASSIGNMENTS YES
+@d CPP_COMMENTS YES
+@d DBG_OUTPUT NO
+@d DEFERRED_MACROS NO
+@d DOT_CONSTANTS YES
+@d FORTRAN88 NO	/* By default, it's \FORTRAN-77. */
+@d FORTRAN_LABEL YES
+@d FREE_FORM_INPUT YES
+@d FREE_FORTRAN NO
+@d IGNORE_C NO
+@d IN_ESCAPE '\\'
+@d INDEX_HIDDEN NO
+@d INDEX_ONE NO
+@d INPUT_MACROS YES
+@d KEEP_TRAILING_COMMENTS YES
+@d LC_KEYWORDS YES /* Changed 1/11/98 */
+@d LINE_INFO YES
+@d LOWERCASE_TOKENS NO
+@d M4_ NO
+@d MAKEINDEX NO
+@d NO_XREF NO
+@d NUMBER_DOS NO
+@d NUWEB_MODE NO
+@d OVERLOAD_OPS YES
+@d POINT_COMMENTS NO
+@d PRN_CONTENTS YES
+@d PRN_OUTER_MACROS YES
+@d PRN_fORMATS YES
+@d PRN_FORMATS YES
+@d PRN_LIMBO YES
+@d PRN_INDEX YES
+@d PRN_MACROS YES
+@d PRN_MODULES YES
+@d PRN_SEMIS NO
+@d PRN_V YES
+@d PRN_VERSION NO
+@d PRN_W YES
+@d QUOTED_INCLUDES NO
+@d RATFOR77 YES
+@d READ_IFORMATS NO
+@d REDEFINE_BUILTINS NO
+@d REDEFINE_MACROS NO
+@d REVERSE_INDICES NO
+@d RMV_FILES YES
+@d SKIP_IFILES NO
+@d SKIP_INCLUDES NO
+@d STATISTICS NO
+@d SUBSCRIPT_FCNS YES
+@d TOGGLE_INCLUDES NO
+@d TOP_VERSION YES
+@d TRANSLATE_ASCII0 NO
+@d TRANSLATE_BRACKETS YES
+@d TRY_EXTENSIONS NO
+@d TEX_PROCESSOR LaTeX_p
+@d XREF_UNNAMED YES
+
+@d CCHAR '&' /* Default \FORTRAN\ continuation character. */
+
+@d NUM_RATFOR_CMDS 20 /* The total number of reserved \RATFOR\ keywords.
+	This is used for an array size later on. */
+
+@ A structure used for |see_reserved| and |id_info|.
+@a
+
+typedef struct
+	{
+	outer_char HUGE *args;
+	boolean intrinsics, keywords, reserveds;
+	} RSRVD;
+
+@
+@a
+
+IN_COMMON outer_char cchar CSET(CCHAR); /* Fortran's continuation
+character. */
+
+IN_COMMON ASCII cont_char CSET(@'\\'); /* Current continuation char for eol. */
+IN_COMMON boolean free_Fortran CSET(NO); /* Free-form syntax in \Fortran.  */
+IN_COMMON boolean free_90 CSET(NO); /* \Fortran/\Ratfor-90 and free-form syntax. */
+
+IN_COMMON unsigned short tr_max[NUM_LANGUAGES]
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {0,0,0,0,0,0,0,0}
+#endif
+#endif
+;
+
+IN_COMMON CONST char HUGE *filter_char[NUM_LANGUAGES] 
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {"","_","_","","", "","_","_"}
+#endif
+#endif
+;
+
+IN_COMMON outer_char abbrev_cmds[NUM_RATFOR_CMDS+1] CSET(""); /* Nothing
+	suppressed by default. */ 
+
+@ Holds the command-line arguments, after expansion from the ini file.
+@a
+
+IN_COMMON outer_char HUGE *cmd_ln_buf;
+
+@ The global variable |word_type| holds the type of identifier that
+|id_lookup| will work on next. This comes into play when the |last|
+argument to |id_lookup| is |NULL|. In this case, |id_lookup| finds its own
+end of the identifier.
+
+@D mod_info info.mod
+@D mod_ilk mod_info->Ilk
+@D macro_type info.Macro_type
+
+@D defined_in(languag) dummy.defined_info[lan_num(languag)].section
+@D defined_type(languag) dummy.defined_info[lan_num(languag)].type
+@D ilk Ilk[language_num]
+@D expandable dummy.RX.Expandable
+@D rlink dummy.RX.Rlink
+@D x_translate dummy.RX.Expand
+
+@f HUGE_FCN_PTR huge
+
+@a
+
+typedef enum {NO_TYPE,ORDINARY_ID,RESERVED_WD,INTRINSIC_FCN,KEYWD} WORD_TYPE;
+
+IN_COMMON WORD_TYPE word_type CSET(ORDINARY_ID);
+
+#define X_FCN SRTN	/* |typedef| didn't work on the VAX. */
+
+typedef struct RX_link
+	{
+	struct name_info HUGE *Rlink; /* right link in binary search tree for
+					module names */  
+	X_FCN (HUGE_FCN_PTR * HUGE *Expand)(VOID); /* Array of functions
+for keyword expansion (one for each language). */
+	boolean Expandable; /* For which language is this expandable? */
+	} RX_LINK;
+
+typedef struct
+	{
+	char Ilk;
+	PARAMS params;	
+	} MOD_INFO;
+
+IN_COMMON boolean index_flag; /* Print identifier in index? */
+
+typedef boolean NAME_TYPE; /* Type of identifier, enumerated below. */
+
+enum {NEVER_DEFINED=0,
+	GENERIC_NAME,FUNCTION_NAME,M_MACRO,D_MACRO,IMPLICIT_RESERVED,
+	TYPEDEF_NAME,
+	NEVER_DEFINED0=0x80,
+	GENERIC_NAME0,FUNCTION_NAME0,M_MACRO0,D_MACRO0,IMPLICIT_RESERVED0,
+	TYPEDEF_NAME0};
+
+/* Maybe the |defined_type| is already marked to not appear in the index.
+(It's $> 128$.)  To properly set a new type, we use a macro to keep the
+flag and attach it to the new type. */ 
+#define SET_TYPE(p,type) p->defined_type(language) =\
+	 ((boolean)(type) | (boolean)((p->defined_type(language) & 0x80)))
+
+/* To recover the base type, use the following, which strips off the flag: */
+#define DEFINED_TYPE(p) (p->defined_type(language) & 0x7F)
+
+typedef struct
+	{
+	sixteen_bits section; /* Section number where identifier defined. */
+	NAME_TYPE type; /* Kind of identifier, such as function name. */
+	} DEFINED_INFO;
+
+typedef struct
+	{
+	ASCII HUGE *text; /* The replacement text for the macro. */
+	unsigned int len; /* Length of replacement text. */
+	eight_bits cat; /* Category code. */
+	} WV_MACRO;
+
+typedef struct name_info 
+	{
+	ASCII HUGE *byte_start; /* Beginning of the name in |byte_mem|. */
+	struct name_info HUGE *link; /* Used for hashing. */
+	union 
+		{
+		struct RX_link RX; /* For \FTANGLE. */
+		DEFINED_INFO defined_info[NUM_LANGUAGES]; /* For \FWEAVE. */
+		} dummy;
+	boolean reserved_word,intrinsic_word,keyword;
+	boolean Language;
+	union
+		{
+		char Macro_type; /* For \FTANGLE. */
+		boolean upper_case; /* For \FWEAVE\ identifiers. */
+		MOD_INFO HUGE *mod; /* For \FWEAVE\ module names */
+		} info;
+	eight_bits Ilk[NUM_LANGUAGES];/* Used by ident.'s in \WEAVE\ only. */
+	ASCII HUGE *equiv_or_xref; /* Info corresponding to names. */
+	WV_MACRO HUGE *wv_macro; /* For fancy identifiers. */
+	} NAME_INFO; /* Contains information about an identifier or mod
+name. */
+
+typedef NAME_INFO HUGE *name_pointer; /* pointer into array of |name_info|s. */
+
+@
+@<Mac...@>=
+@@
+@@f HUGE_FCN_PTR huge
+@@<Initialize |mod_info| and |Language|@@>=
+{
+/* We allocate |MOD_INFO| structures only for module names, not for
+	identifiers. */
+node->mod_info = GET_MEM("mod_info",1,MOD_INFO);
+
+node->mod_info->Ilk = expr;
+node->mod_info->params = params; /* Freeze parameters at this point in time. */
+node->mod_info->params.uses = 0; /* Uses are counted in |new_mod_xref|. */
+
+node->Language = (boolean)language; /* Redundant. */
+}
+
+@
+@<Globals@>=
+
+IN_COMMON BUF_SIZE max_bytes;
+IN_COMMON ASCII HUGE *byte_mem; /* Dynamic array: characters of names. */
+IN_COMMON ASCII HUGE *byte_end; /* End of |byte_mem|. */
+
+IN_COMMON BUF_SIZE max_names;
+IN_COMMON NAME_INFO HUGE *name_dir; /* Dynamic array: information about
+names. */
+IN_COMMON name_pointer name_end; /* End of |name_dir|. */
+IN_COMMON name_pointer npmax; /* |name_ptr - 1|. */
+
+IN_COMMON BUF_SIZE longest_name;
+IN_COMMON ASCII HUGE *mod_text; /* Dynamic array: name being sought for. */
+IN_COMMON ASCII HUGE *mod_end; /* End of |mod_text|. */
+
+
+@ 
+
+@d USED_BY_NEITHER ((eight_bits)0xFF)
+@d USED_BY_OTHER ignore
+
+@<Mac...@>=
+@@ For initializing |ccodes|.
+
+@@m INI_CCODE(defaults,code)
+	ini_ccode((outer_char *)#code,(outer_char *)defaults,code)
+		/* We use the same keyword name as the \FWEB\ code. */
+
+@@m REASSIGNABLE(d,c) INI_CCODE(d,c) /* For stuff that must later be
+reassigned for 	\FTANGLE. */
+
+@@m SAME_CCODE(d,c) INI_CCODE(d,c)
+
+@ 
+
+@<Mac...@>=
+@@ Macros to guard against overflow during |sprintf| or |vprintf|. The function
+|nsprintf| is defined in \.{common.web} to handle non-ANSI return values from
+|sprintf|. 
+
+@@m NSPRINTF(buf_name,fmt,...) 
+	nsprintf(buf_name,OC(fmt),#0,#.)
+@@m NVSPRINTF(buf_name,fmt,...) 
+	nvsprintf(buf_name,OC(fmt),#0,#.)
+
+@@m SPRINTF(nmax,buf_name,args) 
+	if(NSPRINTF(buf_name,args) >= (int)(nmax)) OVERFLW(#buf_name,"")@@;
+
+@@m VSPRINTF(nmax,buf_name,args) 
+	if(NVSPRINTF(buf_name,args) >= (int)(nmax)) OVERFLW(#buf_name,"")@@;
+ 
+@@m vsprintf_(out,fmt,arg_ptr) 
+	@!$P if(NUM_VA_ARGS == 1)
+		{
+		char *fmt0 = va_arg(arg_ptr,char *);
+
+		va_arg(arg_ptr,int); /* Skip over~$n$. */
+		vsprintf((char *)out,fmt0,arg_ptr);
+		}
+	@!$P else
+		vsprintf(out,fmt,arg_ptr);
+	@!$P endif
+
+@@m vprintf_(fmt,arg_ptr) 
+	@!$P if(NUM_VA_ARGS == 1)
+		{
+		char *fmt0 = va_arg(arg_ptr,char *);
+
+		va_arg(arg_ptr,int);
+		vprintf(out,fmt0,arg_ptr);
+		}
+	@!$P else
+		vprintf(fmt,arg_ptr);
+	@!$P endif
+
+@@f VA_ARGS $_EXPR
+@@f VA_DECL int
+@@f VA_LIST int
+
+@ 
+
+@<Mac...@>=
+@@ Abbreviations for buffer allocations.
+
+@@m ABBREV(name) V_##name
+
+@@m V_buf_size "bs"
+@@m V_C_buf_size "cb"
+@@m V_cmd_fsize "cf"
+@@m V_cmd_size "cg"
+@@m V_delta_dots "d"
+@@m V_line_length "ll"
+@@m V_longest_name "ln"
+@@m V_max_bytes "b"
+@@m V_dtexts_max "dx"
+@@m V_max_dtoks "dt"
+@@m V_max_expr_chars "lx"
+@@m V_max_lbls "lb"
+@@m V_max_margs "ma"
+@@m V_max_ifiles "if"
+@@m V_max_include_depth "id"
+@@m V_max_keywords "rk" 
+@@m V_max_modules "m"
+@@m V_max_names "n"
+@@m V_max_refs "r"
+@@m V_max_scraps "s"
+@@m V_max_texts "x"
+@@m V_max_toks_t "tt"
+@@m V_max_toks_w "tw"
+@@m V_mbuf_size "mb"
+@@m V_op_entries "op"
+@@m V_num_files "nf"
+@@m V_sbuf_len "sb"
+@@m V_stck_size_t "kt"
+@@m V_stck_size_w "kw"
+@@m V_X_buf_size "xb"
+
+@ Operator overloading.
+@a
+
+/* Information for each language. */
+typedef struct
+	{
+	CONST outer_char *op_macro; /* The default \FWEB\ macro. */
+	boolean overloaded; /* Has it been overloaded? */
+	eight_bits cat;	/* Category code for this operator. */
+	outer_char HUGE *defn; /* Replacement text for the \Fortran\ macro. */
+	} OP_INFO;
+
+/* The description of an operator. */
+typedef struct
+	{
+	ASCII HUGE *op_name; /* \Fortran-like name of operator. Not |const|
+because it's converted to |ASCII|. */
+	OP_INFO info[NUM_LANGUAGES];
+	} OPERATOR;
+
+@ Colors.
+
+@D ESC 0x1b
+@D MD "[1m" /* High intensity */
+@D US "[4m" /* Underline */
+@D MR "[7m" /* Reverse video */
+@D MO "[m"  /* Revert to normal */
+
+/* In the following, the |ordinary| setting is necessary to kill off
+underlining.  Should do this for |sset_color| as well. */
+@d SET_COLOR(field) 
+	set_color(wt_style.color.ordinary.value),
+	set_color(wt_style.color.field.value)
+
+@d SSET_COLOR(field) sset_color(wt_style.color.field.value)
+
+@d CLR_PRINTF(when, field, args) 
+	{
+	if(msg_level >= when)
+		{
+		SET_COLOR(field); 
+		printf args; fflush(stdout);
+		set_color(color0.last);
+		}
+	}
+
+@a
+
+typedef enum
+	{
+	NULL_COLOR,
+	BLACK,RED,GREEN,YELLOW,BLUE,MAGENTA,CYAN,WHITE,NORMAL,HIGHEST_COLOR
+	} COLOR;
+
+IN_STYLE CONST char *clr_name[]
+#ifdef _STYLE_h
+	= {"NULL",
+	   "black","red","green","yellow","blue","magenta","cyan", "white",
+	    "default"}
+#endif
+;
+
+typedef struct
+	{
+	COLOR last,present;
+	} COLOR0;
+
+IN_COMMON COLOR0 color0
+#ifdef _COMMON_h
+#if(part == 0 || part == 1)
+	= {NORMAL,NORMAL}
+#endif
+#endif
+;
+
+typedef struct
+	{
+	short n;	/* Number of escape sequences attached to this color. */
+	outer_char **string;	/* Array of pointers to those sequences. */
+	} SEQUENCES;
+
+/* A buffer for an array of strings. */
+typedef struct
+{
+int num;
+int n;
+outer_char **s;
+} BUF;
+
+BUF buf;
+
+IN_STYLE outer_char HUGE *termcap; /* Name of termcap file. */
+IN_STYLE BUF sput_buf; /* For temporary color strings. */
+IN_COMMON BUF c_buf; /* For commas. */
+
+@* \TeX\ MODE.
+
+@a
+
+typedef enum
+	{
+	TeX_escape,TeX_bgroup,TeX_egroup,TeX_math_shift,TeX_alignment_tab,
+	TeX_eol,TeX_parameter,TeX_superscript,TeX_subscript,TeX_ignored,
+	TeX_space,TeX_letter,TeX_other,TeX_active,TeX_comment,TeX_invalid
+	} TeX_CATEGORY; 
+
+IN_COMMON TeX_CATEGORY TeX[128];
+
+@ Because we must compare tokens to see if they're the special ones, and we
+don't know where they are in the table, we'll initialize individual
+variables with the appropriate values returned from |id_lookup|.
+
+@f X_FCN void
+
+@a
+
+EXTERN sixteen_bits id_defined;
+
+typedef struct
+	{
+	CONST char HUGE *name; /* Identifier. */
+	int len;	/* Length of identifier. */
+	X_FCN (HUGE_FCN_PTR *expand)(VOID); /* Function that expands this
+token. */ 
+	sixteen_bits HUGE *pid; /* Address of the |sixteen_bits| that is to be
+initialized. */
+	} SPEC;
+
+@ Here we define the text that may be inserted automatically after a
+\Ratfor\ program unit.
+
+@a
+
+typedef struct
+	{
+	eight_bits *start; /* Macro to be inserted. */
+	eight_bits *end; /* End of |start|. */
+	} INSERT_TEXT;
+
+typedef struct
+	{
+	INSERT_TEXT program,module,subroutine,function,blockdata,interface;
+	} INSERT_MATERIAL;
+
+@
+@a
+
+boolean Rat_OK PROTO((outer_char *msg));
+IN_COMMON boolean Rat_is_loaded; /* Set by call to |is_Rat_present|. */
+IN_COMMON boolean xpn_Ratfor CSET(YES);
+
+IN_TANGLE int spcs_after_cmnt TSET(0);/* Turned on for Ratfor error
+messages. */
+IN_TANGLE int brace_level TSET(0);
+IN_TANGLE boolean checking_label TSET(NO);
+IN_TANGLE INSERT_MATERIAL insert; /* For automatic insertions. */
+
+@ The following structure is used to remember where loops etc.\ began.
+
+When we encounter the beginning of a program, module, subroutine, or
+function, we store the identifier token of the program unit's name in
+|cur_fcn|. This can be used by the built-in |$ROUTINE|, or in various error
+messages.
+
+@D cur_fcn begun[rlevel-1].name
+@D NO_FCN (sixteen_bits)0
+	/* Value of |cur_fcn| when function name is unknown. */
+
+@D cur_struct begun[rlevel-1].name
+@D is_function begun[rlevel-1].function
+@D symbolic_label begun[rlevel-1].symbolic
+
+@<Typedefs@>=
+
+typedef enum
+	{
+	_DO_CMD,
+	block_CMD,blockdata_CMD,
+	break_CMD,case_CMD,contains_CMD,
+	default_CMD,do_CMD,for_CMD,function_CMD,
+	if_CMD,interface_CMD,module_CMD,next_CMD,program_CMD,
+	repeat_CMD,return_CMD,type_CMD,subroutine_CMD,switch_CMD,until_CMD,
+	where_CMD,while_CMD
+	} CMD;
+
+typedef struct
+	{
+	CMD cmd; /* Type of keyword being expanded. */
+	sixteen_bits name; /* Identifier for this program unit. */
+	sixteen_bits symbolic; /* Symbolic loop label. */
+	boolean function; /* Is this a function? */
+	LINE_NUMBER line; /* Line number at which expansion started. */
+	int level; /* Expansion level. */
+	} BEGUN;
+
+IN_TANGLE BEGUN HUGE *begun; /* Dynamic array. */
+IN_TANGLE int rlevel TSET(0); /* Current level of \Ratfor\ expansion.  This is
+		incremented for each expandable \Ratfor\ keyword. */
+
+@ The routine |prsw_regular_code| has various nifty branches that the
+outside world needs to access.
+@<Typedef...@>=
+
+@#ifdef MVS
+/* The C370 compiler will do strange integer promotions, if we
+    don't force it to do better.  (Thorsten Ohl.) */
+typedef enum 
+	{MORE_PARSE=-1,GOTO_MISTAKE=-2,GOTO_GET_IDENTIFIER=-3,
+ 	 GOTO_GET_A_STRING=-4,GOTO_SKIP_A_COMMENT=-5,GOTO_MVS_KLUDGE=32000}
+	         @[GOTO_CODE;
+@#else /* Not |MVS|. */
+typedef enum 
+ 	{MORE_PARSE=-1,GOTO_MISTAKE=-2,GOTO_GET_IDENTIFIER=-3,
+	 GOTO_GET_A_STRING=-4,GOTO_SKIP_A_COMMENT=-5} @[GOTO_CODE;
+@#endif /* Not |MVS|. */
+  
+
+@ Here we identify which part of the code we're dealing with.
+
+@d mark_defined w_style.misc.mark
+
+@<Typedef...@>=
+
+typedef enum {LIMBO,TEX_,DEFINITION,CODE} PART;
+
+IN_COMMON PART the_part CSET(LIMBO);
+
+typedef struct
+	{
+	int generic_name,fcn_name,WEB_macro,outer_macro,imp_reserved_name,
+		typedef_name;
+	} MARK_DEFINED;
+
+@ What macros to use to format identifiers.
+
+@<Typedef...@>=
+
+typedef struct
+	{
+	outer_char *reserved, *RESERVED;
+	outer_char *short_id;
+	outer_char *id, *ID;
+	outer_char *id_outer, *ID_OUTER;
+	outer_char *id_inner, *ID_INNER;
+	outer_char *intrinsic;
+	outer_char *keyword, *KEYWORD;
+	outer_char *typewritr;
+	outer_char *wildcrd;
+	} FORMAT;
+
+@ Options for \LaTeX.
+
+@<Typedef...@>=
+
+typedef struct
+{
+outer_char *options;
+outer_char *file;
+} OPTIONS_FILE;
+
+typedef struct
+	{
+	OPTIONS_FILE class, package;
+	} LATEX;
+
+@ Stuff for the style file.
+@<Typedef...@>=
+
+typedef char CC_BUF[2][40]; /*  One line of output for the control codes. */
+
+@
+@<Glob...@>=
+
+IN_STYLE outer_char HUGE *sbuf, HUGE *sbuf_end;/* One line of style file. */
+IN_STYLE CONST outer_char HUGE *sloc; /* Position in |sbuffer|. */
+IN_STYLE outer_char HUGE *slimit; /* Next available position in buffer. */
+IN_STYLE LINE_NUMBER s_line SSET(0); /* Input line number. */
+
+@ Additional macros for compatibility between |char| and |outer_char|.
+@d OC(s) ((outer_char HUGE *)(s))
+
+@d STAT0(name,size,num,max_num,abs_max_num,abbrev,ctrl_chars)
+	stat0(OC(name),size,num,max_num,abs_max_num,
+		OC(abbrev),OC(ctrl_chars))
+
+@d OVERFLW(msg,abbrev) overflow(OC(msg),OC(abbrev))
+@d NEW_SPRM(name, value) new_sprm(OC(name), value)
+@d SPRM_LEN 1500
+
+@d RAT_OK(msg) Rat_OK(OC(msg))
+
+@
+
+@d APP_STR(s) app_str(OC(s))
+
+@<Mac...@>=
+@@
+@@f X_FCN void
+@@m RAT_ERROR(err_type, msg, n, ...) 
+	RAT_error(err_type, OC(msg), n, #.)
+@@m CONFUSION(where, fmt0, ...)
+	confusion(OC(where), OC(fmt0), #.)
+@@m FATAL(origin, msg1, fmt, ...) 
+	fatal(ERR_##origin, OC(msg1), OC(fmt), #.)
+
+@* DEFINITIONS for TANGLE and WEAVE. Here's stuff required for
+\.{tangle.web} and \.{weave.web}. 
+
+@ As much as possible, we adhere to ANSI conventions. However, to support
+pre-ANSI compilers such as \.{gcc}, we must make some modifications. It is
+assumed that the compilers predefine macros such as |vax|, |sun|, or |mac|,
+in \It{lower case}; if they do not, then these macros must be defined from
+the command line. In addition, the \WEB\ files must be tangled with
+\It{upper case} macros such as |VAX|, |SUN|, or |MAC| defined from the
+command line, as in \.{ftangle tangle -m"SUN"}. It is conventional to put
+the machine macro command into the ini file \.{.fweb}, as in ``\.{+mSUN}''.
+
+@ The following flag is used for \Cpp. (??)
+@%@<Common...@>=
+@a
+EXTERN boolean long_comment;
+
+@ Code related to the character set. \It{Mess around here only at your own
+risk.} 
+
+@D and_and OCTAL(4) /* `|&&|'.*/
+@D star_star OCTAL(5) /* `|@@r x**y|' .*/
+
+/* The next two only occur in different languages, so they can have the same
+value. */  
+@D neqv OCTAL(10) /* `|@@r .neqv.|'.*/
+@D ellipsis neqv /* `|...|'.*/
+
+@D stmt_label OCTAL(30)
+
+@D slash_slash OCTAL(26)  /* Concatenation `|@@r \/|' .*/
+
+@D bell OCTAL(7) /* |ASCII| code for ringing the bell.*/
+@D tab_mark @'\t' /* |ASCII| code used as tab-skip.*/
+@D line_feed OCTAL(12) /* |ASCII| code thrown away at end of line; $\equiv$
+			\.{'\\n'}. */
+@D form_feed OCTAL(14) /* |ASCII| code used at end of page.*/
+@D carriage_return OCTAL(15) /* |ASCII| code used at end of line.*/
+
+@D gt_gt OCTAL(20) /* `|>>|'; this doesn't exist in MIT.*/
+@D lt_lt OCTAL(22) /* `|<<|'; this doesn't exist in MIT.*/
+
+@D plus_plus OCTAL(13) /* `|++|'; this corresponds to MIT's up-arrow.*/
+@D minus_minus OCTAL(1) /* `|--|'; this corresponds to MIT's down-arrow.*/
+
+@D minus_gt OCTAL(31) /* `|->|'.*/
+@D eqv minus_gt /* `|@@r .eqv.|'.*/
+
+@D not_eq OCTAL(32) /* `|!=|'.*/
+
+@D paste OCTAL(33) /* `|##|'.*/
+
+@D lt_eq OCTAL(34) /* `|<=|'.*/
+@D gt_eq OCTAL(35) /* `|>=|'.*/
+
+@D eq_eq OCTAL(36) /* `|==|'.*/
+
+@D or_or OCTAL(37) /* `||| |'.*/
+
+@D begin_language OCTAL(16) /* Mark a language switch.*/
+
+@D left_array OCTAL(21)  /* `$\LS$'.*/
+@D right_array OCTAL(25) /* `$\SR$'.*/
+
+@D interior_semi OCTAL(24) /* `\.;'.  In \Fortran, a semicolon that's already
+	present in the input line, as opposed to one that's inserted by
+	\FWEB. */
+
+@
+@a
+
+IN_COMMON ASCII xord[]; /* specifies conversion of input characters. */
+#ifdef scramble_ASCII
+	IN_COMMON ASCII xxord[];
+#endif
+IN_COMMON outer_char xchr[]; /* specifies conversion of output characters. */
+
+@ Code related to input routines:
+
+@a
+
+IN_COMMON BUF_SIZE buf_size; /* Used for \FWEAVE; see \.{common.web}. */
+IN_COMMON ASCII HUGE *loc; /* points to the next character to be read from the
+				buffer*/ 
+
+typedef struct
+	{
+	unsigned size; /* Length of |list|. */
+	unsigned num; /* Number of entries (e.g., number of colons). */
+	outer_char HUGE *list; /* Colon-delimited List of include files. */
+	} INCL_PATHS;
+
+@ Code related to identifier and module name storage:
+
+@d ID_FLAG 10240 /* \bf DON'T MONKEY WITH THIS NUMBER!. */
+
+@d length(c) ((c+1)->byte_start-(c)->byte_start) /* the length of a name. */
+
+@d llink link /* left link in binary search tree for module names. */
+@d root CAST(name_pointer,name_dir)->rlink /* the root of the binary search
+						tree  for module names */
+
+@d is_intrinsic(n) (n->intrinsic_word & (boolean)language)
+@d is_keyword(n) (n->keyword & (boolean)language)
+
+@a
+
+IN_COMMON name_pointer name_ptr; /* first unused position in |byte_start|. */
+IN_COMMON ASCII HUGE *byte_ptr; /* first unused position in |byte_mem|. */
+
+typedef name_pointer HUGE *hash_pointer;
+IN_COMMON hash_pointer hash, /* heads of hash lists */
+	hash_end, /* end of |hash| */
+	h; /* index into hash-head array */
+
+
+@ To distinguish between the constructions \.{@@<\dots@@>} and
+\.{\#<\dots@@>}, both of which return |module_name|, we introduce the flag
+|mac_mod_name|. 
+
+@a
+
+EXTERN boolean mac_mod_name;
+
+@ Module-name level:
+
+@a
+
+IN_COMMON int mod_level CSET(0);
+
+@ Code related to module numbers:
+
+@d BTRANS mod_trans(OC("beginning in section"),module_count) /* English! */
+@d MTRANS mod_trans(OC("section"),module_count) /* String including section and
+						page info.  English! */ 
+@d MTRANS0 mod_trans(OC(""),module_count)
+@d MOD_TRANS(mnum) mod_trans(OC("section"), mnum) /* English! */
+
+@a
+
+IN_COMMON sixteen_bits module_count; /* The current module number. */
+IN_COMMON boolean HUGE *chngd_module; /* Dynamic array: Is the module/
+					changed? */
+IN_COMMON boolean prn_where; /* Tells \.{TANGLE} to print line and file
+					info. */
+
+@ Code relating to output:
+
+@d UPDATE_TERMINAL fflush(stdout) /* Empty the terminal output buffer. */
+@d new_line putchar('\n') @d putxchar putchar
+@d ASCII_write(p0,n) fflush(stdout),
+		ASCII_file_write(stdout,p0,(int)(n))@;
+	/* Write on the standard output, converting from |ASCII|. */ 
+
+@ For FORTRAN, \&{format} commands are annoying, because the use of slashes
+doesn't fit with the rest of the \Fortran\ syntax. Thus, we'll deal with the
+|format| statement something like a preprocessor statement, in that we'll
+raise a special flag when we're inside it, and issue special tokens to
+indicate the start and the end of the statement.
+
+@D begin_format_stmt OCTAL(171)
+@D end_format_stmt OCTAL(172)
+
+@ 
+
+@d is_identifier(c) (isAlpha(c) || c==@'_' || c==@'$' ||
+	(c==@'%' && !C_LIKE(language) && !Fortran88) ) 
+		/* This defines the starting character of an identifier. */ 
+
+@d is_kind(c) (isDigit(c) || isAlpha(c) || c==@'_' || c==@'$') 
+	/* \Fortran-90 kind parameter. */
+
+@<Mac...@>=
+@@ For~C, getting an identifier is simple. For FORTRAN, we treat \&{format}
+statements much like C's preprocessor statement. However, there's no
+special character to start a \&{format} line; we have to actually check the
+identifier. Furthermore, it looks nicer if constructions such as \\{f6.2}
+are treated as one identifier, so when we're inside a \&{format} statement
+we allow the period to be an acceptable (internal) character for an
+identifier.
+
+@@<Get an identifier@@>= 
+{
+IN_COMMON ASCII HUGE *pformat, HUGE *pdata;
+
+get_identifier:
+	@@<Make |id_first| and |id_loc| point to the identifier@@>@@;
+
+if(FORTRAN_LIKE(language))
+	{
+	if(web_strcmp(pformat,pformat+6,id_first,id_loc) == EQUAL)
+		{ /* Raise special flag to say we're inside a |@@r format|
+statement. */ 
+		in_format = YES;
+		return begin_format_stmt; 
+		}
+	else if(program==weave)
+		{
+		if(web_strcmp(pdata,pdata+4,id_first,id_loc) == EQUAL)
+			{ /* Inside a |@@r data| statement. */
+			in_data = YES;
+			return identifier;
+			}
+		else if(at_beginning && *loc==@':' &&
+				!is_in(non_labels,id_first,id_loc))
+			return stmt_label;  
+		}
+	}
+
+if(is_include_like()) 
+	sharp_include_line = YES;
+
+return identifier;
+}
+
+@
+@<Mac...@>=
+@@ 
+@@<Make |id_first|...@@>=
+{
+id_first = --loc;
+
+/* Scan over subsequent elements of an identifier. */
+for(++loc; isAlpha(*loc) || isDigit(*loc)
+	|| *loc==@@'_' || *loc==@@'$' || (in_format && *loc==@@'.'); loc++)
+		;
+
+upcoming_kind = BOOLEAN(Fortran88 && (*loc == @'"' || *loc == @'\'')
+		&& loc[-1] == @'_');
+
+id_loc = loc - upcoming_kind;  /* End plus one of the identifier.  If a
+	kind subscript is coming up, don't include the underscore. */
+}
+
+@ 
+@<Mac...@>=
+@@ Here we obtain the file name after an \.{@@@@o}~command.
+@@<Scan the output file name@@>=
+{
+while(*loc == @' ' || *loc == tab_mark)
+	{
+	loc++;
+	if(loc > limit) return ignore;
+	}
+
+id_first = loc;
+while(*loc != @' ' && *loc != tab_mark) loc++; /* Absorb file name. */
+id_loc = loc;
+if(*id_first == @'"') id_first++;
+if(*(id_loc-1) == @'"') id_loc--;
+if(id_loc - id_first >= MAX_FILE_NAME_LENGTH)
+	{
+	err_print(T,"Output file name too long; allowed only %d characters",
+		MAX_FILE_NAME_LENGTH - 1);
+	id_loc = id_first + MAX_FILE_NAME_LENGTH - 1;
+	}
+}
+
+@ These tables are initialized during |common_init|.
+
+@a
+
+#undef expr
+#define expr 1
+
+#undef unop
+#define unop 2
+
+#undef binop
+#define binop 3
+
+extern DOTS HUGE *dots; /* The dynamic table; see \.{common.web}. */
+
+#ifdef _FWEB_h
+
+	EXTERN DOTS dots0[]
+   #if(part == 0 || part == 1)
+	    = {
+		{(ASCII *)"@@@@@@",3,dot_const,expr,0}, /* Dummy */
+		{(ASCII *)"AND",3,dot_const,binop,and_and}, /* |and_and| */
+		{(ASCII *)"EQ",2,dot_const,binop,eq_eq}, /* |eq_eq| */
+		{(ASCII *)"EQV",3,dot_const,binop,eqv}, /* |eqv| */
+		{(ASCII *)"FALSE",5,dot_const,expr,0},
+		{(ASCII *)"GE",2,dot_const,binop,gt_eq}, /* |gt_eq| */
+		{(ASCII *)"GT",2,dot_const,binop,@'>'}, /* |@'>'| */
+		{(ASCII *)"LE",2,dot_const,binop,lt_eq}, /* |lt_eq| */
+		{(ASCII *)"LT",2,dot_const,binop,@'<'}, /* |@'<'| */
+		{(ASCII *)"NE",2,dot_const,binop,not_eq}, /* |not_eq| */
+		{(ASCII *)"NEQV",4,dot_const,binop,neqv}, /* |neqv| */
+		{(ASCII *)"NOT",3,dot_const,unop,@'!'}, /* |@'!'| */
+		{(ASCII *)"OR",2,dot_const,binop,or_or}, /* |or_or| */
+		{(ASCII *)"TRUE",4,dot_const,expr,1},
+		{(ASCII *)"XOR",3,dot_const,binop,neqv}, /* |neqv| */
+		{(ASCII *)"",0,0,0,0}
+		}
+	#endif /* |part == 1| */
+		;
+#endif /* |_FWEB_h| */
+
+@ The preprocessor commands have a similar format.
+@a
+
+#ifdef _FWEB_h
+
+	EXTERN DOTS mcmds[] 
+   #if(part ==0 || part == 1)
+	 = {
+		{(ASCII *)"define",6,WEB_definition},
+		{(ASCII *)"elif",4,m_elif},
+		{(ASCII *)"elseif",6,m_elif},
+		{(ASCII *)"else",4,m_else},
+		{(ASCII *)"endfor",6,m_endfor},
+		{(ASCII *)"endif",5,m_endif},
+		{(ASCII *)"for",3,m_for},
+		{(ASCII *)"if",2,m_if},
+		{(ASCII *)"ifdef",5,m_ifdef},
+		{(ASCII *)"ifndef",6,m_ifndef},
+		{(ASCII *)"line",4,m_line},
+		{(ASCII *)"undef",5,m_undef},
+		{(ASCII *)"",0,0}
+	    }
+	#endif /* |part == 1| */
+		;
+#endif /* |_FWEB_h| */
+
+@ 
+@<Mac...@>=
+@@ The preprocessor commands are piggy-backed on the \.{@@@@\#} command. If
+there's text after that command, then we hunt through the above table.
+If we find a processor command, any subsequent white space is skipped.
+(This was added for nuweb mode, which otherwise takes each blank one at a
+time.)  Otherwise, it's a |big_line_break|.
+
+@@<Process possible preprocessor command@@>=
+{
+boolean mcode;
+
+*limit = @' '; /* Terminator for identifier search. */
+id_first = loc;
+
+while(isAlpha(*loc)) 
+	loc++; /* Find end of identifier. */
+
+if((mcode=is_mcmd(mcmds,id_first,loc)) != 0) 
+	{
+	while(loc < limit && (*loc == @@' ' || *loc == tab_mark))
+		loc++;
+
+	#ifdef _FWEAVE_h
+		defd_switch = NO; /* Don't let \.{@@@@[} propagate. */
+	#endif
+
+	return mcode;
+	}
+
+loc = id_first; /* Failed to recognize preprocessor command. */
+}
+
+@ Here are macros for use with memory allocation.
+
+@d GET_MEM(why,nunits,type) 
+	(type HUGE *)get_mem0((outer_char *)why,(unsigned long)(nunits),
+		sizeof(type)) 
+
+@d FREE_MEM(p,why,nunits,type) 
+	free_mem0((void HUGE *)p,(outer_char *)why,(unsigned long)(nunits),
+		sizeof(type))
+
+@d ALLOC(type,ptr,abbrev,nunits,dn) 
+	ptr = (type HUGE *)alloc((outer_char *)abbrev,(BUF_SIZE HUGE *)&nunits,
+		sizeof(*ptr),dn)
+
+
+@a
+
+IN_COMMON sixteen_bits HUGE *args; /* For macro processing. */
+IN_COMMON BUF_SIZE max_margs;
+
+IN_COMMON boolean upcoming_kind CSET(NO); 
+	/* For use after dot constant or character kind. */
+
+@ Miscellaneous definitions.
+
+	@D MCHECK0(n,reason) mcheck0((unsigned long)(n),(outer_char *)reason)
+
+	@d EVALUATE(val,p0,p1) 
+	  {unsigned long nbytes;
+	  val_ptr = val_heap = 
+	  GET_MEM("val_heap",nbytes=2*((p1)-(p0)),VAL); 
+		evaluate(&val,p0,p1); 
+	  if(val_heap) FREE_MEM(val_heap,"val_heap",nbytes,VAL);
+	  }
+
+	@d DONE_LEVEL (cur_byte >= cur_end) /* Do we need to pop? */
+
+@<Mac...@>=
+@@
+@@<Glob...@@>=
+
+/* The shorter length here is primarily to keep the stack under control.
+Now that |N_MSGBUF| is used  dynamically, maybe this statement isn't
+necessary. */ 
+#ifdef SMALL_MEMORY
+	#define N_MSGBUF 2000
+#else
+	#define N_MSGBUF 10000
+#endif 
+
+
+@ The following helps insert spaces in the output.
+@<Typedef...@>=
+
+typedef enum
+	{
+	MISCELLANEOUS, /* ``normal'' state */
+	NUM_OR_ID, /* state associated with numbers and identifiers */
+	UNBREAKABLE, /* state associated with \.{@@\&} */
+	VERBATIM /* state in the middle of a string */
+	} OUTPUT_STATE;
+
+@ For debugging and error messages, we need a routine that gives the name
+of a control code.
+
+@A
+#ifdef _FWEB_h
+#if(part == 0 || part == 1)
+
+@[outer_char *ccode_name FCN((code))
+	eight_bits code C1("")@;
+{
+switch(code)
+	{
+   case begin_FORTRAN: return (outer_char *)"begin_FORTRAN";
+   case begin_RATFOR: return (outer_char *)"begin_RATFOR";
+   case begin_C: return (outer_char *)"begin_C";
+   case ascii_constant: return (outer_char *)"ascii_constant";
+   case big_line_break: return (outer_char *)"big_line_break";
+   case begin_meta: return (outer_char *)"begin_meta";
+   case end_meta: return (outer_char *)"end_meta";
+   case TeX_string: return (outer_char *)"TeX_string";
+   case xref_roman: return (outer_char *)"xref_roman";
+   case xref_typewriter: return (outer_char *)"xref_typewriter";
+   case xref_wildcard: return (outer_char *)"xref_wildcard";
+   case formatt: return (outer_char *)"formatt";
+   case definition: return (outer_char *)"definition";
+   case WEB_definition: return (outer_char *)"WEB_definition";
+   case begin_code: return (outer_char *)"begin_code";
+   case module_name: return (outer_char *)"module_name";
+   case new_module: return (outer_char *)"new_module";
+   case m_ifdef: return (outer_char *)"m_ifdef";
+   case m_ifndef: return (outer_char *)"m_ifndef";
+   case m_if: return (outer_char *)"m_if";
+   case m_else: return (outer_char *)"m_else";
+   case m_elif: return (outer_char *)"m_elif";
+   case m_endif: return (outer_char *)"m_endif";
+   case m_undef: return (outer_char *)"m_undef";
+   case m_line: return (outer_char *)"m_line";
+
+#ifdef _FTANGLE_h
+   case begin_vcmnt: return (outer_char *)"begin_vcmnt";
+   case begin_bp: return (outer_char *)"begin_bp";
+   case insert_bp: return (outer_char *)"insert_bp";
+   case control_text: return (outer_char *)"control_text";
+#endif /* |_FTANGLE_h| */
+
+#ifdef _FWEAVE_h
+   case dont_expand: return (outer_char *)"dont_expand";
+   case auto_label: return (outer_char *)"auto_label";
+   case macro_module_name: return (outer_char *)"macro_module_name";
+   case switch_math_flag: return (outer_char *)"switch_math_flag";
+   case underline: return (outer_char *)"underline";
+   case thin_space: return (outer_char *)"thin_space";
+   case math_break: return (outer_char *)"math_break";
+   case line_break: return (outer_char *)"line_break";
+   case no_line_break: return (outer_char *)"no_line_break";
+   case pseudo_semi: return (outer_char *)"pseudo_semi";
+   case macro_space: return (outer_char *)"macro_space";
+   case copy_mode: return (outer_char *)"copy_mode";
+   case toggle_output: return (outer_char *)"toggle_output";
+   case pseudo_expr: return (outer_char *)"pseudo_expr";
+   case pseudo_colon: return (outer_char *)"pseudo_colon";
+   case trace: return (outer_char *)"trace";
+#endif /* |_FWEAVE_h| */
+   default: return OC("UNKNOWN");
+	}	
+}
+#endif /* |part == 1| */
+#endif /* |_FWEB_h| */
+
+@ Wrapping it up.
+@a
+@<Glob...@>@;
+@<Typedef...@>@;
+
+@
+@<Mac...@>=
+@@
+@@<Include...@@>=
+#include "typedefs.h"
+
+@* INDEX.

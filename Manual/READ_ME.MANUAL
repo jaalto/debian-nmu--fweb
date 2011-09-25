@@ -1,0 +1,51 @@
+		   --- The Fweb/Manual SUBDIRECTORY ---
+
+  All FWEB documentation is maintained with texinfo.  The
+installation procedure will automatically install the relevant fweb.info
+files.  To obtain printed documentation, print fweb.ps or say
+
+	tex fweb.texi
+
+assuming that the relevant texinfo macros are installed on your
+system.  This relies on the files fweb.??s being present.  `make install'
+does not install those files by default.  If you are generating
+documentation from the installed fweb.texi, you must say instead
+
+	texi2dvi fweb.texi
+
+which regenerates fweb.??s.  (The version of texinfo.tex used for this
+release is included; a few minor changes have been made, marked by `JAK'.)
+
+  `make install' automatically generates and installs the files fweb.info*.
+
+  The following files are kept in this directory:
+
+Man pages:
+	fweb.1      --- Unix man pages (very abbreviated information).
+
+Texinfo:
+	fweb.texi   --- Source code for the .info files.
+	fweb.cps    --- Concept index for fweb.texi.
+	fweb.fns    --- Function index for fweb.texi.
+	fweb.vrs    --- Parameter index for fweb.texi.
+	fweb.ps     --- Postscript form of the the user manual.
+	texinfo.tex --- TeX macros for texinfo.
+
+FWEB macros:
+	fwebmac.web --- Source code for the FWEB macro package.
+	fwebmac.sty --- The tangled output from above; \input into the TeX
+			files produced by FWEAVE.
+
+LaTeX2e packages:
+	fwebinsert.sty --- Permits insertion of woven output into a LaTeX
+			document. 
+	fwebnum.sty --- Numbers sections consecutively instead than using
+			the default article 1.2.3 style. 
+	idxmerge.sty --- Used for merging indexes of several distinct web
+			files. 
+
+Miscellaneous:
+	fweb.tex    --- TeX macros needed for weaving the FWEB source code.
+
+	index.tex   --- A skeleton for printing a stand-alone index.
+

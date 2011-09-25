@@ -1,0 +1,122 @@
+@z --- ratfor0.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+\Title{RATFOR0}
+
+@c
+
+@* RATFOR0.  The following routines are dummies, used when the full
+\.{ratfor} package is't loaded.  To tell the make file not to load
+\.{ratfor}, you say ``\.{make LOAD\_RATFOR=0 ftangle}'', or put the line
+``\.{LOAD\_RATFOR=0}'' into \.{default.mk}.
+
+@a
+@<Include files@>@;
+@<Prototypes@>@;
+@<Global variables@>@;
+
+@I typedefs.hweb
+
+@
+@<Proto...@>=
+
+#include "c_type.h"
+
+@ The following are dummies to make \FTANGLE\ happy.
+@<Glob...@>=
+
+sixteen_bits id_function,id_program,id_subroutine;
+boolean balanced = YES;
+ASCII cur_delim = '\0';
+
+
+@ |common_init| calls this routine to set the flag |Rat_is_loaded|.  Note
+that we allow \FWEAVE\ to process the |RATFOR| language even though
+\FTANGLE\ may not be able to.
+@a
+SRTN is_Rat_present(VOID)
+{
+Rat_is_loaded = BOOLEAN(program==weave);
+}
+
+@ Various places in the code call this function to make sure we haven't
+somehow gotten into \Ratfor\ by mistake when it's not loaded.
+@a
+boolean Rat_OK FCN((msg))
+	outer_char *msg C1("")@;
+{
+if(Rat_is_loaded) return YES; /* We might get here by a call from
+				\.{common} during \FWEAVE. */
+
+err_print(R,"Ratfor is not loaded.  %s",msg);
+return NO;
+}
+
+@ An error routine for this package; helps to trace confusion.
+
+@d BAD_CALL(fcn_name) bad_call(OC(fcn_name))
+
+@a
+SRTN bad_call FCN((fcn_name))
+	outer_char *fcn_name C1("")@;
+{
+CONFUSION(fcn_name,"This function shouldn't be called");
+}
+
+@ No memory allocations are needed when not loaded.
+@a
+SRTN alloc_Rat(VOID)
+{}
+
+@ Initializations are also moot.
+@a
+SRTN ini_Ratfor(VOID)
+{}
+
+@ Reserved words are stored only when the language is |RATFOR|, so this
+shouldn't happen.
+@a
+SRTN ini_RAT_tokens FCN((language0))
+	LANGUAGE language0 C1("")@;
+{
+if(Rat_is_loaded) return;
+BAD_CALL("ini_RAT_tokens");
+}
+
+@ Should never be called.
+@a
+SRTN cp_fcn_body(VOID)
+{
+BAD_CALL("cp_fcn_body");
+}
+
+@ Likewise.
+@a
+int chk_lbl(VOID)
+{
+BAD_CALL("chk_lbl");
+return -1; // Avoids spurious compiler warning.
+}
+
+@ Likewise.
+@a
+SRTN RAT_error(VOID)
+{
+BAD_CALL("RAT_error");
+}
+
+@ The |_DO| macro ought to transcend |RATFOR|, but it uses a bunch of
+\Ratfor\ features.
+@a
+X_FCN x_unroll(VOID)
+{
+Rat_OK(OC("Therefore, the _DO macro cannot be used, since it relies on some \
+Ratfor features (sorry)"));
+}
+
+@* INDEX.

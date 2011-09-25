@@ -1,0 +1,8 @@
+-o fweave 
+fweave.o fweave2.o fweave3.o
+common.o common2.o
+prod.o prod2.o
+reserved.o reservd2.o
+style.o ratfor0.o termcap0.o
+-lm
+

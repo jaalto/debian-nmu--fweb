@@ -1,0 +1,127 @@
+@z --- xrefs.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@* DATA STRUCTURES EXCLUSIVE to WEAVE.
+As explained in \.{common.web}, the field of a |name_info| structure that
+contains the |rlink| of a module name is used for a completely different
+purpose in the case of identifiers.  It is then called the |ilk| of the
+identifier, and it is used to distinguish between various types of
+identifiers, as follows:
+
+{\narrower\narrower\everypar={\noindent\hang}
+|normal| identifiers are part of the \cee\ program; they 
+will appear in \It{italic type}.
+
+|roman| identifiers are index entries that appear after
+\.{@@\^} in the \.{WEB} file.
+
+|wildcard| identifiers are index entries that appear after
+\.{@@9} in the \.{WEB} file; they will appear in a format controlled by the
+user-defined macro~\.{\\9}.
+
+|typewriter| identifiers are index entries that appear after
+\.{@@.} in the \.{WEB} file; they will appear in \.{typewriter type}.
+
+|do_like| \dots\ identifiers are reserved words whose |ilk| explains how
+they are to be treated when code is being formatted.
+
+}
+
+@d normal 0 /* ordinary identifiers have |normal| ilk */
+@d roman 1 /* normal index entries have |roman| ilk */
+@d wildcard 2 /* user-formatted index entries have |wildcard| ilk */
+@d typewriter 3 /* `typewriter type' entries have |typewriter| ilk */
+
+@d is_reserved(a) (a->ilk>typewriter) /* tells if a name is a reserved word */
+
+@ We keep track of the current module number in |module_count|, which is
+the total number of modules that have started.  Modules which have been
+altered by a change file entry have their |chngd_module| flag turned on
+during the first phase.
+
+@<Global...@>=
+
+EXTERN boolean change_exists; /* has any module changed? */
+
+@ The other large memory area in \WEAVE\ keeps the cross-reference data.
+All uses of the name~|p| are recorded in a linked list beginning at
+|p->xref|, which points into the |xmem| array. The elements of |xmem| are
+structures consisting of an integer~|num| and a pointer~|xlink| to
+another element of |xmem|.  If |x=p->xref| is a pointer into |xmem|, the
+value of |x->num| is either a module number where |p|~is used, or it is
+|def_flag| plus a module number where |p|~is defined; and |x->xlink| points
+to the next such cross-reference for~|p|, if any. This list of
+cross-references is in decreasing order by module number. The next unused
+slot in |xmem| is |xref_ptr|.
+
+The global variable |xref_switch| is set either to |def_flag| or to zero,
+depending on whether the next cross-reference to an identifier is to be
+underlined or not in the index. This switch is set to |def_flag| when
+\.{@@\_}, \.{@@[}, \.{@@]},\.{@@d}, \.{@@m}, or \.{@@f} is scanned, and it
+is cleared to zero when the next identifier or index entry cross-reference
+has been made.  Similarly, the global variable |mod_xref_switch| is either
+|def_flag| or zero, depending on whether a module name is being defined or
+used.
+
+@d append_xref(c) if (xref_ptr==xmem_end) 
+			OVERFLW("cross-references",ABBREV(max_refs));
+  else 
+	{
+	(++xref_ptr)->num=c;
+	xref_ptr->Language = (boolean) language;
+	}
+
+@<Type...@>=
+
+typedef struct xref_info0 
+	{
+	  sixteen_bits num; /* module number plus zero or |def_flag| */
+	  struct xref_info0 HUGE *xlink; /* pointer to the previous
+				cross-reference */ 
+	  boolean Language;	/* Language in force for this module. */
+	} xref_info;
+
+typedef xref_info HUGE *xref_pointer;
+typedef ASCII HUGE *XREF_POINTER; /* For assignments like |name_dir->xref =
+				(XREF_POINTER)xref_ptr|. See the comment
+				immediately below about~|xref|. */ 
+
+@  The integer |def_flag| is added to a module number when that module is
+defined. 
+
+For variable names, a different approach is taken.  If a name (especially a
+function name) is preceded by~\.{@@[}, the switch |defd_switch| is set to
+|YES|.  Then when |new_xref| is called, the module number of that name is
+entered into the |defined_in| field.
+
+@d def_flag ID_FLAG /* must be strictly larger than |max_modules| */
+
+@d xref equiv_or_xref /* The trouble with this is that |xref| is a
+	|xref_pointer| whereas |equiv_or_xref| is |ASCII|. This means that
+	lots of casting needs to be done to keep the compiler happy. Hence
+	the previous |typedef|. */
+
+@f XREF_POINTER int
+
+@<Global...@>=
+
+#ifndef COMMON_FCNS_
+  IN_COMMON BUF_SIZE max_modules; /* Size allocated in \.{common.web}. */
+#endif
+
+EXTERN BUF_SIZE max_refs;
+EXTERN xref_info HUGE *xmem; /* contains cross-reference information */
+EXTERN xref_pointer xmem_end;
+
+EXTERN xref_pointer xref_ptr; /* the largest occupied position in |xmem| */
+
+EXTERN sixteen_bits xref_switch,mod_xref_switch; // either zero or |def_flag|.
+EXTERN boolean defd_switch; // Set by `\.{@@[}'.
+EXTERN NAME_TYPE defd_type SET(NEVER_DEFINED);
+EXTERN boolean typd_switch; // Set by `\.{@@]}'.
+EXTERN boolean index_short; // Set by `\.{@@+}'.

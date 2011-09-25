@@ -1,0 +1,16 @@
+     --- BOOTSTRAPPING FWEB on the SILICON GRAPHICS PERSONAL IRIS ---
+			       Version 1.30
+			       May 15, 1993
+
+   This subdirectory contains bootstrap files for Silicon Graphics
+workstations. 
+
+   First, see whether you can't bootstrap using ./configure (see
+READ_ME.FWEB) or the ansi version; see the discussion in
+boot/unix/ansi/READ_ME.ANSI.  I have been able to do this successfully for
+version 4D1-3.3.2.
+
+  If you get compiler errors from the ansi version, then try the stuff in
+this subdirectory:
+
+   To bootstrap, please see the instructions in READ_ME.FWEB.

@@ -1,0 +1,32 @@
+% This file is a LaTeX2e package.  One may select it in a LaTeX document by
+% the command 
+%
+%	\usepackage{idxmerge}
+%
+% The package provides sample definitions for use with stand-alone merged
+% indexes. For detailed usage instructions, see the texinfo documentation,
+% menu item ``Merging indexes''.
+
+% J. A. Krommes, April 15, 1996
+
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{idxmerge}[1996/04/15]
+
+% The following macro appears in the TEST-names.tex file written by
+% idxmerge.  Its first argument is the number of a web source file.  Its
+% second argument is the name of that file.  The format of \idxname may be
+% redefined as desired.
+
+\def\idxname#1#2{\leavevmode\llap{\textbf{\pgfmt{#1}:}}  \texttt{#2}\par}
+
+% The next macro is used in the preamble of the .ind file written by
+% makeindex.
+
+\def\topofindex{\noindent
+\textbf{List of merged files:}\par\smallskip
+{\parskip=0pt \parindent=25pt
+\input{\jobname-names}
+}%
+\bigskip
+}

@@ -1,0 +1,943 @@
+@z --- custom.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+\Title{CUSTOM.WEB} % Customization header file.
+
+@c
+@* CUSTOMIZATION. 
+Customization refers to tayloring an already compilable \FWEB, as well as
+dealing with the annoyances of different compilers and operating systems. 
+Once you've gotten a workable processor, you could supply a change file for
+\.{custom.web} to maintain your changes from release to release. 
+
+The source code includes the file \.{custom.h}. There are two fundamental
+ways of producing that file.
+
+In the modern way (new with v1.30), a template file \.{custom.h.in} is
+produced.  This file is read by the configuration script \.{./configure},
+which figures out automatically the settings of various parameters
+appropriate for your system, then writes out \.{custom.h}.
+
+In the old way, \.{custom.h} is created directly from \.{custom.web}, using
+conditional flags to handle the differences between machines.  
+
+Conditional branches \It{in this file only} are determined by upper-case \WEB\
+macros, one of which should be defined from the command line (by saying,
+e.g., ``\.{-mIBMPC}'') or put into your \.{.fweb} file.  Currently, these
+macros are |CONFIG| (the special ``machine'' for automatic configuration), 
+|ANSI|, |BSD|, |DSU|, |IBMPC|, |MAC|, |MISC|, |SGI|,
+|SUN|, and |VAX|.  If you're working on the Sun and will be using \.{gcc}
+(highly recommended), you should also define |GCC|.  Use the |MISC| macro
+for working with your own customization.
+
+\comment
+The current list of customization flags is as follows:
+$$\vbox{\halign{\.{#}\hfil&\ ---\ \vtop{\hsize=0.75\hsize\noindent
+	\strut#\strut}\hfil\cr
+machine&\It{Lower-case} name of the machine, such as ``\.{-mmachine=ansi}''
+or ``\.{-mmachine=sun}''.\cr 
+MY\_BANNER&A possible local addition to the start-up banner, such as
+``\.{-mMY\_BANNER=(Princeton)}''.\cr 
+SYS\_NAME&System name, usually used to customize the ANSI version, as in
+``\.{-mSYS\_NAME=CRAY}''.\cr 
+TIMING\_WIDTH&Number of decimal places in the seconds field for timing
+statistics. For example, on the CRAY you might say
+``\.{-mTIMING\_WIDTH=2}''.\cr 
+}}$$
+For the flags such as |SYS_NAME| that require string arguments, quotes are
+optional if the argument contains no embedded blanks.
+\endcomment
+
+@ We can automatically generate the relevant lower-case machine flags from the
+value in \.{.fweb}.
+
+@#ifdef ANSI
+	@m ANSI 1
+@#else
+	@m ANSI 0
+@#endif
+
+@#ifdef APOLLO
+	@m APOLLO 1
+@#else
+	@m APOLLO 0
+@#endif
+
+@#ifdef BSD
+	@m BSD 1
+@#else
+	@m BSD 0
+@#endif
+
+@#ifdef CONFIG
+	@m CONFIG 1
+@#else
+	@m CONFIG 0
+@#endif
+
+@#ifdef DSU
+	@m DSU 1
+@#else
+	@m DSU 0
+@#endif
+
+@#ifdef IBMPC
+	@m IBMPC 1
+@#else
+	@m IBMPC 0
+@#endif
+
+@#ifdef MAC
+	@m MAC 1
+@#else
+	@m MAC 0
+@#endif
+
+@#ifdef MISC
+	@m MISC 1
+@#else
+	@m MISC 0
+@#endif
+
+@#ifdef MVS
+	@m MVS 1
+@#else
+	@m MVS 0
+@#endif
+
+@#ifdef SGI
+	@m SGI 1
+@#else
+	@m SGI 0
+@#endif
+
+@#ifdef SUN
+	@m SUN 1
+
+	@#ifdef GCC
+		@m SUN_GCC 1
+		@m SUN_CC 0
+	@#else
+		@m SUN_GCC 0
+		@m SUN_CC 1
+	@#endif
+@#else
+	@m SUN 0
+	@m SUN_GCC 0
+	@m SUN_CC 0
+@#endif
+
+@#ifdef VAX
+	@m VAX 1
+@#else
+	@m VAX 0
+@#endif
+
+
+@* TEMPLATE DEFINITIONS.  First, we have a macro definition that generates
+the definition, conditionally commented out.  A similar definition handles
+file includes. The |SYS_PATH| macro is used for such things as
+\.{sys/types.h} that have slashes in them.
+
+@m DEFN(when,text) $P define text $EVAL(when)
+@m DEFN0(when,txt) DEFN1(when,txt)
+@m DEFN1(when,txt) $IF(when,txt,$COMMENT(#txt))
+
+@m AUTOCONFIG(name) 
+   AU0("(The flag |",#name,"| is set automatically in config.h by ./configure.)")
+@m AU0(s1,s2,s3) AU1(s1 s2 s3)
+@m AU1(s) $COMMENT(s)
+
+@m INCLUDE(when,file) DEFN0(when,_P include <file.h>)
+@m INCLUDE_LOCAL(when,file) DEFN0(when,_P include #file)
+
+@#if IBMPC
+	@m SYS_PATH(name) $TRANSLIT(#name,"/","\\")
+@#else
+	@m SYS_PATH(name) #!name
+@#endif /* |IBMPC| */
+
+
+@* EXECUTABLE STATEMENTS. Finally, here are the statements that are
+actually written into \.{custom.h} or \.{custom.h.in}.
+
+@A
+/* --- BOOTSTRAPPING --- */
+
+/* To bootstrap yourself onto a new system, you should modify this file
+appropriately.  In most cases, you set a flag by saying ``#define
+FLAG''---i.e., you make a null definition.  Don't set these flags to~0
+or~1.  However, in a few cases the macros are not flags and must be given
+the appropriate definition. */
+
+/* --- MACHINE COMPILER FLAG --- */
+
+/* This must be in lower case.  Presently these are drawn from the list
+{ansi, bsd, dsu, ibmpc, mac, misc, mvs, sgi, sun, vax}.  These
+flags may be used in #define statements within the source code to tailor
+things to a particular compiler or operating system.  If you use
+./configure to generate custom.h, there will be no definition following
+this comment. */ 
+@#if !CONFIG 
+@#if ANSI
+	#ifndef ansi
+	#define ansi
+	#endif
+@#endif@%
+@#if APOLLO
+	#ifndef apollo
+	#define apollo
+	#endif // |apollo|
+@#endif@%
+@#if BSD
+	#ifndef bsd
+	#define bsd
+	#endif // |bsd|
+@#endif@%
+@#if DSU
+	#ifndef dsu
+	#define dsu
+	#endif // |dsu|
+@#endif@%
+@#if IBMPC
+	#ifndef ibmpc
+	#define ibmpc
+	#endif // |ibmpc|
+@#endif@%
+@#if MAC
+	#ifndef mac
+	#define mac
+	#endif // |mac|
+@#endif@%
+@#if MISC
+	#ifndef misc
+	#define misc
+	#endif // |misc|
+@#endif@%
+@#if MVS
+	#ifndef mvs
+	#define mvs
+	#endif // |mvs|
+@#endif@%
+@#if SGI
+	#ifndef sgi
+	#define sgi
+	#endif // |sgi|
+@#endif@%
+@#if SUN
+	#ifndef sun
+	#define sun
+	#endif // |sun|
+@#endif@%
+@#if VAX
+	#ifndef vax
+	#define vax
+	#endif // |vax|
+@#endif@%
+@#endif@%
+
+@ The \FWEB\ variable |SYS_NAME| is usually used to customize the ANSI
+version. If it's not defined while tangling \.{custom.web}, it's given a
+default value. Things are set up so you can override by defining
+|sys_name| from the compiler's line while compiling \.{common.c}.
+
+@m S(type) `$P`##define THE_SYSTEM@= @>$STRING(type) /* (Without the verbatim
+	command, the space disappears under expansion, which Microsoft doesn't
+	like.) */ 
+
+@A
+/* --- FWEB SYSTEM NAME --- */
+
+/* This is a string such as ``IBM-PC/DOS'' or ``VAX/VMS''. It is printed
+when FWEB starts up. */
+
+@#ifdef SYS_NAME
+	S(SYS_NAME)
+@#else@%
+@#if CONFIG
+	S("UNIX")
+@#elif ANSI
+	S("ANSI/UNIX") 
+@#elif BSD
+	S("BSD")
+@#elif DSU
+	S("DECstation/ULTRIX")
+@#elif IBMPC
+	S("IBM-PC/MSDOS")
+@#elif MAC
+	S("Mac/SHELL")
+@#elif MISC
+	S("Vanilla")
+@#elif MVS
+	S("IBM/MVS")
+@#elif SGI
+	S("Iris")
+@#elif SUN
+	S("SunOS/UNIX")
+@#elif VAX
+	S("VAX/VMS")
+@#else
+	S("Unknown")
+@#endif@%
+@#endif@% /* NO |SYS_NAME|. */
+
+/* --- An optional local banner, printed after the system name above. --- */
+
+#define LOCAL_BANNER ""
+
+@* Errors.  We attempt to use the \.{\#error} command to warn the user
+about inconsistencies.
+@A
+/* Does your compiler understand the ANSI preprocessor command \#error?
+If it does, define |HAVE_ERROR|.  (I haven't figured out a general
+autoconf test yet; it seems to be impossible in principle.) */
+
+DEFN(CONFIG || ANSI || IBMPC || MVS || SUN_GCC ||VAX,HAVE_ERROR)@;
+
+@* Running the preprocessor.
+@A
+/* The C preprocessor is run by the \.{-H} option. */
+
+@#if CONFIG
+	AUTOCONFIG(RUN_CPP)
+@#else
+	#define RUN_CPP "gcc -E"
+@#endif
+
+@* Renaming files.
+@A
+/* Occasionally a system command is issued to rename a file.  Here's how to
+do that. */
+@#if(IBMPC)
+	#define MV "rename"
+@#else
+	#define MV "mv"
+@#endif
+
+@* ASCII translation.  For efficiency, translations to and from the
+character set of the external world to \FWEB's internal |ASCII| aren't
+carried out on |ASCII| machines.
+@A
+/* Do we bother with translations to the internal |ASCII| representation?
+If so, define |TRANSLATE_ASCII|.  Don't bother on |ASCII| machines. */
+
+DEFN(MVS,TRANSLATE_ASCII)@;
+
+/* For \It{debugging} of target machines whose character set differs from
+the one on which you're working, define |DEBUG_XCHR|.  \It{Usually, this
+flag should not be defined.}  When it is defined, the |TRANSLATE_ASCII|
+flag is automatically turned on, and the value of the style-file field
+`xchr' is relevant. \It{Don't use this flag unless you're a system
+developer!!!} */
+
+DEFN(0,DEBUG_XCHR)@;
+
+@* Path format.  @A /* Does the operating system have a Unix-like path?
+That is, does it have the form ``/u/krommes'' rather than the VMS form
+``ux3:[krommes]''?  If so, define |UNIX_PATH|. */
+
+DEFN(!VAX,UNIX_PATH)@;
+
+@* Environment variables.
+@A
+/* If the |getenv| call to obtain an environment variable is supported
+(it usually is) define |HAVE_GETENV|. */
+@#if CONFIG
+	AUTOCONFIG(HAVE_GETENV)
+@#else@%
+	DEFN(!(MAC || MVS), HAVE_GETENV)@;
+@#endif@%
+
+@* File names and extensions.
+
+@m NFN(type) `$P`##define NULL_FILE_NAME@= @>$STRING(type) 
+	/* (Without the verbatim
+	command, the space disappears under expansion, which Microsoft doesn't
+	like.) */ 
+
+@A
+/* --- FILE NAMES and EXTENSIONS --- */
+
+/* Name of the null file.  This macro merely defines the default value of
+the style-file parameter `null_file', so it's not essential to add any more
+machines here. */
+
+@#ifdef NULL_NAME
+	NFN(NULL_NAME)
+@#else@%
+@#if VAX
+	NFN("nl:")
+@#elif IBMPC
+	NFN("nul")
+@#elif MVS
+	NFN("'NULLFILE'")
+@#else
+	NFN("/dev/null") // For Unix systems.
+@#endif@%
+@#endif@%
+
+/* Name of \FWEB's initialization file.  Please see below, after the
+definition of |SMALL_MEMORY|. */
+
+/* Name of \FWEB's default style file.  \It{Please don't change this unless
+you absolutely have to!  Use the `-z' option instead.} */
+
+#define STYLE_FILE_NAME "fweb.sty"
+
+/* Here are the default file extensions for each language.  These merely
+set default style-file parameters, so it's not essential that you change
+anything here.  See the parameters `suffix.C', `suffix.N', etc. */
+
+#define C_EXT "c"
+#define V_EXT "mk"
+#define X_EXT "sty"
+
+@#if CONFIG || ANSI || APOLLO || DSU || MISC || SGI || SUN
+/* Unix. */
+	#define Cpp_EXT "C" // Per \.{gcc}.
+	#define R_EXT "r"
+	#define R90_EXT "r90"
+	#define N_EXT "f"
+	#define N90_EXT "f90"
+@#else 
+/* Non-unix. */
+	#define Cpp_EXT "C"
+	#define R_EXT "rat"
+	#define R90_EXT "rat90"
+	#define N_EXT "for"
+	#define N90_EXT "for90"
+@#endif@%
+
+@#if CONFIG
+	AUTOCONFIG(HAVE_TMPNAM)
+	AUTOCONFIG(HAVE_TEMPNAM)
+@#else
+	DEFN(1, HAVE_TMPNAM)@;
+	DEFN(0, HAVE_TEMPNAM)@;
+@#endif
+
+@* Fancy continuations.  
+@A
+/* The |FANCY_SPLIT| flag is used for buffering the output lines of C~code.
+Define this if the C~compiler CAN'T continue an incomplete line with a
+backslash.  (ANSI compilers should be able to.)
+{\bf (This code may not be fully debugged yet!)} */
+
+@#if CONFIG
+	AUTOCONFIG(FANCY_SPLIT)
+@#else
+	DEFN(SUN_CC || DSU || VAX,FANCY_SPLIT)@;
+@#endif
+
+@* Including files.
+@A
+/* --- INCLUDING FILES --- */
+
+/* The code is written in C, and various header files of the form
+``<*.h>'' are included near the beginning of each source file.  The
+names of these files are standardized by ANSI.  Unfortunately, not everyone
+has gotten around to ANSI yet.  Therefore, here we include important files
+whose names may be nonstandard or whose functions may fluctuate. */
+
+/* Does the ANSI <stdlib.h> exist?  If so, say so here.  This is supposed
+to contain prototypes for the following functions used by \FWEB: |abort|,
+|abs|, |atof|, |atoi|, |atol|, |calloc|, |exit|, |free|, |getenv|,
+|realloc|, |strtod|, |strtol|.  If it doesn't, either find the prototypes
+in another file and include it here, or actually give the prototypes here. */
+
+@#if CONFIG
+	AUTOCONFIG(HAVE_STDLIB_H)
+@#else
+DEFN(ANSI || DSU || IBMPC || MISC || MVS || SGI || SUN || VAX,HAVE_STDLIB_H)@;
+@#endif
+
+@#if CONFIG
+	AUTOCONFIG(HAVE_STDARG_H)
+@#else
+DEFN(ANSI || DSU || IBMPC || MISC || MVS || SGI || SUN || VAX,HAVE_STDARG_H)@;
+@#endif
+
+
+/* Does the ANSI <stddef.h> exist?  If so, include it here.  This is
+supposed to define the |NULL| pointer, and the type |size_t|.  Sometimes
+these are defined in other places as well. */
+
+@#if CONFIG
+	AUTOCONFIG(HAVE_STDDEF_H)
+@#else
+	DEFN(ANSI || IBMPC || MISC || MVS || VAX,HAVE_STDDEF_H)@;
+@#endif
+
+/* Other stuff handled by autoconf. */
+@#if CONFIG
+	AUTOCONFIG(HAVE_STRING_H)
+@#else
+DEFN(ANSI || DSU || IBMPC || MISC || MVS || SGI || SUN || VAX,HAVE_STRING_H)@;
+@#endif
+
+@#if CONFIG
+	AUTOCONFIG(HAVE_MEMORY_H)
+@#else
+	DEFN(0,HAVE_MEMORY_H)@;
+@#endif
+
+@#if CONFIG
+	AUTOCONFIG(HAVE_FLOAT_H)
+@#else
+DEFN(ANSI || DSU || IBMPC || MISC || MVS || SGI || SUN || VAX,HAVE_FLOAT_H)@;
+@#endif
+
+/* Does (non-ANSI) <sys/types.h> exist?  You may find some useful stuff in
+here. But don't use it unless you have to. */
+
+INCLUDE(!CONFIG && (APOLLO || DSU || SGI || SUN), SYS_PATH(sys/types))@;
+
+/* Must we include an extra file for memory management?  E.g., for
+Microsoft, <malloc.h>; for Borland; <alloc.h>.  Not necessary for ANSI;
+it's in <stdlib.h>. */
+
+INCLUDE(IBMPC,malloc)@;
+
+/* Numerical limits.  We use the following ANSI macros: |INT_MAX|,
+|INT_MIN|, |LONG_MAX|, |LONG_MIN|, and |ULONG_MAX|, which are found in
+<limits.h>. If you can't find those macros, define the flag
+|HAVE_VALUES_H|, and possibly include another file with different names for
+the limits, such as <values.h> on the Sun.  The flag |HAVE_VALUES_H|
+assumes that the macros |MAXINT| and |MAXLONG| are defined.  If they are
+not, you must define them here. */
+
+@#if CONFIG
+	AUTOCONFIG(HAVE_LIMITS_H)
+	AUTOCONFIG(HAVE_VALUES_H)
+@#else
+DEFN(ANSI || DSU || IBMPC || MISC || MVS || SGI || SUN_GCC|| VAX,HAVE_LIMITS_H)@;
+DEFN(APOLLO || SUN_CC,HAVE_VALUES_H)@;
+@#endif
+
+/* Please note that additional files are included automatically
+(essentially immediately after this file is read; see <includes.hweb>).
+These were considered to be standard, but that might be a mistake.  Those
+files are: <string.h>, <stdio.h>, <ctype.h>, <setjmp.h>, <time.h>.
+Remember that by convention these files should limit themselves to being
+included only once.  Therefore, if for some reason you need to include one
+of these somewhere in this file, you should be able to do it without
+difficulty; the later automatic include just won't be done if those files
+are following standard protocol. */
+
+@#if CONFIG
+	AUTOCONFIG(ANSI_CTYPE_H)
+@#else
+	DEFN(ANSI || IBMPC || SUN_GCC,ANSI_CTYPE_H)@;
+@#endif
+
+@* Variable-length argument lists.
+@A
+/* --- VARIABLE-LENGTH ARGUMENT LISTS --- */
+
+/* For convenience, FWEB attempts to use functions with variable numbers of
+arguments.  We attempt to support two conventions: ANSI, and Sun's.  If
+this feature is supported, define the flag |VARIABLE_ARGUMENTS|, say
+whether |va_start| has one or two arguments, and include the associated
+header file (<stdarg.h> for ANSI). */
+
+/* Does the compiler allow ANSI-style variable arguments? */
+
+DEFN(CONFIG || ANSI || IBMPC || MISC || MVS || SUN || VAX, VARIABLE_ARGUMENTS)@;
+
+/* Is |va_start| defined with one argument (Sun's convention) or two
+(ANSI)? */  
+@#if SUN_CC
+	#define NUM_VA_ARGS 1
+@#else
+	#define NUM_VA_ARGS 2
+@#endif
+@#if CONFIG
+	AUTOCONFIG(HAVE_STDARG_H)
+@#else
+DEFN(CONFIG || ANSI || DSU || IBMPC || MISC || MVS || SGI || SUN_GCC|| VAX,HAVE_STDARG_H)@;
+@#endif
+
+@* Additional prototypes.
+@A
+/* --- ADDITIONAL PROTOTYPES --- */
+
+/* You may wish to collect any additional prototypes that are required and
+put them into your own header file that you include here. */
+
+/* If the flag |HAVE_STD_PROTOTYPES| is false, it causes the file
+"stdlib0.h" to be loaded.  This contains ANSI prototypes that for some
+reason aren't provided with the gcc environment on the Sun. */
+@#if CONFIG
+	AUTOCONFIG(HAVE_STD_PROTOTYPES)
+@#else
+	DEFN(!SUN_GCC,HAVE_STD_PROTOTYPES)@; 
+@#endif
+
+@* Function prototyping, etc.  
+@A 
+/* Define the flag |OLD_PROTOTYPES| for compilers that don't support the
+new (ANSI) style of function declaration and prototyping.  The new style is
+|fcn(int i,char *s){}|; the old style is |fcn(i,s) int i; char *s; {}|. */
+
+@#if CONFIG
+	AUTOCONFIG(OLD_PROTOTYPES)
+@#else
+	DEFN(SUN_CC || DSU || MAC || SGI || MISC || VAX, OLD_PROTOTYPES)@;
+@#endif
+
+/* ANSI also introduces the type |void|.  If your compiler doesn't
+understand the constructions |void *| and |void fcn()|, define |NO_VOID|. */
+
+@#if CONFIG
+	AUTOCONFIG(NO_VOID)
+@#else
+	DEFN(DSU || MAC || SGI || SUN_CC, NO_VOID)@;
+@#endif
+
+@* Special types.
+@A
+/* --- SPECIAL TYPES --- */
+
+/* |const| seems to be an annoyance; not all compilers treat it the same
+way.  We really only want it for debugging, anyway, so we mostly just
+remove it.  It's kept when compiling on the Sun with gcc, because it
+gives the developer more checks on the code.  If you want to keep it,
+define |KEEP_CONST|. */
+
+DEFN(CONFIG || SUN_GCC,KEEP_CONST)@;
+
+/* For personal computers, the kind of pointer is an issue.  They must be
+|huge|.  If your compiler understands |huge|, define |HUGE_POINTERS|. */
+
+DEFN(IBMPC,HUGE_POINTERS)@;
+
+@* Special functions.
+@A
+/* --- SPECIAL FUNCTIONS --- */
+
+/* The ANSI |sprintf| function returns the number of characters written.
+If this is the case on your system, define |ANSI_SPRINTF|.  (It's always
+safe to not define it.) */
+
+@#if CONFIG
+	AUTOCONFIG(ANSI_SPRINTF)
+@#else
+	DEFN((ANSI || IBMPC || MVS || VAX),ANSI_SPRINTF)@;
+@#endif
+
+/* The ANSI |sscanf| does some cute things with scansets, but it doesn't
+always work. */
+@#if CONFIG
+	AUTOCONFIG(ANSI_SSCANF)
+@#else
+	DEFN(ANSI || IBMPC || SUN_GCC, ANSI_SSCANF)@;
+@#endif
+
+/* The ANSI |system| function is supposed to take |NULL| as an argument,
+which means check if a command processor exists.  If this works properly,
+defined |ANSI_SYSTEM|.  (It doesn't work on the Sun.) */
+
+DEFN(ANSI || IBMPC, ANSI_SYSTEM)@;
+
+@* Annoying warnings.  
+@A
+/* --- ANNOYING WARNINGS --- */
+
+/* Sometimes the compiler can't understand that the
+control flow can never get to the bottom of a function. To avoid warning
+complaints, we have the following: */
+
+@#if SUN_CC || DSU || SGI
+	#define DUMMY_RETURN(value) 
+@#else
+	#define DUMMY_RETURN(value) return value
+@#endif
+
+@* Functions with unusual names.
+The Aztec environment handled newlines in a non-standard way, and had
+some other peculiarities.
+
+@f lmalloc malloc
+
+@A
+/* --- UNUSUAL NAMES --- */
+
+/* Put here any definitions that override standard names.  For example, for
+some ancient on the MAC one had to say ``#define getc agetc''. */
+
+@#if MAC /* \.{Machine-dependent}: Non-Unix treatment of newlines, and some
+		other garbage. */
+	#define index indexx
+	#define getc agetc 
+	#define putc aputc
+	#define abs(i) (i > 0 ? i : (-i)) // Maybe in some other header file?
+@#else
+	/* Nothing to be done. */
+@#endif@%
+
+@* Directory specifications.
+@A
+/* --- DIRECTORY SPECIFICATIONS --- */
+
+/* Directory specifications are delimited in different ways under the various
+operating systems. Unix: '/'; IBM-PC: '\\'; VAX/VMS: ']'. */
+
+@#ifdef PREFIX_END_CHR
+	#define PREFIX_END_CHAR PREFIX_END_CHR
+@#else@%
+@#if VAX
+	#define PREFIX_END_CHAR ']' // The VAX has a peculiar format.
+@#elif IBMPC
+	#define PREFIX_END_CHAR '\\' // IBM is perverse.
+@#else@%
+	#define PREFIX_END_CHAR '/' // The Unix convention.
+@#endif@%
+@#endif@%
+
+@* Timing.
+@A
+/* --- TIMING --- */
+
+/* First of all, we have a flag to say whether timing information is
+printed at the end of the run.  (If you can't figure out the timing
+routines for your machine or don't want a timing information line at the
+end of your terminal output, don't define this.)  Beginning with fweb-1.53,
+timing is turned off by default. */
+
+DEFN(0 && !(MVS),TIMING)@;
+
+/* --- Number of decimal places  for timing information in seconds.  (Use
+at least 2 for supercomputers.) --- */
+
+#define TIMING_WIDTH 1
+
+/* There's supposed to be a function |clock()| that returns the cpu time,
+in units of |CLOCKS_PER_SEC|.  The type of |clock| is |clock_t|.  If that
+is defined, define the flag |CLOCK_T_DEFINED|; otherwise, say |typedef ...
+clock_t| here. */
+
+@#if CONFIG
+	AUTOCONFIG(CLOCK_T_DEFINED)
+@#else
+	DEFN(!(APOLLO || SGI), CLOCK_T_DEFINED)@;
+@#endif
+
+/* Some systems don't define |CLOCKS_PER_SEC|.  If not, we try |CLK_TCK|.
+If that's not defined, it defaults to 1000000.  If that's not appropriate,
+define |CLOCKS_PER_SEC| here. */
+
+/*
+#define CLOCKS_PER_SEC 1000000
+*/
+
+/* Are there system routines that return wall-clock time in sub-second units? 
+First, look for |gettimeofday| ($\mu$sec timing). */
+@#if CONFIG
+	AUTOCONFIG(HAVE_GETTIMEOFDAY)
+@#else
+	DEFN(SUN,HAVE_GETTIMEOFDAY)@;
+@#endif
+
+/* Otherwise, does the file sys/timeb.h exist that along with |ftime| gives
+millisecond timing for wall-clock time?  We check for the header file, not
+|ftime| itself, since |ftime| may be in a Berkeley compatibility library,
+not in libc. */
+
+@#if CONFIG
+	AUTOCONFIG(HAVE_SYS_TIMEB_H)
+@#else
+	DEFN((APOLLO || DSU || IBMPC),HAVE_SYS_TIMEB_H)@;
+@#endif
+
+/* Do we use our own version of |difftime()|, which computes the difference
+of two wall clock times?  If so, define |NEW_DIFFTIME|.  This flag should
+always be defined if |HAVE_SYS_TIMEB_H| is defined above.  */
+
+@#if CONFIG
+	/* |NEW_DIFFTIME| is computed from flags set by ./configure. */
+@#else
+	DEFN(APOLLO || DSU || IBMPC || MAC || MISC || SGI || SUN, NEW_DIFFTIME)@;
+@#endif
+
+@* Squeezing it down.
+@A
+/* --- MAKING IT FIT --- */
+
+/* Sometimes the compiler can't handle functions or switches that are too
+large.  In that case, define |FCN_CALLS|.  That converts certain in-line
+code (such as in the syntax production analyzer) into function calls (at
+the price of slowing things down a bit). */
+
+@#ifdef F_CALLS
+	#define FCN_CALLS F_CALLS
+@#else
+	DEFN(IBMPC || MAC, FCN_CALLS)@;
+@#endif
+
+/* The personal computers are starved for memory.  For those machines, we
+specify smaller default values for the lengths of dynamic arrays; define
+|SMALL_MEMORY|.  (You can always use the `-y' option to override these
+defaults.) */ 
+
+@#ifdef SMALL_MEM
+	#define SMALL_MEMORY SMALL_MEM
+@#else
+	DEFN(IBMPC || MAC, SMALL_MEMORY)@;
+@#endif
+
+/* Name of \FWEB's default initialization file.  Please don't change these
+conventions unless you absolutely have to!!!  Also, note that these
+definitions are overridden by the environment variable |FWEB_INI|, if it is
+defined. */
+
+#ifndef SMALL_MEMORY
+	#define SMALL_MEMORY 0
+#endif
+
+#if SMALL_MEMORY
+	#define FWEB_INI "fweb.ini"
+#else
+	#define FWEB_INI ".fweb"
+#endif
+
+@* Allocating and printing memory.
+
+@A
+/* --- MEMORY ALLOCATIONS --- */
+
+/* The ANSI |calloc| routine takes two arguments:  |void
+*calloc(size_t,size_t)|. If the system doesn't have a standard |calloc|
+routine, or if the name isn't standard, you must define an UPPERCASE macro
+that does the same thing.  (The name isn't standard on personal computers
+because one is dealing with |huge| allocations.)  If you define
+|NON_ANSI_CALLOC|, you must define |CALLOC|, |REALLOC|, and |FREE|.  E.g., the
+relevant definitions for Borland are
+\begintt
+#define CALLOC farcalloc
+#define REALLOC(oldblock,nbytes) \
+ farrealloc((void far *)(oldblock),(unsigned long)(nbytes))
+#define FREE(block) farfree((void far *)(block))
+\endtt
+*/ 
+
+DEFN(IBMPC || MAC,NON_ANSI_CALLOC)@;
+
+/* |IBMPC| */
+@#if IBMPC
+	#define CALLOC halloc
+	#define REALLOC hrealloc
+	#define FREE hfree
+@#elif MAC
+	#define CALLOC(nunits,nsize) lmalloc(nunits*nsize)
+	#define REALLOC(oldptr, new_size, old_size) realloc(old_ptr, new_size)
+	#define FREE free
+@#endif
+
+/* Do we supply below a routine that obtains the available memory, such 
+as Borland's farcoreleft()? */
+
+DEFN(IBMPC,PRINT_AVAILABLE_MEMORY)
+
+/* The function call that obtains the memory is called |CORE_LEFT|.  This
+function is assumed to return an |unsigned long int|.  For Microsoft, we had
+to write our own routine |_hmemavl|; see below.  For Borland, the routine
+should be called |farcoreleft|.  For the other machines, we don't have
+anything as yet. */ 
+
+@#if IBMPC
+	#define CORE_LEFT _hmemavl()
+@#endif
+
+
+@* ADDITIONAL FUNCTIONS.  
+
+@A
+/* The following flag is defined only by \common.web}. */
+#ifdef COMMON_FCNS_
+#if(part==0 || part==1)
+
+/* Give here the C code for any additional functions that are
+compiler-specific or missing from your implementation, such as maybe
+|strtod|.  Note that these are bracketed with the flag COMMON_FCNS_ so they
+are compiled into just one module, namely common.c. You must
+always supply some version of the debugging routine |trap|, which must
+return~0 as a minimum. */
+@#if IBMPC /* \.{Machine-dependent}: Custom memory routines required. */
+	@<Finding out about memory@>@;
+@#endif
+@<Additional compiler-specific functions@>@;
+#endif /* |part == 1| */
+
+#endif // |COMMON_FCNS_|
+
+@
+@<Finding out about memory@>=
+
+/* For Microsoft, we must write our own routine to find out about memory,
+since no heap management is done for the huge model. */
+
+#ifdef mcc /* This flag is defined by the Microsoft compiler. */
+
+#include <dos.h>
+#define DOS_GET_MEM 0x48
+
+unsigned long _hmemavl(void)
+{
+union REGS inregs,outregs;
+
+inregs.h.ah = DOS_GET_MEM;
+inregs.x.bx = 0xFFFF; /* Force the request to fail by giving a number
+				that's too big. */
+
+intdos(&inregs,&outregs);  /* Make DOS system call. */
+
+/* When the allocation fails, \.{BX} will return the size of the largest
+block of memory available in paragraphs. */
+return 16*(unsigned long)outregs.x.bx;
+}
+#endif /* mcc */
+
+@ Here we insert any extra functions that are compiler-specific.  
+
+@<Additional compiler-specific...@>=
+
+@#if MAC /* \.{Machine-dependent}: If you want to use the \FWEB\
+		breakpoint/debugging system. */
+/* Required routines for the MAC. */
+SRTN trap(m,name)
+	int m;
+	char name[];
+{
+#if(0)
+printf("Mod %d: \"%s\"\n",m,name); /* For debugging. */
+#endif
+}
+
+double pow()
+{
+puts("! Error: make the linker find pow().");
+return 0.0;
+}
+
+double strtod()
+{
+puts("! Error: Need replacement routine for strtod");
+return 0.0;
+}
+
+long strtol()
+{
+puts("! Error: Need replacement function for strtol");
+return 0;
+}
+@#else
+/* The default |trap| function for debugging. */
+int trap(void)
+{return 0;}
+@#endif
+

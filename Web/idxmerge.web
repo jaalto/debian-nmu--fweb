@@ -1,0 +1,177 @@
+@c
+
+\Title{idxmerge}
+
+@* INTRODUCTION.
+This is skeleton code for the \.{idxmerge} utility.  For detailed usage
+instructions, please see the \.{texinfo} documentation.
+
+Apologies for the lack of comments.  Time is short, and this particular
+subproject isn't really finished.
+
+@a
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+@ The following routine works with |qsort| for sorting file names.
+@a
+int 
+fcmp(const void *arg1, const void *arg2)
+{
+return strcmp(*(char **)arg1, *(char **)arg2);
+}
+
+@
+
+@d BUF_LEN 500
+@d CALLOC(n, type) (type *)calloc(n, sizeof(type))
+
+@a
+main(int num_args, char *args[])
+{
+char **file_name, *root_name = NULL, *out_name = NULL;
+char *pg = "|pg";
+char *name_list = NULL;
+int pg_len, root_len;
+int sort_names = 1;
+char buf[BUF_LEN];
+int i, k, nfiles, nlines;
+FILE *fp_in, *fp_out, *fp_names;
+
+if(num_args == 1)
+	{
+	puts("Usage:  idxmerge [-o output_file_name] [-s] file1 [file2] ...");
+	exit(0);
+	}
+
+nfiles = 0;
+
+/* Allocate the file-name list.  There can't be more file names than the
+total number of command-line arguments. */
+file_name = CALLOC(num_args, char *);
+
+for(i=1; i<num_args; i++)
+	{
+	char *pa = args[i];
+
+	if(*pa == '-')
+		@<Process command-line option@>@;
+	else
+		file_name[nfiles++] = pa;
+	}
+
+if(nfiles == 0)
+	{
+	puts("! No input files; nothing done.");
+	exit(0);
+	}
+
+if(!name_list)
+	name_list = "idx-names.tex";
+
+pg_len = strlen(pg);
+
+if(!out_name)
+	fp_out = stdout; // Unix convention.
+else
+	fp_out = fopen(out_name, "w");
+
+if(sort_names)
+	qsort(file_name, nfiles, sizeof(char *), fcmp);
+
+printf("Writing merged output to `%s', file names to `%s'...",
+	out_name, name_list);
+fflush(stdout);
+
+fp_names = fopen(name_list, "w");
+
+nlines = 0;
+
+for(k=0; k<nfiles; k++)
+	@<Process one file@>@;
+
+printf("done.\n"
+	"IDXMERGE:  %i files, %i index entries.\n", nfiles, nlines);
+
+exit(0);
+}
+
+@
+@<Process com...@>=
+{
+pa++;
+
+switch(*pa++)
+	{
+   case 'n':
+	/* Specify name of output file-name list. */
+	name_list = CALLOC(strlen(pa)+1, char);
+	strcpy(name_list, pa);
+	break;
+
+   case 'o':
+	/* Set name of output file (no \.{.idx}). */
+	root_name = CALLOC((root_len=strlen(pa))+1, char);
+	strcpy(root_name, pa);
+	out_name = CALLOC(root_len+5, char);
+	strcpy(out_name, root_name);
+	strcpy(out_name+root_len, ".idx");
+
+	if(!name_list)
+		{
+		name_list = CALLOC(root_len + 12, char);
+		strcpy(name_list, root_name);
+		strcpy(name_list + root_len, "-names.tex");
+		}
+	break;
+
+   case 'p':
+	/* Give nondefault value of \.{makeindex.pg}. */
+	pg = CALLOC(strlen(pa)+2, char);
+	pg[0] = '|';
+	strcpy(pg+1, pa);
+	break;
+
+   case 's':
+	/* Turn off sorting of file names. */
+	sort_names = !sort_names;
+	break;
+
+   default:
+	printf("! Invalid command-line option `-%s' ignored.", pa-1);
+	break;
+	}
+}
+
+@
+@<Process one...@>=
+{
+char *p, c;
+
+fp_in = fopen(file_name[k], "r");
+
+if(!fp_in)
+	{
+	printf("! Can't open input file #%i, `%s'.\n", k, file_name[k]);
+	continue;
+	}
+
+while(fgets(buf, BUF_LEN, fp_in))
+	{
+	p = strstr(buf, pg);
+	
+	if(!p)
+		continue;
+
+	p += pg_len + 1; // Address of the right brace in \.{|pg\{\}\dots}.
+	c = *p;
+	*p = '\0';
+	fprintf(fp_out, "%s%i%c%s", buf, k+1, c, p+1);
+	nlines++;
+	}
+
+fclose(fp_in);
+
+fprintf(fp_names, "\\idxname{%i}{%s}\n", k+1, file_name[k]);
+}

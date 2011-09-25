@@ -1,0 +1,111 @@
+#if(0)
+  FTANGLE v1.60,\
+ created with UNIX on "Thursday, September 24, 1998 at 16:12." \
+  COMMAND LINE: "Web/ftangle Web/t_type -A -# --F -= 1.62/Web/t_type.h"\
+  RUN TIME:     "Friday, September 25, 1998 at 8:02."\
+  WEB FILE:     "Web/t_type.web"\
+  CHANGE FILE:  (none)
+#endif
+#define OUT_CHAR(c)out_char((eight_bits)(c)) \
+
+
+
+#include "s_type.h" 
+#include "r_type.h" 
+#include "e_type.h" 
+#include "m_type.h" 
+
+X_FCN x_unroll PROTO((VOID));
+
+SRTN app_aconst PROTO((outer_char fmt_char,boolean leading_zero));
+SRTN app_converted PROTO((unsigned long n));
+SRTN app_dmacro PROTO((CONST eight_bits HUGE*p,CONST eight_bits HUGE*p1));
+name_pointer app_macro PROTO((eight_bits last_control));
+BP HUGE*b_link PROTO((TRUNC HUGE*s,LANGUAGE Language,
+CONST ASCII HUGE*p0,CONST ASCII HUGE*p1));
+SRTN blank_out PROTO((int n));
+SRTN buffer_out PROTO((outer_char c));
+SRTN C_out PROTO((outer_char HUGE*buffer,outer_char HUGE*p,
+outer_char HUGE*HUGE*ppC_buffer,
+outer_char*end_str,CONST outer_char*begin_str,int indent));
+SRTN C_putc PROTO((outer_char c));
+SRTN C_sprintf PROTO((CONST outer_char s[],int n ELLIPSIS));
+SRTN close0 PROTO((OPEN_FILE*f));
+SRTN close_out PROTO((FILE*fp,outer_char*name));
+SRTN cmp_outfiles PROTO((VOID));
+int cmpr_bp PROTO((BP HUGE**bb0,BP HUGE**bb1));
+int cmpr_trunc PROTO((TRUNC HUGE**t0,TRUNC HUGE**t1));
+SRTN copy_string PROTO((eight_bits a0));
+SRTN cp_ASCII PROTO((VOID));
+eight_bits out_bracket PROTO((eight_bits cur_char,eight_bits new_char));
+SRTN flush0 PROTO((VOID));
+SRTN flush_out PROTO((boolean prn_new_line));
+int get_constant PROTO((eight_bits HUGE*e));
+GOTO_CODE get_control_code PROTO((VOID));
+eight_bits get_next PROTO((VOID));
+int id PROTO((int n));
+name_pointer id0_lookup PROTO((CONST ASCII HUGE*start,CONST ASCII HUGE*end,
+LANGUAGE l));
+SRTN ini_special_tokens PROTO((LANGUAGE language0,SPEC HUGE*tokens));
+SRTN ini_univ_tokens PROTO((LANGUAGE language0));
+SRTN ins_ln_no PROTO((int delta));
+boolean is_deferred PROTO((sixteen_bits cur_val));
+int main PROTO((int ac,outer_char**av));
+SRTN mcheck0 PROTO((unsigned long n,CONST outer_char reason[]));
+SRTN mcopy PROTO((CONST outer_char*s));
+SRTN new_out PROTO((boolean scope,sixteen_bits a));
+eight_bits next_byte PROTO((VOID));
+SRTN not_unique PROTO((VOID));
+SRTN open_out PROTO((CONST outer_char*msg,boolean global_scope));
+LANGUAGE opn_output_file PROTO((LANGUAGE language0));
+eight_bits out_char PROTO((eight_bits cur_char));
+eight_bits out_dflt PROTO((eight_bits c));
+SRTN out_of_order PROTO((CONST outer_char cmd[]));
+SRTN out_op PROTO((CONST outer_char HUGE*s));
+CONST outer_char HUGE*out_str PROTO((CONST outer_char HUGE*s0));
+SRTN out_trunc PROTO((CONST name_pointer np));
+SRTN out_version PROTO((CONST outer_char*msg));
+SRTN phase1 PROTO((VOID));
+SRTN phase2 PROTO((VOID));
+boolean pop_level PROTO((VOID));
+SRTN prn_mod_num PROTO((outer_char*fmt,long val));
+GOTO_CODE prs_TeX_code PROTO((VOID));
+GOTO_CODE prs_regular_code PROTO((GOTO_CODE iswitch));
+SRTN push_level PROTO((name_pointer p,
+CONST eight_bits HUGE*b0,CONST eight_bits HUGE*b1));
+SRTN RAT_out PROTO((outer_char c));
+SRTN rdc_char_constant PROTO((VOID));
+int rst_out PROTO((boolean continuation));
+TRUNC HUGE*s_link PROTO((TRUNC HUGE*s,CONST ASCII HUGE*id,
+unsigned short len));
+eight_bits HUGE*save_out PROTO((eight_bits HUGE**p,
+int nmax,eight_bits r_before,eight_bits r_after));
+SRTN scan_module PROTO((VOID));
+SRTN scan_repl PROTO((eight_bits t,boolean stop));
+SRTN scan_text PROTO((int text_type,CONST name_pointer p,boolean expand));
+int see PROTO((CONST ASCII HUGE*c0,CONST ASCII HUGE*c1));
+SRTN see_dup PROTO((CONST TRUNC HUGE*s,LANGUAGE Language,
+BP HUGE*HUGE*bb0));
+SRTN see_id PROTO((CONST ASCII HUGE*start,CONST ASCII HUGE*end));
+SRTN send_single PROTO((sixteen_bits a));
+LANGUAGE set_output_file PROTO((LANGUAGE language0));
+eight_bits skip_ahead PROTO((eight_bits last_control,boolean skip_over_bars));
+eight_bits skip_bars PROTO((VOID));
+boolean skip_comment PROTO((VOID));
+SRTN split_C PROTO((VOID));
+SRTN split_X PROTO((CONST outer_char HUGE*prefx));
+SRTN split0_C PROTO((outer_char HUGE*p));
+#ifdef _FTANGLE_h
+SRTN store PROTO((TEXT_BUF HUGE*t,outer_char c));
+#endif
+SRTN store_two_bytes PROTO((sixteen_bits x));
+SRTN sv_macro PROTO((VOID));
+SRTN to_else PROTO((VOID));
+SRTN to_endif PROTO((int m_case));
+int trap PROTO((VOID));
+unsigned trunc_id PROTO((CONST name_pointer np0));
+SRTN unwind PROTO((VOID));
+boolean valid_char PROTO((ASCII c,int l));
+eight_bits x_identifier PROTO((eight_bits cur_char));
+
+

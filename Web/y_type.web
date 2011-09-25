@@ -1,0 +1,31 @@
+@z --- y_type.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+
+\Title{Y\_TYPE.WEB} % Prototypes for MEMORY ALLOCATION.
+
+@c 
+@* PROTOTYPES for {\tt MEMORY ALLOCATION}.  The function prototypes are
+macroed up so that if |PROTOTYPES==1| (see \.{proto.hweb}) one gets full
+function prototyping; otherwise just old-style declarations.
+
+@I formats.hweb
+
+@I os.hweb
+
+@ The make file produces \.{y\_type.h} from these prototypes.
+@a
+
+void HUGE *alloc PROTO((CONST outer_char abbrev[],BUF_SIZE HUGE *pnunits,
+	size_t nsize,int dn)); 
+
+SRTN free_mem0 PROTO((void HUGE *p,CONST outer_char why[],BUF_SIZE nunits,
+	size_t nsize));
+
+void HUGE *get_mem0 PROTO((CONST outer_char why[],BUF_SIZE nunits,
+	size_t nsize));

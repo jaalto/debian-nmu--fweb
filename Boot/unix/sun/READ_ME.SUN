@@ -1,0 +1,13 @@
+                --- BOOTSTRAPPING FWEB on the SUN ---
+
+   This subdirectory contains bootstrap files for SunOS/Unix (developed on a
+Sparcstation 1). There are two further subdirectories: .../unix/sun/cc and
+.../unix/sun/gcc. The cc subdirectory is for Sun's standard cc environment
+(which isn't ANSI). The gcc subdirectory is for the GNU gcc environment,
+which is closer to ANSI.  USE GCC IF YOU CAN.  The cc environment is a
+mess, and is no longer supported
+
+   To bootstrap, see the instructions in READ_ME.FWEB.
+
+   All my FWEB development work is now being done on a SUN, so if you have
+any difficulties I should be able to help you readily.

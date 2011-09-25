@@ -1,0 +1,240 @@
+@z --- includes.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ This file is included immediately after \.{custom.h}.  It contains logic
+based on the flags set in \.{custom.h}, includes some extra files that are
+pretty well standard, and includes the timing macros.
+
+First, we try to ensure the preprocessor doesn't get annoyed.
+
+@<Operating sys...@>=
+
+/* SYSTEM LOGIC based on \.{custom.h}, and additional include files. */
+
+#ifndef ANSI_CTYPE_H
+	#define ANSI_CTYPE_H 0
+#endif
+
+#ifndef ANSI_SPRINTF
+	#define ANSI_SPRINTF 0
+#endif
+
+#ifndef ANSI_SSCANF
+	#define ANSI_SSCANF 0
+#endif
+
+#ifndef ANSI_SYSTEM
+	#define ANSI_SYSTEM 0
+#endif
+
+#ifndef DEBUG_XCHR
+	#define DEBUG_XCHR 0
+#endif
+
+#ifndef FCN_CALLS
+	#define FCN_CALLS 0
+#endif
+
+#ifndef FANCY_SPLIT
+	#define FANCY_SPLIT 0
+#endif
+
+#ifndef HAVE_ERROR
+	#define HAVE_ERROR 0
+#endif
+
+#ifndef HAVE_GETENV
+	#define HAVE_GETENV 0
+#endif
+
+#ifndef HAVE_GETTIMEOFDAY
+	#define HAVE_GETTIMEOFDAY 0
+#endif
+
+#ifndef HAVE_LIMITS_H
+	#define HAVE_LIMITS_H 0
+#endif
+
+#ifndef HAVE_SYS_TIMEB_H
+	#define HAVE_SYS_TIMEB_H 0
+#endif
+
+#ifndef HAVE_STDARG_H
+	#define HAVE_STDARG_H 0
+#endif
+
+#ifndef HAVE_STDDEF_H
+	#define HAVE_STDDEF_H 0
+#endif
+
+#ifndef HAVE_STDLIB_H
+	#define HAVE_STDLIB_H 0
+#endif
+
+#ifndef HAVE_STD_PROTOTYPES
+	#define HAVE_STD_PROTOTYPES 0
+#endif
+
+#ifndef HAVE_STRERROR
+	#define HAVE_STRERROR 0
+#endif
+
+#ifndef HAVE_VALUES_H
+	#define HAVE_VALUES_H 0
+#endif
+
+#ifndef HUGE_POINTERS
+	#define HUGE_POINTERS 0
+#endif
+
+#ifndef KEEP_CONST
+	#define KEEP_CONST 0
+#endif
+
+#ifndef NEW_DIFFTIME
+	#define NEW_DIFFTIME 0
+#endif
+
+#ifndef NO_VOID
+	#define NO_VOID 0
+#endif
+
+#ifndef NON_ANSI_CALLOC
+	#define NON_ANSI_CALLOC 0
+#endif
+
+#ifndef OLD_PROTOTYPES
+	#define OLD_PROTOTYPES 0
+#endif
+
+#ifndef PRINT_AVAILABLE_MEMORY
+	#define PRINT_AVAILABLE_MEMORY 0
+#endif
+
+#ifndef SIZE_T_DEFINED
+	#define SIZE_T_DEFINED 0
+#endif
+
+#ifndef TIMING 
+	#define TIMING 0
+#endif
+
+#ifndef TRANSLATE_ASCII 
+	#define TRANSLATE_ASCII 0
+#endif
+
+#ifndef UNIX_PATH
+	#define UNIX_PATH 0
+#endif
+
+@ Next, we start conditional processing.
+@<Operating sys...@>=
+
+#if HAVE_STDARG_H
+	#include <stdarg.h>
+#else
+	#include <varargs.h>
+#endif
+
+#if HAVE_STDLIB_H
+	#include <stdlib.h>
+#endif
+
+#if !HAVE_STD_PROTOTYPES
+	#include "stdlib0.h"
+#endif
+
+#if HAVE_STDDEF_H
+	#include <stddef.h>
+#endif
+
+#if HAVE_LIMITS_H
+	#include <limits.h> // ANSI: Numerical limits.
+#else
+	#if HAVE_VALUES_H
+		#define INT_MAX MAXINT
+		#define LONG_MAX MAXLONG
+	#else
+		#define INT_MAX 0x7FFF
+		#define LONG_MAX INT_MAX
+	#endif
+
+	#define INT_MIN (~(INT_MAX))
+	#define LONG_MIN (~(LONG_MAX))
+	#define ULONG_MAX (MAXLONG | (~(MAXLONG)))
+		/* E.g., |0x7FFF @t\OR@> 0x8000|. */
+#endif
+
+#if HAVE_FLOAT_H
+	#include <float.h>
+#else
+	#ifndef DBL_DIG
+		#define DBL_DIG 10
+	#endif
+#endif
+
+#if !NON_ANSI_CALLOC
+	#define CALLOC calloc
+	#define REALLOC(old_ptr, new_size, old_size) realloc(old_ptr, new_size)
+	#define FREE free
+#endif // |ANSI_CALLOC|
+
+
+/* Some compilers can't handle |unsigned long| constants of the form
+|123UL|.  Thus, these constants are declared via the following macro. */
+
+#define UL(num) ((unsigned long)(num))
+
+#include <stdio.h> // ANSI: STDIO routines.
+#include <errno.h>
+
+/* We use only ANSI write routines. */
+#define FWRITE(buf,len,fp) fwrite((CONST void *)(buf),(size_t)(len),\
+				(size_t)(1),fp)
+
+#define WRITE1(buf,len) \
+	{\
+	int _k;\
+	outer_char *_p;\
+	for(_p=buf,_k=(int)(len); _k>0; _k--)\
+	  {\
+	  PUTC(*_p);\
+	  _p++;\
+	  }\
+	}
+
+/* The following is courtesy of the autoconf Info file. */
+#if STDC_HEADERS || HAVE_STRING_H
+	#include <string.h> // ANSI: String manipulation routines.
+
+	#if !STDC_HEADERS && HAVE_MEMORY_H
+		#include <memory.h>
+	#endif
+#else
+	#include <strings.h>
+#endif
+
+#include <ctype.h> // ANSI: Character classification macros.
+
+/* The following works only for |ASCII| machines.  Furthermore, it's slower
+than the usual procedure involving ANDing a |_ctype| array with various bit
+flags.  However, that procedure isn't portable across machines.  Caution:
+This solution evaluates |c| more than once, so watch out for side effects! */
+#if !ANSI_CTYPE_H
+	#undef isalpha
+	#undef isupper
+	#undef islower
+
+	#define isupper(c) ('A' <= (unsigned)(c) && (unsigned)(c) <= 'Z')
+	#define islower(c) ('a' <= (unsigned)(c) && (unsigned)(c) <= 'z')
+	#define isalpha(c) (isupper(c) || islower(c))
+#endif
+
+#include <setjmp.h> // ANSI: |longjmp| and |setjmp|.
+
+@I time.hweb // Timing's quite an annoyance.

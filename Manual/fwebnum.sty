@@ -1,0 +1,92 @@
+% This file is a LaTeX2e package.  One may select it by the FWEB style-file
+% command 
+%
+%	LaTeX.package = "fwebnum"
+%
+% which should be put into fweb.sty.
+
+% The package provides a slight modification of LaTeX's \@sect command to
+% replace the Dewey-decimal type of section numbering with integer section
+% numbers a la the original WEB.  By default, it numbers the unnamed
+% sections.  However, one may say
+%
+%	LaTeX.package.options = "dontnumberunnamed"
+%
+% to override that.
+
+
+% J. A. Krommes, September 9, 1995
+
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{fwebnum}[1995/09/15]
+
+\DeclareOption{numberunnamed}{\numberunnamedtrue}
+\DeclareOption{dontnumberunnamed}{\numberunnamedfalse}
+
+\ExecuteOptions{numberunnamed} % Set up default.
+\ProcessOptions
+
+\gdef\Wrefstepcounter#1{\stepcounter{section}%
+\protected@edef\@currentlabel{\thesection}}
+
+\gdef\@seccntformat#1{\csname the#1\endcsname.\hskip1em}
+
+\gdef\@sect#1#2#3#4#5#6[#7]#8{%
+\ifnum#2>\c@secnumdepth
+	\let\@svsec\@empty
+\else
+	\Wrefstepcounter{#1}%
+	\protected@edef\@svsec{\@seccntformat{#1}}%
+\fi
+\@tempskipa#5\relax
+\ifdim\@tempskipa>\z@
+	\begingroup
+		#6\relax
+		\@hangfrom{\hskip#3\relax\@svsec}%
+		{\interlinepenalty\@M
+		#8\par}%
+	\endgroup
+	\csname#1mark\endcsname{#7}%
+	\addcontentsline{toc}{#1}%
+		{\ifnum#2>\c@secnumdepth
+		\else
+			\protect\numberline{\csname the#1\endcsname}%
+		\fi
+		#7}%
+\else
+	\def\@svsechd{#6\hskip#3\relax
+		\@svsec#8\csname#1mark\endcsname{#7}%
+		\addcontentsline{toc}{#1}%
+			{\ifnum#2>\c@secnumdepth
+			\else
+				\protect\numberline{\csname the#1\endcsname}%
+			\fi
+			#7}%
+		}%
+\fi
+\@xsect{#5}%
+}
+
+\gdef\Wmodhd#1{} % No redundant section numbering at top of page.
+
+\gdef\thesubsection{\thesection}
+\gdef\thesubsubsection{\thesection}
+\gdef\thesubsubsubsection{\thesection}
+
+% The following overrides LaTeX's default \numberline, which doesn't skip
+% enough for large section numbers and overwrites the header.  One could
+% get fancier here.
+\newdimen\W@tempdima
+
+\def\W@settoc#1{{\setbox0=\hbox{\bf #1.\qquad}
+\global\W@tempdima=\wd0
+\gdef\numberline##1{\hbox to\W@tempdima{\hfil##1.\enspace}}
+}}
+
+% The following is needed in case the table-of-contents appears at the
+% front; it doesn't know the maximum section number at that point, so we
+% guess it's in the range 10--99.
+\def\FWEBtoc{\ifFWEBstandalone\Wtoc{99}\fi
+	\gdef\Wcon##1{\FWEBend}}
+

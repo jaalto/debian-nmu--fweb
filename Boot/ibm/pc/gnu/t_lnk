@@ -1,0 +1,7 @@
+-o ftangle
+ftangle.o ftangle2.o ftangle3.o
+common.o common2.o
+reserved.o reservd2.o
+ratfor.o ratfor2.o
+eval.o macs.o style.o termcap0.o
+-lm

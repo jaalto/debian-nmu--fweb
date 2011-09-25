@@ -1,0 +1,48 @@
+			--- FWEB FOR THE IBM-PC ---
+			       Version 1.5x
+			    September 13, 1995
+
+* EXECUTABLE BINARIES
+
+   In the present release, the  executable binaries 
+
+	ftangle.exe --- The full-blown ftangle, including Ratfor.
+	ftangle0.exe --- Ftangle without Ratfor.
+	fweave.exe --- The fweave processor.
+
+MAY BE supplied.  If they are present, they will be found in the
+/pub/fweb/executables subdirectory.  If they are not present, it means that
+I haven't had time to produce them yet.  If you need them desperately,
+please notify me.
+
+
+* ENVIRONMENT VARIABLES
+
+   The processors look for environment variables such as ``HOME''.  If
+``HOME'' is not defined on your system, say something like
+
+	set HOME=.
+
+NOTE that there is no white space before or after the equals sign.  (It
+won't work right otherwise.)  To see what environment variables are set,
+simply say ``set''.
+
+
+* COMPILING IT YOURSELF.
+
+   This directory contains the following subdirectories:
+
+	microsoft --- Stuff for use with the Microsoft C compiler
+	gnu       --- For compiling with a `gcc for DOS' such as djgpp.
+
+FWEB has grown so large that the stuff in the microsoft subdirectory is
+virtually useless.  Although the processors fit in low memory, they can't
+allocate enough space to do anything.
+
+   Fortunately, there are now compilers that provide a 32-bit environment
+that works nicely with extended memory.  In particular, a port of the gnu C
+compiler is available.  I used djgpp, written by D.J. Delorie and available
+from oak.oakland.edu:/SimTel/vendors/djgpp.  Bootstrapping files for that
+environment are found in the gnu subdirectory.  See the READ_ME file there
+for further discussion.
+

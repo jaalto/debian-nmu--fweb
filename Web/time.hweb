@@ -1,0 +1,76 @@
+@z --- time.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ This file is included into \.{includes.hweb}. It takes care of the
+details of cpu and wall clock timing.
+
+@<Operating sys...@>=
+
+/* --- TIMING --- */
+
+/* The compiler-line macro |timing_width| overrides the default format for
+the time output; it's the number of \.x's in \.{n.xx} seconds. (See
+\.{custom.web}.) */ 
+#ifndef TIMING_WIDTH
+	#define TIMING_WIDTH 1 // We ensure that it's defined to something.
+#endif /* |TIMING_WIDTH| */
+
+#include <time.h> /* ANSI: Time-conversion routines. (For non-ANSI
+			machines, defines |struct tm|.) */
+
+#if TIMING
+
+/* We like wall-clock timing more precise than seconds. */
+
+ /* \.{Machine-dependent}: Non-ANSI timing: */
+#if HAVE_GETTIMEOFDAY
+	/* uSec timing */
+	#include <sys/time.h>
+	#undef NEW_DIFFTIME
+	#define NEW_DIFFTIME 1
+	#define TIME_T struct timeval
+	#ifdef _COMMON_h
+		struct timezone tz_dummy;
+	#endif
+	int gettimeofday PROTO((struct timeval *tp, struct timezone *tzp));
+	#define TIME(p) gettimeofday(p, &tz_dummy)
+#else
+#if HAVE_SYS_TIMEB_H
+	/* mSec timing */
+	#include <sys/timeb.h>
+	#undef NEW_DIFFTIME
+	#define NEW_DIFFTIME 1
+	#define TIME_T struct timeb 
+	#define TIME(p) ftime(p)
+#else /* ANSI timing */
+	#define TIME_T time_t
+	#define TIME(p) time(p)
+#endif // |HAVE_SYS_TIMEB_H|
+#endif // |HAVE_GETTIMEOFDAY|
+
+#if NEW_DIFFTIME
+	#define DIFFTIME diff_time /* We supply our own version of
+|difftime| when we don't like the ANSI version. See \.{common.web}. (We
+can't just call our new version |difftime| because if that's already been
+prototyped the compiler will complain about a prototype mismatch.) */
+#else
+	#define DIFFTIME difftime /* Use the ANSI routine. */
+#endif // |NEW_DIFFTIME|
+
+clock_t clock PROTO((VOID)); // Not defined on some machines.
+
+#ifndef CLOCKS_PER_SEC
+	#ifdef CLK_TCK
+		#define CLOCKS_PER_SEC CLK_TCK // Some use older name.
+	#else
+		#define CLOCKS_PER_SEC 1000000 /* Guess at default:
+$\mu$sec timing. */ 
+	#endif // |CLK_TCK|
+#endif // |CLOCKS_PER_SEC|
+
+#endif // |TIMING|

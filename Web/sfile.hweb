@@ -1,0 +1,92 @@
+@z --- sfile.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@ Now we deal with the possibility that we will be including files from
+other than the current directory. Line commands may change the apparent
+directory, so an include intended to be from the current directory may not
+succeed. Here we'll code in the actual \FWEB\ directory structure, defining
+two macros |VFILE| and |SFILE| to generate a file name from the top-level
+directory or a specific subdirectory, respectively. In doing this, we use
+the environmental built-in macro |_HOME|.  We construct the file name in Unix
+format, even for~VMS. We do this in a special way so that we can then
+use the |$TRANSLIT| built-in in two different ways depending on whether
+we're on the VAX or a Unix system. 
+
+@m VFILE(name) #name
+@m SFILE(name) #name
+
+@#if 0
+
+@#ifndef FWEB_HOME
+	@m FWEB_HOME _HOME/fweb/v1 /* E.g., \.{/u/krommes/fweb/v1}. */
+@#endif
+
+@#ifndef SDIR /* One might override this from the command line or ini file. */
+
+/* \.{Machine-dependent}: Specify location of the bootstrap code. */ 
+	@#if ANSI
+		@m SDIR FWEB_HOME/unix/ansi
+	@#elif APOLLO
+		@m SDIR FWEB_HOME/unix/apollo
+	@#elif IBMPC
+		@m SDIR FWEB_HOME/pc
+	@#elif DSU
+		@m SDIR FWEB_HOME/unix/dsu
+	@#elif MAC
+		@m SDIR FWEB_HOME/unix/mac
+	@#elif MISC
+		@m SDIR FWEB_HOME/misc
+	@#elif SGI
+		@m SDIR FWEB_HOME/unix/sgi
+	@#elif SUN
+		@m SDIR FWEB_HOME/unix/sun
+	@#elif VAX 
+		@m SDIR FWEB_HOME/vax
+	@#else
+		@m SDIR . /* Current directory. */
+	@#endif /* Bootstrap locations. */
+
+@#endif /* |SDIR| */
+
+@#ifdef VFILE
+	@m VFILE(name) FL_NM_FMT(FWEB_HOME,#!name) /* File in top-level
+directory. */ 
+@#else
+	@m VFILE(name) #name
+@#endif /* |VFILE| */
+
+@#ifdef SFILE
+	@m SFILE(name) FL_NM_FMT(SDIR,#!name) /* File in specific
+subdirectory. */ 
+@#else
+	@m SFILE(name) #name
+@#endif /* |SFILE| */
+
+@m FL_NM_FMT(sub,name) FL_NM_FMT0(sub>#!name)
+
+/* \.{Machine-dependent}: Translate file-name formats. */
+@#if VAX 
+	@m FL_NM_FMT0(name) $STRING($TRANSLIT(#name,"/>]",".]")) /* \.] is
+deleted. */ 
+@#elif IBMPC
+	@m FL_NM_FMT0(name) $STRING($TRANSLIT(#name,">","\\")) /* The PC is
+		perverse, using backslashes. */
+@#else
+	@m FL_NM_FMT0(name) $STRING($TRANSLIT(#name,">","/")) /* Standard Unix,
+		with forward slashes. */
+@#endif /* File-name format translations. */
+
+/* \.{Machine-dependent}: The |SYS_PATH| macro is used for such things as
+\.{sys/types.h} that have slashes in them. */
+@#if IBMPC
+	@m SYS_PATH(name) <$TRANSLIT(#name,"/","\\")>
+@#else
+	@m SYS_PATH(name) <#!name>
+@#endif /* |IBMPC| */
+
+@#endif

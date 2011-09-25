@@ -1,0 +1,88 @@
+@z --- termcap0.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+
+\Title{TERMCAP0} % Dummy termcap routines.
+
+@c
+
+@* INTRODUCTION.  These dummy routines replace those of the termcap library
+for the particular uses that \FWEB\ makes of them.
+
+@A 
+
+@<Include files@>@;
+typedef char outer_char;
+@<Prototypes@>@;
+
+@I os.hweb // System-dependent stuff. 
+
+@ The function prototypes must appear before the global variables.
+@<Proto...@>=
+
+#include SFILE(a_type.h)
+
+@
+@a
+
+int tgetent FCN((buffer,name))
+	outer_char *buffer C0("")@;
+	CONST outer_char *name C1("")@;
+{
+*buffer = '\0';
+
+return 0;
+}
+
+@
+@a
+int tgetflag FCN((id))
+	CONST outer_char *id C1("")@;
+{
+return 0;
+}
+
+@
+@a
+int tgetnum FCN((id))
+	CONST outer_char *id C1("")@;
+{
+return -1;
+}
+
+@
+@a
+outer_char *tgetstr FCN((id,pp))
+	CONST outer_char *id C0("")@;
+	outer_char **pp C1("")@;
+{
+return NULL;
+}
+
+@
+@a
+outer_char *tgoto FCN((cm,destcol,destline))
+	CONST outer_char *cm C0("")@;
+	int destcol C0("")@;
+	int destline C1("")@;
+{
+return (outer_char *)"OOPS";
+}
+
+@
+@a
+SRTN tputs FCN((cp,affcnt,outc))
+	outer_char *cp C0("")@;
+	int affcnt C0("")@;
+	int (*outc) PROTO((int)) C1("")@;
+{
+while(*cp)
+	(*outc)(*cp++);
+}
+
+@* \INDEX.

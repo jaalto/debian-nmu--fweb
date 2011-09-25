@@ -1,0 +1,95 @@
+@z --- texts.hweb ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+@* DATA STRUCTURES EXCLUSIVE to FTANGLE.  We've already seen that the
+|byte_mem| array holds the names of identifiers, strings, and modules; the
+|tok_mem| array holds the replacement texts for modules.  It also serves as
+a temporary storage place for macros.  Allocation is sequential, since
+things are deleted only during Phase II, and only in a last-in-first-out
+manner.
+
+A \&{text} variable is a structure containing a pointer |tok_start| into
+|tok_mem|, which tells where the corresponding text starts, and an integer
+|text_link|, which, as we shall see later, is used to connect pieces of
+text that have the same name.  Additional entries keep track of the
+language that referenced the name (|Language|), the number |nargs| of
+arguments if it is a macro, and the offset |moffset| of the macro
+replacement text from the start (namely, after the right paren of the
+argument list or after the blank space if there are no arguments).  All the
+\&{text}s are stored in the array |text_info|, and we use a |text_pointer|
+variable to refer to them.
+
+The first position of |tok_mem| that is unoccupied by replacement text is
+called |tok_ptr|, and the first unused location of |text_info| is called
+|text_ptr|.  Thus we usually have the identity
+|text_ptr->tok_start=tok_ptr|.
+
+Macro tokens are temperarily appended to |tok_mem|.  However, when they're
+all there, permanent space is allocated from the heap and the macro is
+copied into that.  This way, that space can be easily freed if the macro is
+ever undefined.
+
+In fact, there are two kinds of macros, immediate and deferred. The
+immediate ones are defined in the definition section and are processed
+during phase~1; these can be entered sequentially into |tok_mem|. The
+deferred ones, however, are not processed until phase~2, after the code has
+been shuffled around. Since they must be read during phase~1, however, they
+must be stored somewhere, and it is convenient to put them into a separate
+place---the deferred pool---than the code text that is being built at the
+moment the deferred macro definition is encountered. Thus, we have the
+deferred variables |text_infod|, |tok_memd|, etc.
+
+@<Typed...@>=
+
+typedef struct 
+  {
+  eight_bits HUGE *tok_start; /* Pointer into |tok_mem| (for a module or
+regular macro).  For an internal macro, points to the internal function. */
+  sixteen_bits text_link; // Relates replacement texts  (0 for a macro).
+  boolean Language;	// Which language referenced this name.
+  eight_bits nargs;	// Number of macro arguments.
+  unsigned@\
+	moffset:8,	// Offset to macro replacement text from start.
+	recursive:1,	// Is this macro allowed to be recursive?
+	var_args:1,	// Can it have variable number of arguments?
+	module_text:1,	// Distinguishes from preprocessor fragment.
+	built_in:1,	// Is it a built-in function (internal macro)?
+	protected:1,	// Is it protected (not redefinable)?
+	nbytes:19;	// Length of macro or text.  $2^{19} \approx (10^6)/2$.
+  } text;
+
+typedef text HUGE *text_pointer;
+
+@ 
+@<Glob...@>=
+
+EXTERN long max_texts;	// Number of replacement texts, must be $< 10240$.
+EXTERN text HUGE *text_info; // Dynamic array.
+EXTERN text_pointer text_end; // End of above.
+
+EXTERN long dtexts_max; // Number of deferred replacement texts.
+EXTERN text HUGE *txt_dinfo; // Dynamic array.
+EXTERN text_pointer textd_end;
+
+EXTERN text_pointer text_ptr,txt_dptr; /* First unused position in |text_info|
+					and in |txt_dinfo|. */
+
+EXTERN long max_toks; // Number of bytes in compressed code.
+EXTERN eight_bits HUGE *tok_mem; // Dynamic array.
+EXTERN eight_bits HUGE *tok_m_end;
+
+EXTERN long max_dtoks; // Number of bytes in deferred macros.
+EXTERN eight_bits HUGE *tok_dmem; // Dynamic array.
+EXTERN eight_bits HUGE *tokd_end;
+
+EXTERN eight_bits HUGE *tok_ptr, HUGE *tok_dptr; /* First unused position in
+			|tok_mem| and in |tok_dmem|. */
+EXTERN eight_bits HUGE *mx_tok_ptr, HUGE *mx_dtok_ptr; /* Largest value
+	assumed by |tok_ptr|  and |tok_ptrd|; for statistics. */
+
+EXTERN text_pointer macro_text;

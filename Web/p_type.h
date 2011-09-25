@@ -1,0 +1,153 @@
+#if(0)
+  FTANGLE v1.60,
+ created with UNIX on "Thursday, September 24, 1998 at 16:12." 
+  COMMAND LINE: "Web/ftangle Web/p_type -A -# --F -= 1.62/Web/p_type.h"
+  RUN TIME:     "Friday, September 25, 1998 at 8:02."
+  WEB FILE:     "Web/p_type.web"
+  CHANGE FILE:  (none)
+#endif
+
+
+#include "c_type.h" 
+
+SRTN app_loop_num PROTO((int n));
+SRTN app_str PROTO((CONST outer_char HUGE*s));
+SRTN app_ASCII_str PROTO((CONST ASCII HUGE*s));
+SRTN b_app PROTO((Token a));
+SRTN b_app1 PROTO((scrap_pointer a));
+
+SRTN C_productions PROTO((VOID));
+SRTN C_ignore_scrap PROTO((VOID));
+SRTN C_expr PROTO((VOID));
+SRTN C_UNOP PROTO((VOID));
+SRTN C_BINOP PROTO((VOID));
+SRTN C_COMMA PROTO((VOID));
+SRTN C__E PROTO((VOID));
+SRTN C__E_ PROTO((VOID));
+SRTN C_E_ PROTO((VOID));
+SRTN C_new_like PROTO((VOID));
+SRTN C_lproc PROTO((VOID));
+SRTN C_LPRC PROTO((VOID));
+SRTN C_space PROTO((VOID));
+SRTN C_question PROTO((VOID));
+SRTN C_int_like PROTO((VOID));
+SRTN C_ext_like PROTO((VOID));
+SRTN C_modifier PROTO((VOID));
+SRTN C_huge_like PROTO((VOID));
+SRTN C_decl_hd PROTO((VOID));
+SRTN C_decl PROTO((VOID));
+SRTN C_fn_decl PROTO((VOID));
+SRTN C_functn PROTO((VOID));
+SRTN C_typedef_like PROTO((VOID));
+SRTN C_imp_reserved PROTO((VOID));
+SRTN C_op_like PROTO((VOID));
+SRTN C_class_like PROTO((VOID));
+SRTN C_struct_like PROTO((VOID));
+SRTN C_str_hd PROTO((VOID));
+SRTN C_lpar PROTO((VOID));
+SRTN C_lbracket PROTO((VOID));
+SRTN C_rbracket PROTO((VOID));
+SRTN C_lbrace PROTO((VOID));
+SRTN C__unop PROTO((VOID));
+SRTN C_unorbinop PROTO((VOID));
+SRTN C_cast PROTO((VOID));
+SRTN C_sizeof_like PROTO((VOID));
+SRTN C__binop PROTO((VOID));
+SRTN C_do_like PROTO((VOID));
+SRTN C_for_like PROTO((VOID));
+SRTN C_forhd PROTO((VOID));
+SRTN C_if_like PROTO((VOID));
+SRTN C_IF PROTO((VOID));
+SRTN C_if_hd PROTO((VOID));
+SRTN C_els_hd PROTO((VOID));
+SRTN C_else PROTO((VOID));
+SRTN C_ELS PROTO((VOID));
+SRTN C_IF_top PROTO((VOID));
+SRTN C_stmt PROTO((VOID));
+SRTN C_case_like PROTO((VOID));
+SRTN C_langle PROTO((VOID));
+SRTN C_namespace PROTO((VOID));
+SRTN C_rangle PROTO((VOID));
+SRTN C_reference PROTO((VOID));
+SRTN C_semi PROTO((VOID));
+SRTN C_tag PROTO((VOID));
+SRTN C_template PROTO((VOID));
+SRTN C_tlist PROTO((VOID));
+SRTN C_tstart PROTO((VOID));
+SRTN C_virtual PROTO((VOID));
+SRTN C_wh_do PROTO((VOID));
+
+boolean compare_text PROTO((text_pointer t0,text_pointer t1));
+SRTN defined_at PROTO((name_pointer p));
+sixteen_bits first_id PROTO((text_pointer t));
+text_pointer indirect PROTO((text_pointer t));
+SRTN V_productions PROTO((VOID));
+SRTN make_reserved PROTO((scrap_pointer p));
+name_pointer make_underlined PROTO((scrap_pointer p));
+SRTN prn_cat PROTO((eight_bits c));
+SRTN prn_math PROTO((scrap_pointer a));
+SRTN prn_text PROTO((text_pointer p));
+SRTN prn_trans PROTO((scrap_pointer p));
+
+SRTN R_productions PROTO((void));
+SRTN R_expr PROTO((VOID));
+SRTN R_key_wd PROTO((VOID));
+SRTN R_exp_op PROTO((VOID));
+SRTN R_program_like PROTO((VOID));
+SRTN R_fcn_hd PROTO((VOID));
+SRTN R_proc_like PROTO((VOID));
+SRTN R_private_like PROTO((VOID));
+SRTN R_int_like PROTO((VOID));
+SRTN R_struct_like PROTO((VOID));
+SRTN R_str_hd PROTO((VOID));
+SRTN R_op_like PROTO((VOID));
+SRTN R_dcl_hd PROTO((VOID));
+SRTN R_decl PROTO((VOID));
+SRTN R_functn PROTO((VOID));
+SRTN R_lpar PROTO((VOID));
+SRTN R_colon PROTO((VOID));
+SRTN R_lbrace PROTO((VOID));
+SRTN R_unop PROTO((VOID));
+SRTN R_unorbinop PROTO((VOID));
+SRTN R_slash_like PROTO((VOID));
+SRTN R_binop PROTO((VOID));
+SRTN R_Rdo_like PROTO((VOID));
+SRTN R_do_like PROTO((VOID));
+SRTN R_until_like PROTO((VOID));
+SRTN R_if_like PROTO((VOID));
+SRTN R_go_like PROTO((VOID));
+SRTN R_end_like PROTO((VOID));
+SRTN R_END PROTO((VOID));
+SRTN R_endif_like PROTO((VOID));
+SRTN R_if_hd PROTO((VOID));
+SRTN R_else_like PROTO((VOID));
+SRTN R_stmt PROTO((VOID));
+SRTN R_CASE PROTO((VOID));
+SRTN R_case_like PROTO((VOID));
+SRTN R_tag PROTO((VOID));
+SRTN R_label PROTO((VOID));
+SRTN R_semi PROTO((VOID));
+SRTN R_common_like PROTO((VOID));
+SRTN R_cmn_hd PROTO((VOID));
+SRTN R_read_like PROTO((VOID));
+SRTN R_rd_hd PROTO((VOID));
+SRTN R_implicit_like PROTO((VOID));
+SRTN R_imp_hd PROTO((VOID));
+SRTN R_assign_like PROTO((VOID));
+SRTN R_entry_like PROTO((VOID));
+SRTN R_define_like PROTO((VOID));
+SRTN R_no_order PROTO((VOID));
+SRTN R_built_in PROTO((VOID));
+SRTN R_newline PROTO((VOID));
+
+int get_language PROTO((text_pointer xp));
+SRTN reduce PROTO((scrap_pointer j,short k,eight_bits c,short d,
+unsigned long n));
+SRTN squash PROTO((scrap_pointer j,short k,eight_bits c,short d,
+unsigned long n));
+sixteen_bits tok_val PROTO((scrap_pointer p));
+text_pointer translate PROTO((PARSING_MODE mode0));
+name_pointer underline_xref PROTO((name_pointer p));
+SRTN X_productions PROTO((VOID));
+
+

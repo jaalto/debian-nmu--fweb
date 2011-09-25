@@ -1,0 +1,66 @@
+@z --- e_type.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+
+\Title{E\_TYPE.WEB} % Prototypes for EVAL.
+
+@c 
+@* PROTOTYPES for {\tt EVAL.WEB}.  The function prototypes are macroed
+up so that if |PROTOTYPES==1| (see \.{proto.hweb}) one gets full function
+prototyping; otherwise just old-style declarations.
+
+@I formats.hweb
+
+@I os.hweb
+
+@ The make file produces \.{e\_type.h} from these prototypes.
+@a
+
+#include SFILE(c_type.h) /* Prototypes for \.{common.web}. */
+
+SRTN i_eval_ PROTO((int n,PARGS pargs));
+SRTN i_const_ PROTO((int n, PARGS pargs));
+SRTN i_log_ PROTO((int n, PARGS pargs));
+SRTN i_min_max_ PROTO((int n, PARGS pargs));
+
+unsigned long btoi PROTO((CONST ASCII HUGE *b,CONST ASCII HUGE *b1));
+SRTN chk_zero PROTO((outer_char c,CONST VAL HUGE *pv));
+SRTN convert_to PROTO((TYPE type,VAL HUGE *v0,VAL HUGE *v1));
+SRTN e_macros PROTO((VOID));
+boolean eval PROTO((CONST eight_bits HUGE *p0,CONST eight_bits HUGE *p1));
+CONST eight_bits HUGE *eval0 PROTO((VAL HUGE *val,CONST eight_bits HUGE *p0,
+			CONST eight_bits HUGE *p1,eight_bits delim));
+VAL HUGE *eval1 PROTO((CONST VAL HUGE *v0,CONST VAL HUGE *v1,
+	PRECEDENCE prec0,int found_op[])); 
+CONST eight_bits HUGE *evaluate PROTO((VAL HUGE *val,CONST eight_bits HUGE *p0,
+				CONST eight_bits HUGE *p1));
+
+SRTN fin_constant PROTO((TYPE type));
+
+#ifndef C_TYPES
+	name_pointer id_lookup PROTO((CONST ASCII HUGE *first,
+			CONST ASCII HUGE *last,eight_bits t));
+#endif /* |C_TYPES| */
+void HUGE *mac_lookup PROTO((sixteen_bits cur_val));
+SRTN mcheck0 PROTO((unsigned long n,CONST outer_char reason[]));
+SRTN misplaced_id PROTO((sixteen_bits a0,sixteen_bits a1));
+int neval PROTO((CONST eight_bits HUGE *p0,CONST eight_bits HUGE *p1));
+SRTN num_to_mbuf PROTO((int n,PARGS pargs,
+		CONST char *built_in_name,int num_args,
+		CONST char *num_descr,int num));
+outer_char *op_name PROTO((eight_bits tokn));
+unsigned long otoi PROTO((CONST ASCII HUGE *b,CONST ASCII HUGE *b1));
+PRECEDENCE precedence PROTO((eight_bits tokn));
+SRTN promote PROTO((VAL HUGE *v0,VAL HUGE *v1));
+unsigned stnd_num PROTO((LANGUAGE Language));
+outer_char *stype PROTO((TYPE type));
+CONST eight_bits HUGE *vfill PROTO((VAL HUGE *v,CONST eight_bits HUGE *p0,
+	CONST eight_bits HUGE *p1));
+unsigned long xtoi PROTO((CONST ASCII HUGE *b,CONST ASCII HUGE *b1));
+
+@ Index:

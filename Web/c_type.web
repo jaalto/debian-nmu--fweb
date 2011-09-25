@@ -1,0 +1,237 @@
+@z --- c_type.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+
+\Title{C\_TYPE.WEB} % Prototypes for COMMON.
+
+@c 
+@* PROTOTYPES for {\tt COMMON.WEB}.  The function prototypes are macroed
+up so that if |PROTOTYPES==1| (see \.{proto.hweb}) one gets full function
+prototyping; otherwise just old-style declarations.
+
+@I formats.hweb
+
+@I os.hweb
+
+@ The make file produces \.{c\_type.h} from these prototypes.
+@a
+#ifndef C_TYPES /* Make sure it gets loaded only once. */
+
+#define C_TYPES
+
+#include SFILE(y_type.h) // Prototypes for memory allocation.
+#include SFILE(d_type.h) // Prototypes for reserved words.
+
+#ifdef mcc
+	unsigned long _hmemavl PROTO((VOID));
+	void HUGE *hrealloc PROTO((void HUGE *old_ptr,
+		unsigned long new_size, unsigned long old_size));
+#endif
+
+SRTN ASCII_file_write PROTO((FILE *file_ptr,CONST ASCII HUGE *p0,size_t n));
+SRTN FR_args PROTO((LANGUAGE Language));
+SRTN acopy PROTO((outer_char c,outer_char HUGE **a,int n));
+SRTN add_keyword PROTO((ASCII HUGE *pk, ASCII HUGE *pk_end,
+	ASCII HUGE *pt, ASCII HUGE *pt_end));
+SRTN add_prefix PROTO((outer_char HUGE *file_name));
+SRTN anlz_cmnts PROTO((VOID));
+SRTN bad_lcmd PROTO((CONST char*type,CONST outer_char HUGE *pa0));
+SRTN bad_loption PROTO((LANGUAGE Language));
+SRTN bad_option PROTO((VOID));
+SRTN banner PROTO((VOID));
+char beep PROTO((int n));
+boolean bscn_cmnt PROTO((VOID));
+boolean bscn_white PROTO((VOID));
+boolean buf_chk PROTO((CONST outer_char *file_name,unsigned buf_len,
+	unsigned needed));
+SRTN cant_negate PROTO((outer_char HUGE *s));
+outer_char *ccode_name PROTO((eight_bits code));
+SRTN chk_args PROTO((outer_char *name,int num,int n,PARGS pargs));
+SRTN chk_change PROTO((VOID));
+SRTN chk_complete PROTO((VOID));
+SRTN chk_override PROTO((LANGUAGE language0));
+int chr_cnt PROTO((outer_char *s, outer_char c));
+SRTN cls_files PROTO((VOID));
+outer_char HUGE *cmd_line PROTO((int num_args,outer_char *args[]));
+SRTN set_color PROTO((COLOR clr));
+outer_char *commas PROTO((unsigned long l));
+SRTN common_init PROTO((VOID));
+int confusion PROTO((CONST outer_char where[], 
+	CONST outer_char fmt0[] ELLIPSIS));
+SRTN conv_bi PROTO((BUILT_IN HUGE *b));
+SRTN conv_dot PROTO((DOTS HUGE *d));
+#if TIMING
+	double diff_time PROTO((TIME_T t1,TIME_T t0));
+#endif // |TIMING|
+SRTN divert PROTO((ASCII HUGE *buffer,ASCII HUGE *end,
+	boolean stop)); 
+SRTN do_args PROTO((boolean doing_cmd_line,int argc,outer_char HUGE *argv[],
+	boolean HUGE *pfound_web,outer_char wbflnm[],
+	boolean HUGE *pfound_change));
+eight_bits dot_code PROTO((DOTS HUGE *d0,CONST ASCII HUGE *p0,
+			CONST ASCII HUGE *p1,eight_bits new_code));
+SRTN err0_print PROTO((ERR_ORIGIN err_origin,CONST outer_char *fmt,
+	int n ELLIPSIS));
+unsigned esc_file_name PROTO((outer_char *esc_name,unsigned max_length,
+			outer_char *name));
+outer_char HUGE *xpn_name PROTO((outer_char HUGE *HUGE *out_name,int buf_len,
+	CONST outer_char *in_name,CONST outer_char wbflnm[]));
+int fatal PROTO((ERR_ORIGIN err_origin, CONST outer_char s1[], 
+	CONST outer_char fmt[] ELLIPSIS)); 
+MEM HUGE *find_abbrev PROTO((CONST outer_char abbrev[]));
+SRTN fin_language PROTO((VOID));
+SRTN find_keywords PROTO((ASCII HUGE *p, ASCII HUGE *p_end));
+sixteen_bits find_id PROTO((eight_bits a0,eight_bits a1));
+sixteen_bits find_n PROTO((sixteen_bits n));
+sixteen_bits find_s PROTO((CONST outer_char *s));
+unsigned find_prefix PROTO((outer_char s[]));
+SRTN flags3 PROTO((boolean not));
+SRTN free_buf PROTO((BUF *p));
+SRTN frz_params PROTO((VOID));
+outer_char *get_arg PROTO((outer_char *result, outer_char *s,
+	outer_char ldelim, outer_char rdelim));
+boolean get_fname PROTO((outer_char HUGE *file_name));
+boolean get_line PROTO((VOID));
+SRTN help PROTO((VOID));
+SRTN id_info PROTO((name_pointer np,long n,CONST outer_char *s, 
+	CONST RSRVD HUGE *prsrvd));
+name_pointer id_lookup PROTO((CONST ASCII HUGE *first,
+			CONST ASCII HUGE *last,eight_bits t)); 
+boolean ignored_cmnts PROTO((VOID));
+
+/* The following function should be superceded by ANSI's |strchr|. However,
+there's replacement code in \.{common.web} if necessary. */
+#if(0)
+	char HUGE *index PROTO((char HUGE *s,char c));
+#endif
+
+boolean ini_input_prms PROTO((int ilevel,outer_char HUGE *path,
+	boolean quit_on_error));
+boolean ini0_input_prms PROTO((INPUT_PRMS0 HUGE *p0,outer_char HUGE *path,
+	outer_char file_type[],boolean quit_on_error,SEQUENCES *extensions));
+SRTN ini0_language PROTO((VOID));
+SRTN ini_language PROTO((ASCII l));
+SRTN ini_node PROTO((CONST name_pointer node));
+SRTN ini_p PROTO((name_pointer p,eight_bits t));
+SRTN ini_program PROTO((PROGRAM program0));
+SRTN ini_timer PROTO((VOID));
+SRTN init_buf PROTO((BUF *p, int num));
+boolean input_ln PROTO((INPUT_PRMS0 HUGE *p0));
+name_pointer install_node PROTO((name_pointer parent,int crl,
+		CONST ASCII HUGE *j,int name_len));
+boolean is_dot PROTO((VOID));
+boolean is_in PROTO((CONST BUILT_IN b0[],CONST ASCII HUGE *p0,
+			CONST ASCII HUGE *p1));
+boolean is_include_like PROTO((VOID));
+eight_bits is_mcmd PROTO((DOTS HUGE *d0,CONST ASCII HUGE *p0,
+		CONST ASCII HUGE *p1)); 
+LANGUAGE lan_enum PROTO((int num));
+int lan_index PROTO((LANGUAGE Language));
+int lan_num PROTO((LANGUAGE Language));
+LANGUAGE lcase PROTO((LANGUAGE l0,outer_char c0,LANGUAGE l1,outer_char c1,
+	outer_char HUGE * HUGE *pp));
+int Length PROTO((name_pointer np));
+SRTN macro_err PROTO((CONST outer_char s[],int trail ELLIPSIS));
+SRTN mem_avail PROTO((int iswitch));
+char *mk_fname PROTO((outer_char *buffer,unsigned buf_len,
+	CONST outer_char *env_var,
+	boolean	print_msg, CONST outer_char *file_name));
+SRTN mfree PROTO((VOID));
+name_pointer mod_lookup PROTO((CONST ASCII HUGE *k,CONST ASCII HUGE *l));
+outer_char HUGE *mod_trans PROTO((outer_char *prefix, sixteen_bits modno));
+SRTN more_includes PROTO((INCL_PATHS *pincl, outer_char *incl_list0));
+MEM HUGE *msearch PROTO((CONST outer_char abbrev[],BUF_SIZE nunits));
+boolean names_match PROTO((name_pointer p,
+			CONST ASCII HUGE *first,int l,eight_bits t));
+SRTN multi_chars PROTO((outer_char c, int ));
+SRTN new_fname PROTO((outer_char HUGE * HUGE *pname,outer_char *name,
+	outer_char *ext));
+SRTN new_sprm PROTO((CONST outer_char name[], int value));
+SRTN no_arg PROTO((outer_char c, CONST outer_char *letters));
+int nsprintf PROTO((outer_char *s,CONST outer_char *fmt,int n ELLIPSIS));
+int nvsprintf PROTO((outer_char *s,CONST outer_char *fmt,int n ELLIPSIS));
+SRTN ntrunc PROTO((VOID));
+SRTN open_tex_file PROTO((VOID));
+SRTN opt_args PROTO((ASCII l));
+SRTN out_error PROTO((CONST outer_char fcn[]));
+SRTN overflow PROTO((CONST outer_char msg[],CONST outer_char abbrev[]));
+name_pointer prefix_lookup PROTO((CONST ASCII HUGE *k,CONST ASCII HUGE *l));
+SRTN pr_lan PROTO((CONST char *name,boolean b));
+SRTN predefine_macros PROTO((void));
+SRTN prime_the_change_buffer PROTO((VOID));
+SRTN prn_codes PROTO((VOID));
+unsigned prn_id PROTO((name_pointer np));
+unsigned long prn_nd PROTO((VOID));
+SRTN progress PROTO((VOID));
+SRTN prn_time PROTO((VOID));
+SRTN ptr_range PROTO((void HUGE *p,unsigned long nbytes));
+outer_char *push_buf PROTO((BUF *p, outer_char *s));
+boolean rd_Fortran PROTO((VOID));
+boolean rd_free_form PROTO((VOID));
+boolean rd_Ratfor PROTO((VOID));
+SRTN read_aux PROTO((VOID));
+SRTN reading PROTO((CONST outer_char *in_name,boolean emit_newline));
+SRTN redirect_output PROTO((VOID));
+SRTN rst_input PROTO((VOID));
+SRTN save_macro PROTO((CONST outer_char HUGE *cmd,outer_char HUGE *t));
+SRTN scan_args PROTO((VOID));
+SRTN scan_for_cmnts PROTO((VOID));
+SRTN see_statistics PROTO((VOID));
+SRTN set_args PROTO((int HUGE *pargc,outer_char HUGE * HUGE * *pargv));
+SRTN set_filter PROTO((LANGUAGE Language));
+SRTN set_fname PROTO((LANGUAGE l,outer_char HUGE *sf,boolean check));
+SRTN set_name PROTO((LANGUAGE l,outer_char *output_ext));
+SRTN show_alloc PROTO((outer_char c,CONST outer_char why[],
+		unsigned long nunits,
+		unsigned long nsize,unsigned long nbytes,
+		void HUGE *p,unsigned long total_mem));
+boolean skip_Ftext PROTO((VOID));
+boolean skip_Rtext PROTO((VOID));
+boolean skp_cmnt PROTO((VOID));
+BUF_SIZE smin0 PROTO((BUF_SIZE abs_max_num));
+SRTN spurious PROTO((outer_char HUGE *pa1));
+SRTN stat0 PROTO((CONST outer_char *name,size_t size,unsigned long num,unsigned
+	long max_num,unsigned long abs_max_num,CONST outer_char *abbrev,
+	CONST outer_char *ctrl_chars)); 
+#if !HAVE_STRERROR
+	char *strerror PROTO((int errnum));
+#endif
+CONST outer_char * the_cdate PROTO((CONST struct tm *t));
+CONST outer_char * the_day PROTO((CONST struct tm *t));
+struct tm * the_localtime PROTO((VOID));
+CONST outer_char * the_time PROTO((CONST struct tm *t));
+int to_args PROTO((outer_char HUGE *arg_buffer,outer_char HUGE *args[],
+	int max_args));
+ASCII HUGE *to_ASCII PROTO((outer_char HUGE *p0));
+ASCII HUGE *x_to_ASCII PROTO((CONST outer_char HUGE *p0));
+ASCII HUGE *x__to_ASCII PROTO((CONST outer_char HUGE *p0));
+outer_char HUGE *to_outer PROTO((ASCII HUGE *p0));
+SRTN too_long PROTO((VOID));
+SRTN undivert PROTO((VOID));
+ASCII HUGE *uppercase PROTO((ASCII HUGE *p,int n));
+SRTN usage PROTO((CONST char *msg, boolean is_fatal));
+boolean verify PROTO((CONST outer_char fmt[] ELLIPSIS));
+boolean was_opened PROTO((CONST outer_char HUGE *name, boolean global_scope,
+	outer_char HUGE * HUGE *pname,FILE **pptr));
+LEXI web_strcmp PROTO((CONST ASCII HUGE *j,CONST ASCII HUGE *j1,
+			CONST ASCII HUGE *k,CONST ASCII HUGE *k1));
+int wrap_up PROTO((VOID));
+SRTN writing PROTO((boolean print_write,CONST outer_char *out_name));
+SRTN x_keyword PROTO((eight_bits HUGE * HUGE *pmp,
+	eight_bits HUGE *buf_end,
+	eight_bits HUGE *p, eight_bits HUGE *p1, 
+	boolean in_quotes, boolean out_quotes, int input_level));
+SRTN xpnd_file_name PROTO((outer_char HUGE *name));
+FILE *xopen PROTO((outer_char *file_name,outer_char HUGE *path,
+	SEQUENCES *extensions,CONST outer_char *iomode));
+FILE *x0open PROTO((outer_char *file_name,
+	SEQUENCES *extensions,CONST outer_char *iomode));
+
+#endif
+
+@ Index:

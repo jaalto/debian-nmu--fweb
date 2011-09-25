@@ -1,0 +1,112 @@
+\initial {A}
+\entry {\code {ASCII_Fcn}}{118}
+\initial {C}
+\entry {\code {cchar}}{118}
+\entry {\code {cdir_start}}{118}
+\entry {\code {Color.black}}{118}
+\entry {\code {Color.blue}}{118}
+\entry {\code {Color.cyan}}{118}
+\entry {\code {Color.default}}{118}
+\entry {\code {color.error}}{117}
+\entry {\code {color.fatal}}{117}
+\entry {\code {Color.green}}{118}
+\entry {\code {color.in_file}}{117}
+\entry {\code {color.include_file}}{117}
+\entry {\code {color.info}}{117}
+\entry {\code {color.line_num}}{117}
+\entry {\code {Color.magenta}}{118}
+\entry {\code {color.mod_name}}{117}
+\entry {\code {color.mod_num}}{117}
+\entry {\code {color.ordinary}}{117}
+\entry {\code {color.out_file}}{117}
+\entry {\code {color.program_name}}{117}
+\entry {\code {Color.red}}{118}
+\entry {\code {color.timing}}{117}
+\entry {\code {color.warning}}{117}
+\entry {\code {Color.white}}{118}
+\entry {\code {Color.yellow}}{118}
+\entry {\code {contents.postamble}}{114}
+\entry {\code {contents.preamble}}{114}
+\entry {\code {contents.tex}}{114}
+\initial {D}
+\entry {\code {delim_0}}{113}
+\entry {\code {delim_n}}{113}
+\entry {\code {dot_constant.begin}}{120}
+\entry {\code {dot_constant.end}}{120}
+\initial {E}
+\entry {\code {ext.ch}}{120}
+\entry {\code {ext.hch}}{120}
+\entry {\code {ext.hweb}}{120}
+\entry {\code {ext.web}}{120}
+\initial {F}
+\entry {\code {format.id}}{115}
+\entry {\code {format.ID}}{115}
+\entry {\code {format.intrinsic}}{115}
+\entry {\code {format.keyword}}{115}
+\entry {\code {format.KEYWORD}}{115}
+\entry {\code {format.outer_macro}}{115}
+\entry {\code {format.reserved}}{115}
+\entry {\code {format.RESERVED}}{115}
+\entry {\code {format.short_id}}{115}
+\entry {\code {format.typewriter}}{115}
+\entry {\code {format.WEB_macro}}{115}
+\initial {G}
+\entry {\code {group_skip}}{114}
+\initial {I}
+\entry {\code {indent.code}}{116}
+\entry {\code {indent.TeX}}{116}
+\entry {\code {index.collate}}{113}
+\entry {\code {index.name}}{113}
+\entry {\code {index.postamble}}{113}
+\entry {\code {index.preamble}}{113}
+\entry {\code {index.tex}}{113}
+\entry {\code {item_0}}{114}
+\initial {L}
+\entry {\code {language.prefix}}{114}
+\entry {\code {language.suffix}}{114}
+\entry {\code {LaTeX.class}}{116}
+\entry {\code {LaTeX.class.options}}{116}
+\entry {\code {LaTeX.options}}{116}
+\entry {\code {LaTeX.package}}{116}
+\entry {\code {LaTeX.package.options}}{116}
+\entry {\code {LaTeX.style}}{116}
+\entry {\code {lethead.flag}}{114}
+\entry {\code {lethead.prefix}}{114}
+\entry {\code {lethead.suffix}}{114}
+\entry {\code {limbo.begin}}{120}
+\entry {\code {limbo.end}}{120}
+\entry {\code {line_char}}{119}
+\entry {\code {line_length}}{119}
+\initial {M}
+\entry {\code {macros}}{119}
+\entry {\code {mark_defined.exp_type}}{115}
+\entry {\code {mark_defined.fcn_name}}{115}
+\entry {\code {mark_defined.generic_name}}{115}
+\entry {\code {mark_defined.outer_macro}}{115}
+\entry {\code {mark_defined.typedef_name}}{115}
+\entry {\code {mark_defined.WEB_macro}}{115}
+\entry {\code {meta}}{120}
+\entry {\code {meta.bottom}}{119}
+\entry {\code {meta.bottom.hdr}}{119}
+\entry {\code {meta.prefix}}{119}
+\entry {\code {meta.prefix.hdr}}{119}
+\entry {\code {meta.top}}{119}
+\entry {\code {meta.top.hdr}}{119}
+\entry {\code {modules.info}}{114}
+\entry {\code {modules.postamble}}{114}
+\entry {\code {modules.preamble}}{114}
+\entry {\code {modules.tex}}{114}
+\initial {N}
+\entry {\code {null_file}}{120}
+\initial {O}
+\entry {\code {outer.def}}{119}
+\entry {\code {outer.under}}{119}
+\initial {P}
+\entry {\code {preamble.named}}{120}
+\entry {\code {preamble.unnamed}}{120}
+\entry {\code {protect}}{119}
+\initial {S}
+\entry {\code {suffix}}{119}
+\initial {U}
+\entry {\code {underline.prefix}}{114}
+\entry {\code {underline.suffix}}{114}

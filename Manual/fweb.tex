@@ -1,0 +1,101 @@
+% Copyright (C) 1987 Princeton University
+
+% This file (was) part of CWEB.
+% This program by Silvio Levy is based on a program by D. E. Knuth.
+% It is distributed WITHOUT ANY WARRANTY, express or implied.
+% $Revision: 0.5$ -- April 1987
+
+%			*	*	*
+
+% FWEB is a substantial modification by John A. Krommes of CWEB v. 0.5
+% to handle multiple languages, Fortran, and Ratfor statement translation.
+% It is distributed with EVEN LESS WARRANTY than was CWEB.
+
+% These macros help typeset the woven FWEB output, and should be input
+% after fwebmac.sty.  A convenient way to do that automatically is to say in
+% the style file fweb.sty `limbo.begin = "\\input fweb"'.
+
+% Include these macros only once.
+\ifx\FWEBTeXisloaded\relax\endinput\else\let\FWEBTeXisloaded\relax\fi
+
+\def\version{1.60}
+\def\vdate{January 1, 1997}
+
+%			*	*	*
+
+% The following stuff was inherited from CWEB (now modified for LaTeX2e).
+
+% Here is TeX material that gets inserted after \input webmac
+\def\hang{\hangindent 3em\indent\ignorespaces}
+
+\ifnoLaTeXe
+	\font\ninerm=cmr9
+	\font\revfont=cmr10 scaled\magstep1
+\else % 
+	\def\ninerm{\fontfamily{\rmdefault}\fontseries{m}\fontshape{n}%
+		\small}
+	\def\revfont{\fontfamily{\rmdefault}\fontseries{m}\fontshape{n}%
+		\large}
+\fi
+
+\let\mc=\ninerm % Medium caps
+
+\def\ceeref{{\it The C Reference Manual}}
+
+\def\Cb{$\Wtypewriter|\ldots\.|$} % C brackets (|...|)
+\def\ttv{\Wtypewriter{\char'174}} % vertical (|) in typewriter font
+\mathchardef\RA="3221 % right arrow
+\mathchardef\BA="3224 % double arrow
+
+%\def\({} % kludge for alphabetizing certain module names
+
+\def\Revision{\FWEB\ version \version}
+
+\ifLaTeXisloaded
+	\author{{\revfont\Revision}}
+	\date{{\revfont\vdate}}
+\else
+	\contentspageno=1 % should be odd
+
+	\def\topofcontents{
+		\titlefalse % include headline on the contents page
+		\def\rheader{\hfil}\def\lheader{\hfil}
+		\centerline{\titlefont\Wtitle}
+		\vskip 15pt
+		\centerline{\revfont\Revision}
+		\medskip
+		\centerline{\revfont\vdate}
+		\vfill
+	}
+
+	\pageno=\contentspageno \advance\pageno by 1
+\fi
+
+% --- This stuff is added for FWEB ---
+%\let\cmntfont\Csc % This is how to define a new font for comments.
+
+\identicalpageheadstrue
+
+\let\lb\{ % Avoids (spurious) FWEB warning about unmatched { in comment.
+\let\vb\vertbar % Use inside typewriter mode.
+
+\def\slashstar{/*} % Avoids (spurious) compiler warning about nested comments.
+\def\starslash{*/} % Similar to above.
+
+\def\dleft{[\![} \def\dright{]\!]} % double brackets
+
+\def\cee{code} % We talk about ``code'' text, not C text.
+%\def\It#1{{\it #1}} % This could be made fancier.
+\let\It\emph % The \LaTeX\ way.
+
+\def\ast{\mathbin{*}} % Test of better spacing for binary times.
+
+% --- Beautify index (see the `lethead.prefix' entry in fweb.sty) ---
+%\def\letter#1{} % A null default.
+\def\letter#1{\hbox{\let\\\WBS\let\|\vertbar\let\&\WAM\def\@{@}%
+\kern2em--- {\tt #1} ---}\smallskip}
+
+% Kill off annoying warnings.
+\overfullrule=0pt
+
+%			*	*	*

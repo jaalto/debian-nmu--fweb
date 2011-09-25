@@ -1,0 +1,14 @@
+		     --- The boot/ibm SUBDIRECTORY ---
+
+
+   Here you will find machine-dependent files for IBM operating systems,
+especially the custom.h and defaults.mk files necessary for bootstrapping.
+Presently you have your choice of the following machines or compiler
+environments (each one of which has its own subdirectory):
+
+	mvs --- Any EBCDIC machine
+	pc  --- Any IBM-PC compatible
+
+The IBM RISC-6000 is a Unix machine with an ANSI compiler.  You should be
+able to use ./configure to bootstrap.  See READ_ME.FWEB for
+installation details.

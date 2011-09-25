@@ -1,0 +1,105 @@
+			  --- INSTALLING FWEB ---
+
+
+IMPORTANT NOTES:
+
+* FWEB attempts to use the GNU standards for configuration, makefiles, etc.
+If you are a Unix user (more precisely, if you have sh available), please
+follow the installation procedure described below under ``SUMMARY of
+INSTALLATION PROCEDURE''.  If you are an IBM-PC user, executable files that
+run in extended memory MAY be provided in
+
+	ftp/pppl.gov:/pub/fweb/executables
+
+(Their availability may lag behind the standard Unix release.)  Otherwise,
+DO NOT USE THIS VERSION, as neither the code nor the installation
+procedures have been tested for v1.50 or above on non-unix platforms.
+
+* Documentation for this version is maintained in GNU texinfo format.  The
+installation procedure will install the relevant files (`make install').
+Online information will then be available through the info browser
+(accessible through emacs, stand-alone, or by saying `ftangle -h').
+Alternatively, you can obtain printed documentation by saying
+
+	cd Manual
+	lpr fweb.ps
+
+if fweb.ps has been saved on your system.
+
+SUMMARY of INSTALLATION PROCEDURE:
+
+  (0) If you are a Unix user with an ANSI-C compiler (you will have a
+minimum of hassle with gcc), install FWEB by using the `./configure', then
+`make' procedure described below.  Brackets denote optional.  By default,
+
+	prefix == /usr/local 
+	exec-prefix == /usr/local
+
+	CFLAGS == -O
+
+(NOTE WELL that the FWEB source code is supposed to be ANSI-compatible.  It
+compiles without warnings with `gcc -ansi -pedantic'.  Some compilers
+default to old-style Kernighan & Ritchie; for them, you must override the
+default by providing an explicit CFLAGS argument to make.  For example, on
+the DEC alpha, you may need to say `make CFLAGS="-std1 -O"'.  Please report
+ANY compiler warnings you obtain from an allegedly ANSI-compatible
+compiler.)
+
+------------------------------------------------------------------------------
+	cd fweb-1.61/Web
+	./configure [--prefix=path] [--exec-prefix=path]
+	make -n install 
+# Use the -n option to see what's going to happen.  Ignore the fact that this
+# may say it's going to run FTANGLE; that won't happen when you say `make'
+# below.  If you need to make changes to system paths, etc.,
+# either use the --prefix and/or --exec-prefix options, or edit
+# defaults.mk.in, then rerun ./configure.)
+	make [CFLAGS='special compiler flags']
+	<Log on as root>
+	make install
+-------------------------------------------------------------------------------
+
+This should be sufficient.  However, if you have difficulties, you may need
+to absorb the following information.
+
+  ./configure is an sh script that was generated automatically by running the
+utility program `autoconf'.  In a departure from standard procedure, it first
+reads an FWEB configuration file whose default name is `configure.ini'.
+(More about that below.)  Then it attempts to figure out various local
+system features automatically.  Finally, it generates three files from
+autoconf templates with .in suffixes:
+
+	defaults.mk.in  => defaults.mk
+	config.h.in     => config.h
+	custom.h.in     => custom.h
+
+The file `defaults.mk' is included into Web/Makefile.  The files `config.h'
+and `custom.h' are included into the C code by the *.c files.  Check
+out what configure produces, especially for the directory prefixes in the
+INSTALLATION section of `defaults.mk'.  If you need to make changes, make
+them in the *.in files (save the old templates), then run ./configure again.
+
+  For more information about automatic configuration, read the file
+UNIX_INSTALL, which comes courtesy of the Free Software Foundation..  
+
+  The present procedure differs in one respect from standard ./configure
+protocol: an extra layer of variable definitions is used for variables
+related to FWEB that are not figured out automatically by ./configure.
+E.g., instead of saying in defaults.mk.in ``OBJ = obj'', one says ``OBJ =
+@_OBJ_@''.  Configure replaces the @_OBJ_@ with the present value of the
+environment variable _OBJ_.  To give that a value, ./configure sources in
+the contents of the file $CONFIGURE_INI.  If the environment variable
+CONFIGURE_INI isn't defined, then the default file `configure.ini' is read.
+This mechanism is partly used to aid the developer--files like `ansi.ini' are
+used to automatically generate the old-style bootstrap files for systems
+that can't use ./configure---and partly to ease the transition to
+./configure, which doesn't figure everything out for itself yet.
+
+  Note that configure.ini unsets the values of certain variables like CC.
+(It unsets CC in particular in order to help ensure that gcc is
+automatically chosen as the compiler of choice.)
+
+   (1) If you can't use ./configure, you can try using the (very-very!)
+old-style bootstraps in the boot subdirectory.  However, these haven't yet
+been upgraded or tested, with the exception of those for the IBM-PC.  (If
+you're an expert, of course, you're welcome to proceed at your own risk.)

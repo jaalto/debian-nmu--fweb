@@ -1,0 +1,1305 @@
+@z --- eval.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+
+\Title{EVAL.WEB} % Expression evaluation for FTANGLE.
+
+@c
+
+@* EXPRESSION EVALUATION. The following code is used to evaluate
+arithmetic, logical, and bit expressions. This is needed in particular in
+order to parse conditional expressions for the macro preprocessor, and can
+also be called up with the built-in macro |$EVAL|.
+
+Three data types are allowed: |int|, |double|, and |sixteen_bits|
+(identifier tokens). These are represented by the enumerated types |Int|,
+|Double|, and |Id|. The identifier tokens are only allowed in conjunction
+with the |defined| command taken from ANSI~C, which is implemented as a
+unary operator with the highest precedence. (Actually, the |int|'s are
+really |long|, to accomodate the pc~people. We didn't see the need to have
+separate |int| and |long| types.)
+
+In addition, a fourth type, |Op|, is used to represent unary or binary
+operators. 
+
+Although the expression evaluator is patterned after ANSI~C, it isn't
+complete, and it doesn't behave exactly identically.  In particular, the
+order of evaluation isn't necessarily left-to-right.  Presently, I don't
+see the need for anything more elaborate, but time will tell.
+
+@m _EVaL_ /* Note that the fully upper-case form conflicts with the
+		built-in |_EVAL_|! */
+@d _EVAL_h
+
+@A
+@<Include files@>@;
+@<Typedef declarations@>@;
+@<Prototypes@>@;
+@<Global variables@>@;
+
+@I typedefs.hweb
+
+@I texts.hweb
+@I trunc.hweb
+
+@ The function prototypes must appear before the global variables.
+@<Proto...@>=
+
+#include "e_type.h" // Function prototypes for \.{eval}.
+#include "r_type.h" // Prototypes for \.{ratfor}.
+
+@ Something from \.{ratfor.web}.
+
+@f sixteen_bits int
+@f token x
+
+@I t_codes.hweb
+
+@i val.hweb
+
+@ For the error messages, we have a function that returns a pointer to the
+name of the type.
+@a
+outer_char *stype FCN((type))
+	TYPE type C1("Type whose name is desired.")@;
+{
+switch(type)
+	{
+	case Int: return OC("Int");
+	case Double: return OC("Double");
+	case Id: return OC("Id");
+	case Op: return OC("Op");
+	default: return OC("UNKNOWN");
+	}
+}
+
+@ Using the previous ingredients, we represent each token by a |VAL|
+structure. First, |evaluate| parses the incoming tokens and fills a |VAL|
+structure with the correct data value or operator token; it then links it
+into a list, which it later traverses to effect the expression evaluation.
+The linkage is necessary because items must be removed as unary operators
+are evaluated.
+
+@<Typedef...@>=
+
+/* A static heap of available |VAL| structures. */
+VAL HUGE *val_heap; // Allocated at outer level of |evaluate|.
+VAL HUGE *val_ptr; // Next available |VAL| in heap.
+
+@ The outermost expression evaluator |eval| used for the preprocessor must
+return either~1 for true or~0 for false. The actual evaluation routine
+|evaluate| is recursive; the following macro makes the outer call to it. It
+also allocates and frees the |VAL| heap used during the evaluation.
+
+@a
+boolean eval FCN((p0,p1))
+	CONST eight_bits HUGE *p0 C0("Beginning of tokens.")@;
+	CONST eight_bits HUGE *p1 C1("End of tokens.")@;
+{
+VAL val;
+
+EVALUATE(val,p0,p1);
+
+switch(val.type)
+	{
+	case Int: return (boolean)(val.value.i != 0);
+	case Double: return (boolean)(val.value.d != 0.0);
+	default: 
+		EMACRO_ERR("! Non-numeric type returned from eval \
+(undefined macro?); assumed FALSE",YES);
+		return 0;	// Error in evaluation.
+	}
+}
+
+@ A related routine returns an integer that is the evaluation of the
+expression. 
+@a
+int neval FCN((p0,p1))
+	CONST eight_bits HUGE *p0 C0("Beginning of tokens.")@;
+	CONST eight_bits HUGE *p1 C1("End of tokens.")@;
+{
+VAL val;
+
+EVALUATE(val,p0,p1);
+
+switch(val.type)
+	{
+	case Int: return (int)(val.value.i);
+	case Double: return (int)(val.value.d);
+	default: 
+		EMACRO_ERR("! Non-numeric type returned from neval \
+(undefined macro?); assumed 0",YES);
+		return 0;	// Error in evaluation.
+	}
+}
+
+@ Related to |eval| are an important internal macro |$EVAL|, which
+evaluates a string expression.
+@<Define internal macros@>=
+
+SAVE_MACRO("$EVAL(expr)$$EVAL(expr)"); // Expand the expression.
+
+@ Here is the function that evaluates the value of a string.
+@a
+SRTN i_eval_ FCN((n,pargs))
+	int n C0("")@;
+	PARGS pargs C1("")@;
+{
+VAL val;
+eight_bits HUGE *p0;
+
+CHK_ARGS("$EVAL",1);
+
+p0 = pargs[0] + 1;
+EVALUATE(val, p0, pargs[1]);
+
+@<Write the expansion directly into the |macrobuf|@>;
+}
+
+@ Here the result of the evaluation is written directly into the
+|macrobuf|. If the result failed to evaluate to a number, the original
+expression is just copied over.
+@<Write the expansion...@>=
+{
+MCHECK0(2, "expansion |constant|"); 
+	// Takes care of the two bracketing |constant|s. 
+*mp++ = constant; // Beginning of the |constant|.
+
+switch(val.type)
+	{
+   case Int: 
+	NSPRINTF((outer_char *)mp,"%ld",val.value.i); 
+	break;
+
+   case Double: 
+	NSPRINTF((outer_char *)mp,"%#.*g", DBL_DIG, val.value.d); 
+// Format guarantees a decimal point.
+	break; 
+
+   case Id:
+	MCHECK0(pargs[1] - p0,"Id");
+	mp--; // Backspace to beginning of |constant|.
+	while(p0<pargs[1]) *mp++ = *p0++; // Copy it over.
+	return;
+
+   default:
+	EMACRO_ERR("! Invalid type returned from _eval_",YES);
+	return;
+	}
+
+fin_constant(val.type);
+}
+
+@ The fundamental recursive routine |evaluate| parses a bounded string of
+tokens, possibly ended by a special delimiter. It then evaluates the
+resulting expression, fills a |VAL| structure with the value, and returns a
+pointer to the next unprocessed token.
+
+If an error occurs, a cascade of additional messages would be possible. To
+prevent this, we use |setjmp| and |longjmp| to get out fast. Because the
+evaluation is recursive, we have to jump all the way out of that (with a
+|longjmp|), so we make the top level of |evaluate| simple, and call |eval0|
+to do the hard work.
+
+@m EVAL_ERR(...) 
+	{
+	EMACRO_ERR(#.); longjmp(top_of_evaluate,1); /* Non-zero
+		value signifies the second return from |setjmp|. */
+	}
+
+@m EMACRO_ERR(...) if(eval_msgs) MACRO_ERR(#.)@;
+
+@f jmp_buf int
+
+@<Glob...@>=
+
+static jmp_buf top_of_evaluate; // Environment for the |setjmp|--|longjmp|./
+boolean eval_msgs ESET(YES); // Sometimes we want to suppress the msgs.
+
+@ In the top level, we first call |setjmp|. The first call to |setjmp| is
+guaranteed to return~0; from this normal return we call |eval0| to actually
+evaluate the expression. If a |longjmp| is executed (see the |EVAL_ERR|
+macro, it returns from |setjmp| with a nonzero value; we then fill |val|
+with a bad data value and return. The function returns a pointer to the
+next token to be examined. 
+@a
+CONST eight_bits HUGE *evaluate FCN((val,p0,p1))
+	VAL HUGE *val C0("Return the evaluated |DATA| structure here.")@;
+	CONST eight_bits HUGE *p0 C0("Beginning of the input tokens.")@;
+	CONST eight_bits HUGE *p1 C1("End of the input tokens.")@;
+{
+if(setjmp(top_of_evaluate) == 0) return eval0(val,p0,p1,(eight_bits)'\0');
+	// Evaluate the expression.
+else
+	{ /* Get here from |longjmp|. */
+	val->type = Id; // Flag for bad expression.
+	val->value.id = ignore;
+	return p1;
+	}
+}
+
+@ The fundamental expression evaluator must be recursive because of
+parenthesized expressions. The basic procedure is simple. (1)~Convert the
+input string to a linked list, with some added information such as the
+precedence of the operators for efficiency; (2)~scan the list (from left to
+right) and evaluate all unary operators, proceeding from highest to lowest
+precedence; (3)~scan again to evaluate binary operators. This last scan is
+done recursively, proceeding from lowest to highest precedence. At a given
+precedence, the list is split to the left and to the right of the given
+binary operator; each part is evaluated recursively; then the binary
+operator is applied. In order to ensure that the final evaluation is from
+left to right at a given precedence, the splitting must be done from right
+to left. For example, $2\times 2/4$ must be evaluated as $(2\times 2)/(4)$,
+not $2\times(2/4)$.  For ease of coding, the first and last |VAL|s in the
+list are dummies, having no values. Only their addresses are used to help
+terminate the scans.
+
+To help speed things up, the array |found_op| is introduced. When the |VAL|
+list is first being formed, |found_op| keeps track of how many operators of
+a given precedence were encountered. If there are none at a given
+precedence, then the list need not be scanned for it. Also, when an
+operator is applied, |found_op| is decremented. At the end, |found_op|
+should be identically zero.
+
+@a
+CONST eight_bits HUGE *eval0 FCN((val,p0,p1,delim))
+	VAL HUGE *val C0("Return the evaluated |DATA| structure here.")@;
+	CONST eight_bits HUGE *p0 C0("Beginning of the input tokens.")@;
+	CONST eight_bits HUGE *p1 C0("End of the input tokens.")@;
+	eight_bits delim C1("End the scan when this token is encountered.")@;
+{
+CONST eight_bits HUGE *p;
+eight_bits a;
+sixteen_bits id;
+VAL v_root,v_end; // Dummies to help terminate the list.
+VAL HUGE *v; // Current |VAL|.
+VAL HUGE *v0= &v_root, HUGE *v1= &v_end; /* Point to the first and
+		last elements in the chain. */ 
+VAL HUGE *vlast, HUGE *vnext;	// Temporaries.
+int prec;
+boolean at_start; // Are we at start of list?
+eight_bits last_op; /* The first of two consecutive operator tokens. Also
+	used as a |boolean| operator; if it's non-zero, the last token was an
+	operator. */
+int k,found_op[HIGHEST_PRECEDENCE+1];
+
+/* Initialize the speed array. */
+for(k=LOWEST_PRECEDENCE; k<=HIGHEST_PRECEDENCE; k++) found_op[k] = 0;
+
+/* Check for invalid, null expression. */
+if(p0>=p1 || *p0==delim)
+	{
+	EMACRO_ERR("! Null expression encountered during expression \
+evaluation; 0 assumed",YES);
+	val->type = Int;
+	val->value.i = 0;
+	
+	if(*p0 == delim) return p0+1;
+	else return p1;
+	}
+
+@<Construct the |VAL| list@>@;
+@<Reduce the unary operators@>@;
+
+/* Traverse the chain beginning at~|v0| and ending at~|v1|, and reduce
+binary operations according to precedence. */
+v0 = eval1(v0,v1,(PRECEDENCE)LOWEST_PRECEDENCE,found_op);
+val->type = v0->type;
+val->value = v0->value;
+
+for(k=LOWEST_PRECEDENCE; k<=HIGHEST_PRECEDENCE; k++)
+	if(found_op[k]) 
+		EVAL_ERR("! Missing operand(s) at precedence \
+level %d (null macro?)", YES, k);
+
+return p;
+}
+
+@ Here we scan the input string, converting it into a doubly-linked list.
+Note that the |VAL| heap was allocated at the beginning; it's not allocated
+during recursive calls to |eval0|.
+
+One annoyance is that one must pay attention to the two possible uses of a
+minus sign. We assume that if it comes first or after another operator
+token, it's the unary minus; otherwise, it's the binary operator. To help
+us here, we introduce the flag |at_start|.
+@<Construct the |VAL|...@>=
+{
+at_start = YES; // In case of a leading unary minus.
+last_op = ignore;
+
+for(p=p0,vlast=v0,v=v0->next= ++val_ptr,v->last=vlast; p<p1; )
+	{
+	if(TOKEN1(a= *p++)) 
+		@<Process single-byte token for |VAL| list@>@;
+	else 
+		@<Process identifier token for |VAL| list@>@;
+
+/* This statement is put here rather than as part of the |for| so we can
+skip over it if we're skipping a string. */
+	vlast=v; @+ v = v->next = ++val_ptr; @+ v->last=vlast;
+	}
+
+vlast->next = v1; // Terminate the chain forward.
+v1->last = vlast;
+}
+
+@
+@<Process single-byte token...@>=
+{
+if(a==delim) 
+	break; // The token |delim| ends the scan.
+
+reswitch:
+switch(a)
+	{
+   case @'(':
+	last_op = ignore;
+	p = eval0(v,p,p1,@')'); 
+		// Recursively evaluate parenthesized expressions. 
+	break;
+
+   case dot_const:
+	{
+	extern DOTS dots0[];
+	DOTS *d;
+	int num = *p++;
+
+	if(num > PREDEFINED_DOTS) EVAL_ERR("! May only use predefined dot \
+constants such as .AND. here",YES);
+
+	d = dots0 + num;
+
+	if(d->cat == expr) EVAL_ERR("! .FALSE. and .TRUE. are not handled \
+by the expression evaluator.  Please use 0 or 1 instead",YES)@;
+	if(d->cat != binop) EVAL_ERR("! Invalid dot constant during \
+expression evaluation; was expecting binary operator",YES)@;
+	a = d->token; // The translation.
+	goto reswitch;
+	}
+
+   case constant:
+	last_op = ignore;
+	p = vfill(v,p,p1); // Convert constant to data. 
+	break;
+
+   case stringg:
+	while(*p++ != stringg); /* Skip over embedded string, to
+overlook verbatim comments. */
+	continue;
+
+   case @' ':
+   case tab_mark:
+	continue; // These sneak in during nuweb mode.
+
+   case @'-':
+	if(last_op || at_start) a = UNARY_MINUS;
+	last_op = ignore; // Falls through to |default|.
+
+   default:
+	if( (prec=(int)precedence(a)) > 0)
+		{
+		if(last_op && ((IS_UNARY(last_op) && IS_UNARY(a))
+|| (IS_BINARY(last_op) && IS_BINARY(a)))) 
+			EVAL_ERR("! Adjacent operators \"%s %s\" \
+not allowed in expression",YES,op_name(last_op),op_name(a))@;
+
+		v->type = Op;
+		last_op = v->value.op.token = a;
+		found_op[(int)(v->value.op.precedence =	(PRECEDENCE)prec)]++;  
+		}
+	else EVAL_ERR(_Xx("! Invalid token '%c' (0x%x) in \
+expression"),YES,a >= @' ' ? a : '?',a)@;
+	break;
+	}
+
+at_start = NO;
+}
+
+@
+@<Process identifier token...@>=
+{
+at_start = NO; @+ last_op = ignore;
+
+if( (id = IDENTIFIER(a,*p++)) == id_defined)
+	{
+	v->type = Op;
+	last_op = v->value.op.token = DEFINED_TOKEN;
+	found_op[(int)(v->value.op.precedence =	precedence(DEFINED_TOKEN))]++; 
+	}
+else
+	{
+	v->type = Id; // This had better be the argument of |defined|.
+	v->value.id = id;
+	}
+}
+
+@ The previous fragment uses the |vfill| function, which
+converts a constant expression to bit form and returns a pointer to the
+next token to be processed. Note that we must make special provision for
+hex, octal, and binary constants, since when programming in~C these are not
+converted automatically.
+@a
+CONST eight_bits HUGE *vfill FCN((v,p0,p1))
+	VAL HUGE *v C0("To be filled.")@;
+	CONST eight_bits HUGE *p0 C0("Start of expression.")@;
+	CONST eight_bits HUGE *p1 C1("End of expression.")@;
+{
+CONST eight_bits HUGE *p;
+eight_bits a;
+ASCII temp[100]; // Should be error checked.
+ASCII HUGE *t;
+TYPE type = Int;
+
+/* Put the stuff between |constant| into a temporary buffer. */
+for(p=p0,t=temp; p<p1; )
+	{
+	if( (a=*p++) == constant) break; // Terminating delimiter found.
+	
+	if(a==@'.' || a==@'e' || a==@'E' || a==@'d' || a==@'D') type = Double;
+
+	*t++ = a;
+	}
+
+*t = '\0';
+
+/* Convert the buffer. */
+switch(v->type=type)
+	{
+   case Int:
+	if(temp[0] == @'0')
+		if(temp[1] == @'x' || temp[1] == @'X') 
+			v->value.i = xtoi(temp,t);
+		else if(temp[1] == @'b' || temp[1] == @'B') 
+			v->value.i = btoi(temp,t);
+		else v->value.i = otoi(temp,t);
+	else v->value.i = ATOL(to_outer(temp));
+	break;
+
+   case Double:
+	v->value.d = ATOF(to_outer(temp));
+	break;
+
+   default: 
+	CONFUSION("vfill","Type must be Int or Double here");
+	}
+
+return p;
+}
+
+@ Here we scan for and reduce the unary operators. This must be done in
+order of decreasing precedence.
+@<Reduce the unary...@>=
+
+for(prec = (int)HIGHEST_UNARY; prec >= (int)UNARY; prec--)
+   if(found_op[prec])
+	for(v=v0->next; v != v1; v=vnext)
+		{
+		vnext = v->next;
+
+		if(v->type == Op && v->value.op.precedence == (PRECEDENCE)prec)
+			{
+			switch(v->value.op.token)
+				{
+				case DEFINED_TOKEN:
+					@<Apply |defined| operator@>; @+ break;
+
+				case @'!':
+					@<Negate@>; @+ break;
+
+				case @'~':
+					@<Complement@>;@+ break;
+
+				case UNARY_MINUS:
+					@<Unary minus@>; @+ break;
+				}
+
+/* The value is now where the unary operator was; remove the original value
+from the list. */
+			v->next = vnext->next;
+			v->next->last = v;
+			vnext = v->next;
+
+			if(!(--found_op[prec])) break;
+			}
+		}
+
+@ The routine |eval1| that actually reduces the expressions is recursive.
+We scan for operators with the highest precedence and handle those first.
+All unary operators with the same precedence can be evaluated on the same
+pass. For binary operators, we split into the expressions to the left and
+to the right of the operator, and apply |eval1| recursively to each half.
+(The splitting must proceed from right to left in order that the final
+order of evaluation is left to right.)  Then we can return the result of
+the binary operation.
+
+@a
+VAL HUGE *eval1 FCN((v0,v1,prec0,found_op))
+	CONST VAL HUGE *v0 C0("Start of list.")@;
+	CONST VAL HUGE *v1 C0("End of list.")@;
+	PRECEDENCE prec0 C0("Start scanning with this value of precedence.")@;
+	int found_op[] C1("Array of flags---was an operator found at \
+each precedence level?")@;
+{
+int prec;
+VAL HUGE *v, 
+	HUGE *val0, HUGE *val1; /* Returned pointers from |eval1| to the
+left and right operands of a binary operator. */
+
+if(v0->next == v1->last) return v0->next; // Reduced down to constant.
+
+for(prec=(int)prec0; prec < (int)UNARY; prec++)
+   if(found_op[prec])
+	for(v=v1->last; v != v0; v=v->last)
+		{
+		if(v->type == Op && v->value.op.precedence == (PRECEDENCE)prec)
+			{
+			val0 = eval1(v0,v,(PRECEDENCE)LOWEST_PRECEDENCE,
+					found_op); // Left-hand expression. 
+			val1 = eval1(v,v1,(PRECEDENCE)(prec+1),found_op); 
+					// Right-hand expression.
+			promote(val0,val1);
+
+			@<Process an operator token@>@;
+
+			found_op[prec]--;
+			return val0;
+			}
+		}
+
+EVAL_ERR("! Missing binary operator, or undefined macro",YES)@;
+
+DUMMY_RETURN(NULL);
+}
+
+@ In the following, note the use of the pseudo-expression to help out the
+formatting.
+@<Process an operator...@>=
+
+switch(v->value.op.token)
+	{
+	case star_star:
+		@<Exponentiate@>; @+ break;
+
+	case @'*': ARITH(*@e);
+	case @'/': chk_zero('/',val1); @+ ARITH(@e/@e); 
+	case @'%': chk_zero('%',val1); @+ BIT(@e%@e);
+
+	case @'+': ARITH(@e+@e);
+	case @'-': ARITH(-@e);
+
+	case lt_lt: BIT(@e<<@e);
+	case gt_gt: BIT(@e>>@e);
+
+	case @'<': LOG(@e<@e);
+	case lt_eq: LOG(@e<=@e);
+	case @'>': LOG(@e>@e);
+	case gt_eq: LOG(@e>=@e);
+
+	case eq_eq: 
+		if(val0->type == Id && val1->type == Id)
+			{
+			val0->value.i = val0->value.id == val1->value.id;
+			val0->type = Int;
+			break;
+			}
+		else
+			LOG(@e==@e);
+
+	case not_eq: 
+		if(val0->type == Id && val1->type == Id)
+			{
+			val0->value.i = val0->value.id != val1->value.id;
+			val0->type = Int;
+			break;
+			}
+		else
+			LOG(@e!=@e);
+
+	case @'&': BIT(&@e);
+	case @'^': case neqv: BIT(@e^@e);
+	case @'|': BIT(@e|@e);
+
+	case and_and: BIT(@e&&@e);
+	case or_or: BIT(@e||@e);
+	}
+
+
+@ Check an operand for zero.
+@a
+SRTN chk_zero FCN((c,pv))
+	outer_char c C0("Operator.")@;
+	CONST VAL HUGE *pv C1("Right-hand operand.")@;
+{
+boolean is_zero = NO;
+
+switch(pv->type)
+	{
+	case Int:
+		if(pv->value.i == 0) is_zero = YES;
+		break;
+
+	case Double:
+		if(pv->value.d == 0.0) is_zero = YES;
+		break;
+
+	default:
+		EVAL_ERR("! Right operand of '%c' must have type Int or \
+Double",YES,c)@;
+	}
+
+if(is_zero) EVAL_ERR("! RIGHT OPERAND OF '%c' IS ZERO",YES,c)@;
+}
+
+@ Effect logical negation. The result is always |int|.
+@<Negate@>=
+
+switch(vnext->type)
+	{
+	case Int:
+		v->value.i = !(vnext->value.i);
+		break;
+
+	case Double:
+		v->value.i = !(vnext->value.d);
+		break;
+
+	default:
+		EVAL_ERR("! Can't negate type %s",YES,stype(vnext->type))@;
+	}
+
+v->type = Int@;
+
+
+@ One's complement.
+@<Complement@>=
+
+if(vnext->type != Int) 
+	{
+	EMACRO_ERR("! Can't take one's complement of type %s; \
+operand converted to integer",YES,stype(vnext->type));
+	v->value.i = (long)(vnext->value.d);
+	}
+
+v->type = Int;
+v->value.i = ~vnext->value.i@;
+
+@ The unary minus is straightforward.
+@<Unary minus@>=
+
+switch(v->type = vnext->type)
+	{
+	case Int:
+		v->value.i = -(vnext->value.i); @+ break;
+
+	case Double:
+		v->value.d = -(vnext->value.d); @+ break;
+
+	default:
+		EVAL_ERR("! Missing or invalid operand of unary minus \
+has type %s",
+			NO, stype(v->type))@;
+	}
+
+@ ANSI's |defined| command is implemented as a unary operator with the
+highest precedence. 
+
+@<Apply |defined|...@>=
+{
+text_pointer m;
+
+if(vnext->type != Id)
+	EVAL_ERR("! 'defined' must act on identifier, not type %s",
+		NO,stype(vnext->type))@;
+else v->value.i = ((m=mac_lookup(vnext->value.id)) != NULL && !(m->built_in));
+
+v->type = Int;
+}
+
+@ Computing the binary operation is aided by some macros.
+
+@d BINARY(l,token) switch(val0->type)
+	{
+	case Int:
+		val0->value.i = val0->value.i token val1->value.i;
+		break;
+
+	case Double:
+		val0->value.l = val0->value.d token val1->value.d; 
+		break;
+
+	case Id:
+		misplaced_id(val0->value.id,val1->value.id);
+
+	default:
+		EVAL_ERR("! Shouldn't have type Op here",YES)@;
+	}
+
+@d ARITH(token) BINARY(d,token)@; break@;
+
+@d LOG(token) BINARY(i,token)@; val0->type = Int; break@;
+
+@d BIT(token) if(val0->type != Int) EVAL_ERR("! Invalid type %s in bit \
+operation. (Macro not defined?)",YES,stype(val0->type))@;
+	val0->value.i = val0->value.i token val1->value.i;
+	break@;
+
+@ An error routine.
+@a
+SRTN misplaced_id FCN((a0,a1))
+	sixteen_bits a0 C0("Left-hand token.")@;
+	sixteen_bits a1 C1("Right-hand token.")@;
+{
+outer_char left_id[MAX_ID_LENGTH],right_id[MAX_ID_LENGTH];
+
+STRCPY(left_id,name_of(a0));
+STRCPY(right_id,name_of(a1));
+
+EVAL_ERR("! Identifier not allowed as binary operand:  \
+left = \"%s\" (%d), right = \"%s\" (%d).  (Undefined WEB macro?)",
+	NO,left_id,a0,right_id,a1)@;
+}
+
+@ Since C~doesn't have an explicit exponentation token, we have to
+implement explicit code.
+@<Unused@>=
+
+@#if 0
+@#if !ANSI
+double pow PROTO((double x,double y));
+double atof();
+@#endif
+@#endif
+
+@ 
+@<Exponentiate@>=
+
+switch(val0->type)
+	{
+	case Int:
+		val0->value.i = 
+		   (long)pow((double)val0->value.i,(double)val1->value.i);
+		break;
+
+	case Double:
+		val0->value.d = pow(val0->value.d,val1->value.d);
+		break;
+
+	default:
+		EVAL_ERR("! Invalid operand of exponentiate has type %s",
+			NO,stype(val0->type))@;
+	}
+
+@* PRECEDENCE. A simple routine returns the precedence of a given token. 
+
+@d DEFINED_TOKEN OCTAL(23)
+@d UNARY_MINUS OCTAL(24)
+
+@d LOWEST_PRECEDENCE 1
+@d HIGHEST_PRECEDENCE 13
+
+/* In the following, the casting shouldn't be necessary, since according to
+ANSI |enum|s behave like integers. But it's necessary to keep the |DSU|
+compiler happy. */
+@d IS_UNARY(token) ((int)precedence(token) >= (int)UNARY)
+@d IS_BINARY(token) ((int)precedence(token) < (int)UNARY)
+
+@ This function returns the proper precedence of an operator.
+@a
+PRECEDENCE precedence FCN((token))
+	eight_bits token C1("Operator token whose precedence is desired.")@;
+{
+switch(token)
+	{
+	case DEFINED_TOKEN:
+		return HIGHEST_UNARY;
+
+/* --- The unary operators: Logical negation, one's complement, unary minus. */
+	case @'!':
+	case @'~':
+	case UNARY_MINUS:
+		return UNARY;
+
+/* --- Exponentiation --- */
+	case star_star:
+		return EXP;
+
+/* --- Multiplication, division, modulus --- */
+	case @'*':
+	case @'/':
+	case @'%':
+		return TIMES;
+
+/* --- Addition, subtraction --- */
+	case @'+':
+	case @'-':
+		return PLUS_MINUS;
+
+/* --- Bit shift --- */
+	case lt_lt:
+	case gt_gt:
+		return BIT_SHIFT;
+
+/* --- Less than, greater than --- */
+	case @'<': case lt_eq:
+	case @'>': case gt_eq:
+		return LOG_LT;
+
+/* --- Equals, not equals --- */
+	case eq_eq:
+	case not_eq:
+		return LOG_EQ;
+
+/* --- Bitwise AND --- */
+	case @'&':
+		return BIT_AND;
+
+/* --- Bitwise EXCLUSIVE OR --- */
+	case @'^':
+	case neqv:
+		return BIT_XOR;
+
+/* --- Bitwise OR --- */
+	case @'|':
+		return BIT_OR;
+
+/* --- Logical AND --- */
+	case and_and:
+		return AND_AND;
+
+/* --- Logical OR --- */
+	case or_or:
+		return OR_OR;
+
+	default:
+		return BAD_TOKEN;
+	}
+}
+
+@ Return a readable representation of an operator token.
+@a
+
+#define NAME(token,name) case token: return OC(name)@;
+
+outer_char *op_name FCN((token))
+	eight_bits token C1("Operator token whose name is desired.")@;
+{
+switch(token)
+	{
+	NAME(DEFINED_TOKEN,"defined");
+	NAME(@'!',"!");
+	NAME(@'~',"~");
+	NAME(UNARY_MINUS,"-");
+	NAME(star_star,"**");
+	NAME(@'*',"*");
+	NAME(@'/',"/");
+	NAME(@'%',"%");
+	NAME(@'+',"+");
+	NAME(@'-',"-");
+	NAME(lt_lt,"<<");
+	NAME(gt_gt,">>");
+	NAME(@'<',"<");
+	NAME(lt_eq,"<=");
+	NAME(@'>',">");
+	NAME(gt_eq,">=");
+	NAME(eq_eq,"==");
+	NAME(not_eq,"!=");
+	NAME(@'&',"&");
+	NAME(@'^',"^");
+	NAME(neqv,"?=");
+	NAME(@'|',"|");
+	NAME(and_and,"&&");
+	NAME(or_or,"||");
+
+	default: return OC("(UNKNOWN)");
+	}
+}
+
+#undef NAME
+
+@ Promote operands to same type.
+
+@d TO_DOUBLE(v)	CONVERT_TO(Double,d,double,v)
+@d TO_ID(v) CONVERT_TO(Id, id, sixteen_bits, v)
+
+@d CONVERT_TO(t,lhs,cast,v) if(v->type != t) 
+	{
+	v->value.lhs = (cast)v->value.i;
+	v->type = t;
+	}
+
+@a
+SRTN promote FCN((v0,v1))
+	VAL HUGE *v0 C0("Left-hand value.")@;
+	VAL HUGE *v1 C1("Right-hand value.")@;
+{
+if((int)v0->type > (int)v1->type) convert_to(v0->type,v0,v1);
+else convert_to(v1->type,v0,v1);
+}
+
+SRTN convert_to FCN((type,v0,v1))
+	TYPE type C0("Type to be converted to.")@;
+	VAL HUGE *v0 C0("Left-hand value.")@;
+	VAL HUGE *v1 C1("Right-hand value.")@;
+{
+switch(type)
+	{
+	case Int: break;
+
+	case Double:
+		TO_DOUBLE(v0);
+		TO_DOUBLE(v1);
+		break;
+
+	case Id:
+		TO_ID(v0);
+		TO_ID(v1);
+		break;
+
+	default:
+		EVAL_ERR("! Invalid data type %s in promotion",
+			NO,stype(type))@;
+	}
+}
+
+@* BUILT-IN FUNCTIONS.
+Here is a language facility for the preprocessor.
+
+@a
+SRTN i_lang_ FCN((n,pargs))
+	int n C0("")@;
+	PARGS pargs C1("")@;
+{
+outer_char temp[5],*temp1=temp+1;
+sixteen_bits l; // The number of the language identifier.
+
+CHK_ARGS("$LANGUAGE",0);
+
+/* Initialize to \Fortran--77. */
+STRCPY(temp,"$N"); // Some compilers don't allow auto initialization.
+
+switch(language)
+	{
+	case C:
+		*temp1 = 'C'; @+ break;
+
+	case C_PLUS_PLUS:
+		STRCPY(temp1,"CPP"); @+ break;
+
+	case RATFOR:
+		if(!RAT_OK("(_LANGUAGE)")) 
+			CONFUSION("_lang_",
+				"Language shouldn't be Ratfor here");
+		*temp1 = 'R'; @+ break;
+
+	case RATFOR_90:
+		if(!RAT_OK("(_LANGUAGE)")) 
+			CONFUSION("_lang_",
+				"Language shouldn't be Ratfor here");
+		STRCPY(temp1,"R90"); @+ break;
+
+	case TEX:
+		*temp1 = 'X'; @+ break;
+
+	case LITERAL:
+		*temp1 = 'V'; @+ break;
+
+	case FORTRAN:
+	default:
+		*temp1 = 'N'; @+ break;
+
+	case FORTRAN_90:
+		STRCPY(temp1,"N90"); @+ break;
+	}
+
+to_ASCII(temp);
+l = ID_NUM((ASCII HUGE *)temp,(ASCII HUGE *)(temp+STRLEN(temp))); 
+	// Get number of the language identifier.
+MCHECK0(2,"language token");
+*mp++ = LEFT(l,ID0); // Return the language token.
+*mp++ = RIGHT(l);
+}
+
+@ For |$IFCASE| statements, it is useful to obtain the number of the
+current language.
+@a
+SRTN i_lnum_ FCN((n,pargs))
+	int n C0("")@;
+	PARGS pargs C1("")@;
+{
+num_to_mbuf(n,pargs,"$LANGUAGE_NUM",0,"language number",stnd_num(language));
+}
+
+@ We need a standardized numbering system for use by the external world.
+This numbering should never change, regardless of what we do internally.
+@a
+unsigned stnd_num FCN((Language))
+	LANGUAGE Language C1("")@;
+{
+proper_language:
+ switch(Language)
+	{
+   case C:		return 0;
+   case C_PLUS_PLUS:	return 1;
+   case FORTRAN:	return 2;
+   case FORTRAN_90:	return 3;
+   case RATFOR:		return 4;
+   case RATFOR_90:	return 5;
+   case TEX:		return 6;
+   case LITERAL:	return 7;
+   default:
+	Language = global_language;
+	goto proper_language;
+	}
+}
+
+@ For completeness, we have an exponentiation built-in.
+@<Define internal...@>=
+
+SAVE_MACRO("$POW(x,y)$EVAL((x)^^(y))");
+
+@ This is an interface to |predefine_macros| in \FTANGLE. 
+@a
+SRTN e_macros(VOID)
+{
+@<Define internal...@>;
+}
+
+
+@ Now we generate some mathematical constants.
+@<Define internal...@>=
+
+SAVE_MACRO("$PI(...)$$CONST(\"$PI\", \".31415926535897932384626433832795028\
+8419716939937510\",#.)");
+
+SAVE_MACRO("$E(...)$$CONST(\"$E\", \".2718281828459045235360287471352662497\
+75724709369995\",#.)");
+
+SAVE_MACRO("$EXP(x)$POW($E, x)");
+SAVE_MACRO("$SQRT(x)$POW(x, 0.5)");
+
+@
+@a
+SRTN i_const_ FCN((n,pargs))
+	int n C0("")@;
+	PARGS pargs C1("")@;
+{
+VAL val;
+int prec, carry;
+
+if(n == 2)
+	prec = DBL_DIG;
+else
+	{
+	CHK_ARGS("$$CONST", 3);
+	EVALUATE(val, pargs[2]+1, pargs[3]);
+	if(val.type != Int)
+		{
+		EMACRO_ERR("! Precision argument of $PI or $E must be an \
+integer; default precision of %d assumed", YES, DBL_DIG);
+		prec = DBL_DIG;
+		}
+	else
+		{
+		prec = (int)MIN(val.value.i, 49L);
+		prec = MAX(prec, 0);
+		}
+	}
+
+prec += 2; // Take account of the leading digit and the decimal point.
+
+MCHECK0(prec+2, "math constant");
+
+*mp++ = constant;
+STRNCPY(mp, pargs[1]+3, prec+1); 
+	/* The '3' accounts for comma, |constant|, and quote.  We get one
+extra so we can round. */
+
+n = prec;
+carry = (mp[n--] >= @'5');
+
+while(carry)
+	{
+	mp[n] += 1;
+
+	if(mp[n] > @'9')
+		mp[n--] = @'0';
+	else
+		break;
+	}
+
+mp[0] = mp[1];
+mp[1] = @'.';
+
+mp += prec;
+
+if(FORTRAN_LIKE(language))
+	{ /* In \Fortran, it isn't |double precision| unless one says so
+explicitly. */
+	MCHECK0(2, "d0");
+	*mp++ = @'d';
+	*mp++ = @'0';
+	}
+
+*mp++ = constant;
+}
+
+@
+@
+@<Define internal...@>=
+
+SAVE_MACRO("$LOG(x)$$LOG(0, x)");
+SAVE_MACRO("$LOG10(x)$$LOG(1, x)");
+
+@
+@a
+SRTN i_log_ FCN((n,pargs))
+	int n C0("")@;
+	PARGS pargs C1("")@;
+{
+int m;
+VAL val;
+double x,y;
+
+m = *(pargs[0]+2) - @'0';
+EVALUATE(val, pargs[1]+1, pargs[2]);
+
+if(val.type == Int)
+	x = (double)val.value.i;
+else if(val.type == Double)
+	x = val.value.d;
+else 
+	{
+	EMACRO_ERR("! Invalid argument to $LOG or $LOG10 (undefined \
+macro?); expansion aborted", YES);
+	return;
+	}
+
+if(m==0)
+	y = log(x);
+else
+	y = log10(x);
+
+MCHECK0(DBL_DIG+2, "$$LOG");
+*mp++ = constant;
+sprintf((char *)mp, "%#.*g", DBL_DIG, y);
+
+fin_constant(Double);
+}
+
+@ Here we finish the process of putting a constant into the macro buffer.
+Fundamentally we must convert it to |ASCII| and terminate it with
+|constant|.  Also, if the constant is floating point, we kill off trailing
+zeros, except we leave one zero after the decimal point.
+
+@a
+SRTN fin_constant FCN((type))
+	TYPE type C1("")@;
+{
+int n = STRLEN(mp);
+
+if(type == Double)
+	while(mp[n-1] == @'0')
+		{
+		if(mp[n-2] == @'.')
+			break;
+
+		n--;
+		}
+	
+to_ASCII(mp);
+mp += n;
+*mp++ = constant;
+}
+
+@
+@<Define internal...@>=
+
+SAVE_MACRO("$MIN(a,...)$$MIN_MAX(0, a, #.)");
+SAVE_MACRO("$MAX(a,...)$$MIN_MAX(1, a, #.)");
+
+@ The |$MIN| amd |$MAX| functions take at least one, possibly more
+arguments.  The annoyance in the logic is to avoid promoting |int|s to
+|double|s if everything is an |int|.
+
+@a
+SRTN i_min_max_ FCN((n,pargs))
+	int n C0("")@;
+	PARGS pargs C1("")@;
+{
+int m = *(pargs[0]+2) - @'0';
+long l = 0; // Accumulator for integers.
+double z = 0; // Acuumulator for floating point.
+double v = 0;
+VAL val;
+TYPE type;
+int k;
+
+EVALUATE(val, pargs[1]+1, pargs[2]); // Obtain the first value.
+
+type = val.type;
+
+if(type == Int)
+	l = val.value.i;
+else
+	z = val.value.d;
+
+for(k=2; k<n; k++)
+	{
+	EVALUATE(val, pargs[k]+1, pargs[k+1]);
+
+	if(val.type == Double)
+		{
+		if(type == Int)
+			z = (double)l; // From now, accumulate floating point.
+
+		type = Double;
+		}
+
+	if(type == Double)
+		if(val.type == Int)
+			v = (double)val.value.i;
+		else
+			v = val.value.d;
+
+	if(type == Int)
+		if(m == 0)
+			{
+			if(val.value.i < l)
+				l = val.value.i;
+			}
+		else
+			{
+			if(val.value.i > l)
+				l = val.value.i;
+			}
+	else
+		if(m == 0)
+			{
+			if(v < z)
+				z = v;
+			}
+		else
+			{
+			if(v > z)
+				z = v;
+			}
+	}
+
+MCHECK0(DBL_DIG+2, "min_max");
+*mp++ = constant;
+
+if(type == Int)
+	sprintf((char *)mp, "%ld", l);
+else
+	sprintf((char *)mp, "%#.*g", DBL_DIG, z);
+
+fin_constant(type);
+}
+		
+@* INDEX.

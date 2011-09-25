@@ -1,0 +1,43 @@
+		   --- BOOTSTRAPPING FWEB on VAX/VMS ---
+
+   This subdirectory contains bootstrap files for VAX/VMS.  (This
+information has not been updated or tested since 1993.)
+
+   To bootstrap, do the following from your top-level fweb directory:
+
+	BOOT :== [.boot.vax]
+	copy 'BOOT'/.fweb SYS$LOGIN
+	copy 'BOOT'/custom.h [.web]
+	copy 'BOOT'/fweb.opt [.web]
+
+  * Edit the file 'BOOT'/defaults.mk to specify the name of your compiler,
+form of the compile and link line, etc.  
+
+Then, say
+
+	@'BOOT'compile_fweb
+
+
+In COMPILE_FWEB.COM, the executable files are shortened by linking the run time
+library dynamically. See the file FWEB.OPT. This is optional. If it doesn't
+work, don't use it.
+
+   During the compiles, you may receive warning messages---for example,
+``Includes of library modules are not portable.''  Such warnings about
+portablility can be ignored (and will never appear if you turn off
+``/standard=portable'').
+
+   At least one user has run out of memory while compiling FTANGLE.C and
+FWEAVE.C.  If this happens to you, you can compile each of those several
+times, following the procedure developed for the memory-starved IBM-PC.  As
+an example, consider FTANGLE: The first time, use the compiler's
+command-line options ``/DEFINE="part=1"'' and ``/OBJECT=ftangle1.obj''; the
+second time replace '1' by '2'; do it once more, replacing '2' by '3'".
+Then link FTANGLE1.OBJ, FTANGLE2.OBJ, and FTANGLE3.OBJ with the other
+files, naming the result FTANGLE.EXE.  This procedure works for FTANGLE.C,
+FWEAVE.C, and RESERVED.C.
+
+   The original development for FWEB was done on a VAX. Although I am now
+working on a Sun, a VAX/VMS version is briefly tested for each release.  I
+should be able to emulate and resolve any problems you encounter rather
+quickly.

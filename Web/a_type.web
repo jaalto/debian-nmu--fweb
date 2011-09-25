@@ -1,0 +1,29 @@
+@z --- a_type.web ---
+
+FWEB version 1.62 (September 25, 1998)
+
+Based on version 0.5 of S. Levy's CWEB [copyright (C) 1987 Princeton University]
+
+@x-----------------------------------------------------------------------------
+
+
+\Title{A\_TYPE.WEB} % Prototypes for dummy termcap routines.
+
+@c
+@* INTRODUCTION.
+
+@I formats.hweb
+@I os.hweb
+
+@ The make file produces \.{a\_type.h} from these prototypes.
+
+@a
+
+int tgetent PROTO((outer_char *buffer,CONST outer_char *name));
+int tgetflag PROTO((CONST outer_char *id));
+int tgetnum PROTO((CONST outer_char *id));
+outer_char *tgetstr PROTO((CONST outer_char *id,outer_char **area));
+outer_char *tgoto PROTO((CONST outer_char *cm,int destcol,int destline));
+SRTN tputs PROTO((outer_char *cp,int affcnt,int (*outc)(int)));
+
+
