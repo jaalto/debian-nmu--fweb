@@ -20,6 +20,7 @@ topdir = $(shell pwd)
 tmpdir = ${topdir}/debian/$(package)
 texdir = ${tmpdir}/usr/share/texmf/tex/latex/litprog
 docdir = ${topdir}/debian/$(package)-doc/usr/share/doc/${package}
+infodir = ${topdir}/debian/$(package)-doc/usr/share/info
 mandir = ${tmpdir}/usr/share/man
 htmldocdir= ${docdir}/html-info
 
@@ -76,7 +77,7 @@ install: build
 	${MAKE} -C Web CFLAGS=-O2 LDFLAGS=-s \
 		INSTALL_PROGRAM='install -c ${INSTALLFLAGS}' \
 		prefix=${tmpdir}/usr texdir=${texdir} \
-		infodir=${tmpdir}/usr/share/info \
+		infodir=$(infodir) \
 		mandir=${mandir}/man1 \
 		install
 # documentation
