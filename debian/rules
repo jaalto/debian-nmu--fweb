@@ -70,6 +70,7 @@ install: build
 	mkdir ${tmpdir}
 	cd ${tmpdir} && mkdir -p usr/bin usr/share/man/man1 \
 		usr/share/info
+	mkdir -p $(infodir)
 
 	install -d ${texdir} ${htmldocdir}
 
