@@ -1,3 +1,21 @@
+fweb (1.62-11.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+    - Move to packaging format "3.0 (quilt)".
+  * debian/compat
+    - Update to 8.
+  * debian/control
+    - (Build-Depends): update to debhelper 8.
+    - (Depends): Add ${misc:Depends}.
+    - (Homepage): Add.
+    - (Recommends): Change to tetex-base to texlive (Closes: #601268).
+    - (Standards-Version): Update to 3.9.2.
+    - (Suggests): Remove tetex-base.
+  * debian/source/format
+    - New file.
+
+ -- Jari Aalto <jari.aalto@cante.net>  Sun, 25 Sep 2011 16:23:25 +0300
+
 fweb (1.62-11) unstable; urgency=low
 
   * Fixed Web/Makefile not to depend on the number of splitted info files
