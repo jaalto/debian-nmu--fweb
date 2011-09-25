@@ -19,7 +19,7 @@ export DH_OPTIONS
 topdir = $(shell pwd)
 tmpdir = ${topdir}/debian/$(package)
 texdir = ${tmpdir}/usr/share/texmf/tex/latex/litprog
-docdir = ${tmpdir}/usr/share/doc/${package}
+docdir = ${topdir}/debian/$(package)-doc/usr/share/doc/${package}
 mandir = ${tmpdir}/usr/share/man
 htmldocdir= ${docdir}/html-info
 
@@ -54,7 +54,7 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	-${MAKE} -C Web -i distclean || ${MAKE} -C Web -f Makefile.in distclean
+	${MAKE} -C Web -i distclean || ${MAKE} -C Web -f Makefile.in distclean
 	-rm -f Web/idxmerge Web/idxmerge.c Web/custom.h Web/config.h \
 		Manual/fweb.info* Manual/fweb*.html
 	rm -rf Manual/fweb/
@@ -68,7 +68,7 @@ install: build
 
 	mkdir ${tmpdir}
 	cd ${tmpdir} && mkdir -p usr/bin usr/share/man/man1 \
-		usr/share/info usr/share/doc-base
+		usr/share/info
 
 	install -d ${texdir} ${htmldocdir}
 
