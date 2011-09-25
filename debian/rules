@@ -64,7 +64,7 @@ install: DH_OPTIONS=
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 
 	mkdir ${tmpdir}
 	cd ${tmpdir} && mkdir -p usr/bin usr/share/man/man1 \
@@ -85,9 +85,6 @@ install: build
 	${installdoc} debian/idxmerge.1 ${mandir}/man1/
 	ln -s fweb.1.gz ${mandir}/man1/fweave.1.gz
 	ln -s fweb.1.gz ${mandir}/man1/ftangle.1.gz
-
-	dh_movefiles
-	test -z `find ${tmpdir} -type f`
 
 binary-indep: DH_OPTIONS=-i
 binary-indep: install
