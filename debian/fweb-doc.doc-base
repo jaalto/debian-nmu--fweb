@@ -1,5 +1,5 @@
 Document: fweb
-Section: Apps/Programming
+Section: Programming
 Title: The FWEB literate programming system
 Author: John Krommes <krommes@princeton.edu>
 Abstract: FWEB is a system for `literate programming'.  It enables one to
@@ -11,4 +11,4 @@ Abstract: FWEB is a system for `literate programming'.  It enables one to
 
 Format: HTML
 Index: /usr/share/doc/fweb/html-info/index.html
-Files: /usr/share/doc/fweb/html-info/*.html 
+Files: /usr/share/doc/fweb/html-info/*.html
