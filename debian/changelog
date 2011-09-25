@@ -6,17 +6,28 @@ fweb (1.62-11.1) unstable; urgency=low
     - Update to 8.
   * debian/control
     - (Build-Depends): update to debhelper 8.
-    - (Depends): Add ${misc:Depends}.
+    - (Description): Adjust first line (lintian).
     - (Homepage): Add.
     - (Recommends): Change to tetex-base to texlive (Closes: #601268).
     - (Standards-Version): Update to 3.9.2.
     - (Suggests): Remove tetex-base.
+    Package fweb-doc
+    - (Depends): Add ${misc:Depends}, add dpkg (>= 1.15.4) | install-info
+    - (Section): Add doc.
+  * debian/copyright
+    - Remove obsolete FSF address. Correct GPL path.
   * debian/rules
-    - (tmpdir): Use $package variable.
+    - Replace obsolete dh_clean with dh_prep
+    - (docdir): Install docs to $package-doc.
+    - (install): Don't create directory doc-base (lintian).
+    - (tmpdir): Install to $package, not tmp dir thus no longer needing
+      dh_movefiles.
   * debian/source/format
     - New file.
+  * fweb-doc.doc-base
+    - (Section): Update from Apps/Programming to Programming.
 
- -- Jari Aalto <jari.aalto@cante.net>  Sun, 25 Sep 2011 16:26:15 +0300
+ -- Jari Aalto <jari.aalto@cante.net>  Sun, 25 Sep 2011 17:02:33 +0300
 
 fweb (1.62-11) unstable; urgency=low
 
