@@ -24,7 +24,7 @@ fweb (1.62-11.1) unstable; urgency=low
   * debian/rules
     - Replace obsolete dh_clean with dh_prep
     - (build-arch, build-indep): New (W: Lintian).
-    - (clean): Aff if-statement to conditionally run make (Lintian).
+    - (clean): Adjust make call Web/Makefile (Lintian).
       Delete generated files: Web/fweave.mds Web/fweave.ndx
     - (docdir): Install docs to $package-doc.
     - (infodir): New variable.
@@ -36,7 +36,7 @@ fweb (1.62-11.1) unstable; urgency=low
   * fweb-doc.doc-base
     - (Section): Update from Apps/Programming to Programming.
 
- -- Jari Aalto <jari.aalto@cante.net>  Fri, 18 Nov 2011 15:54:38 +0200
+ -- Jari Aalto <jari.aalto@cante.net>  Fri, 18 Nov 2011 20:46:00 +0200
 
 fweb (1.62-11) unstable; urgency=low
 

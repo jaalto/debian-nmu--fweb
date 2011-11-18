@@ -55,11 +55,13 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	if [ -f Web/Makefile ]; then \
-	    ${MAKE} -C Web -i distclean ; \
-	else \
-	    ${MAKE} -C Web -f Makefile.in distclean ; \
-	fi
+
+	# The problem is that Makefile includes defaults.mk which is a
+	# ./configure generated file, but it does not exist when clean
+	# is being run.
+	touch Web/defaults.mk
+	$(MAKE) -C Web distclean
+
 	-rm -f Web/idxmerge Web/idxmerge.c Web/custom.h Web/config.h \
 		Manual/fweb.info* Manual/fweb*.html
 	rm -rf Manual/fweb/
