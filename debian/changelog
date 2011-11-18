@@ -12,12 +12,19 @@ fweb (1.62-11.1) unstable; urgency=low
     - (Standards-Version): Update to 3.9.2.
     - (Suggests): Remove tetex-base.
     Package fweb-doc
+    - (Description): Extend first line (Lintian).
     - (Depends): Add ${misc:Depends}, add dpkg (>= 1.15.4) | install-info
     - (Section): Add doc.
   * debian/copyright
     - Remove obsolete FSF address. Correct GPL path.
+  * debian/idxmerge.1
+    - Fix hyphen-used-as-minus-sign (Lintian).
+  * debian/patches
+    - New. Convert embedded changes to upstream code into individual patches.
   * debian/rules
     - Replace obsolete dh_clean with dh_prep
+    - (build-arch, build-indep): New (W: Lintian).
+    - (clean): rm generated fieles: Web/fweave.mds Web/fweave.ndx
     - (docdir): Install docs to $package-doc.
     - (infodir): New variable.
     - (install): Don't create directory doc-base (lintian).
@@ -28,7 +35,7 @@ fweb (1.62-11.1) unstable; urgency=low
   * fweb-doc.doc-base
     - (Section): Update from Apps/Programming to Programming.
 
- -- Jari Aalto <jari.aalto@cante.net>  Sun, 25 Sep 2011 17:15:28 +0300
+ -- Jari Aalto <jari.aalto@cante.net>  Fri, 18 Nov 2011 15:46:29 +0200
 
 fweb (1.62-11) unstable; urgency=low
 
