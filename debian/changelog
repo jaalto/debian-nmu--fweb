@@ -29,6 +29,7 @@ fweb (1.62-11.1) unstable; urgency=low
     - (docdir): Install docs to $package-doc.
     - (infodir): New variable.
     - (install): Don't create directory doc-base (lintian).
+      Don't create empty info dir (Lintian).
     - (tmpdir): Install to $package, not tmp dir thus no longer needing
       dh_movefiles.
   * debian/source/format
@@ -36,7 +37,7 @@ fweb (1.62-11.1) unstable; urgency=low
   * fweb-doc.doc-base
     - (Section): Update from Apps/Programming to Programming.
 
- -- Jari Aalto <jari.aalto@cante.net>  Fri, 18 Nov 2011 20:46:00 +0200
+ -- Jari Aalto <jari.aalto@cante.net>  Fri, 18 Nov 2011 21:05:43 +0200
 
 fweb (1.62-11) unstable; urgency=low
 

@@ -75,8 +75,7 @@ install: build
 	dh_prep
 
 	mkdir ${tmpdir}
-	cd ${tmpdir} && mkdir -p usr/bin usr/share/man/man1 \
-		usr/share/info
+	cd ${tmpdir} && mkdir -p usr/bin usr/share/man/man1
 	mkdir -p $(infodir)
 
 	install -d ${texdir} ${htmldocdir}
