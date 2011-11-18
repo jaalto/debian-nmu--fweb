@@ -1,0 +1,30 @@
+From cf2fbadce932db87f4a2e605b305348e63a4d53f Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:35:32 +0200
+Subject: [PATCH] Web/style.c: comment out see_all
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Web/style.c |    3 ---
+ 1 files changed, 0 insertions(+), 3 deletions(-)
+
+diff --git a/Web/style.c b/Web/style.c
+index 75d5deb..04789b5 100644
+--- a/Web/style.c
++++ b/Web/style.c
+@@ -1630,9 +1630,6 @@ SET_COLOR(info);
+ printf("%s style-file parameters%s%s%s%s:\n",
+ see_all?"Default":"Modified",
+ *pa?" beginning with \"":"",(char*)pa,*pa?"\"":"",
+-#if 0
+-see_all
+-#endif
+ 0?"\n (null or empty values for \
+ @ command codes are misleading)":"");
+ 
+-- 
+1.7.7.1
+

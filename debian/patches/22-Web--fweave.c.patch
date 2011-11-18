@@ -1,0 +1,8897 @@
+From 5cbeaa90d22df08bb49918afb9ab7f6cc1a2b878 Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:33:04 +0200
+Subject: [PATCH] Web/fweave.c: miscellaneous
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Web/fweave.c | 3194 ++++++++++++++++++++++++++++++++++++++++++++--------------
+ 1 files changed, 2459 insertions(+), 735 deletions(-)
+
+diff --git a/Web/fweave.c b/Web/fweave.c
+index f3de3d6..2635fe1 100644
+--- a/Web/fweave.c
++++ b/Web/fweave.c
+@@ -1,9 +1,9 @@
+ #if(0)
+-  FTANGLE v1.60,\
+- created with UNIX on "Thursday, September 24, 1998 at 16:12." \
+-  COMMAND LINE: "Web/ftangle Web/fweave -A -# --F -= 1.62/Web/fweave.c"\
+-  RUN TIME:     "Friday, September 25, 1998 at 8:02."\
+-  WEB FILE:     "Web/fweave.web"\
++  FTANGLE v1.61,\
++ created with UNIX on "Friday, September 25, 1998 at 8:02." \
++  COMMAND LINE: "./ftangle ./fweave -uCONFIG -mCONFIG -mGCC -= fweave.c"\
++  RUN TIME:     "Monday, December 13, 1999 at 23:13."\
++  WEB FILE:     "./fweave.web"\
+   CHANGE FILE:  (none)
+ #endif
+ #define _FWEAVE_h  
+@@ -150,140 +150,140 @@ xref_ptr->Language= (boolean)language; \
+ #define kill_newlines  114 \
+ 
+ #define ignore  0
+-#define verbatim  (eight_bits)02
+-#define force_line  (eight_bits)03 \
++#define verbatim  (eight_bits)'\2'
++#define force_line  (eight_bits)'\3' \
+ 
+-#define begin_comment0  (eight_bits)0376
+-#define begin_comment1  (eight_bits)0375
+-#define begin_comment  (eight_bits)011 \
++#define begin_comment0  (eight_bits)'\xFE'
++#define begin_comment1  (eight_bits)'\xFD'
++#define begin_comment  (eight_bits)'\11' \
+ 
+-#define compound_assignment  (eight_bits)017 \
++#define compound_assignment  (eight_bits)'\17' \
+  \
+ 
+-#define L_switch  (eight_bits)0200
+-#define begin_C  (eight_bits)0201
+-#define begin_RATFOR  (eight_bits)0202
+-#define begin_FORTRAN  (eight_bits)0203
+-#define begin_LITERAL  (eight_bits)0204
+-#define begin_TEX  (eight_bits)0205 \
++#define L_switch  (eight_bits)'\200'
++#define begin_C  (eight_bits)'\201'
++#define begin_RATFOR  (eight_bits)'\202'
++#define begin_FORTRAN  (eight_bits)'\203'
++#define begin_LITERAL  (eight_bits)'\204'
++#define begin_TEX  (eight_bits)'\205' \
+ 
+-#define begin_nuweb  (eight_bits)0206 \
++#define begin_nuweb  (eight_bits)'\206' \
+  \
+  \
+ 
+-#define dont_expand  (eight_bits)0210
+-#define auto_label  (eight_bits)0211
+-#define all_variable_args  (eight_bits)0212
+-#define macro_module_name  (eight_bits)0213
+-#define eq_gt  (eight_bits)0214
+-#define colon_colon  (eight_bits)0215 \
++#define dont_expand  (eight_bits)'\210'
++#define auto_label  (eight_bits)'\211'
++#define all_variable_args  (eight_bits)'\212'
++#define macro_module_name  (eight_bits)'\213'
++#define eq_gt  (eight_bits)'\214'
++#define colon_colon  (eight_bits)'\215' \
+  \
+  \
+  \
+  \
+  \
+ 
+-#define switch_math_flag  (eight_bits)0175
+-#define underline  (eight_bits)0176 \
++#define switch_math_flag  (eight_bits)'\175'
++#define underline  (eight_bits)'\176' \
+ 
+-#define next_expr  (eight_bits)0226
+-#define next_reserved  (eight_bits)0227 \
++#define next_expr  (eight_bits)'\226'
++#define next_reserved  (eight_bits)'\227' \
+ 
+-#define xref_roman  (eight_bits)0233
+-#define xref_wildcard  (eight_bits)0234
+-#define xref_typewriter  (eight_bits)0235
+-#define TeX_string  (eight_bits)0236
+-#define ascii_constant  (eight_bits)0237
+-#define join  (eight_bits)0240
+-#define thin_space  (eight_bits)0241
+-#define math_break  (eight_bits)0242
+-#define line_break  (eight_bits)0243
+-#define ln_break_outdent  (eight_bits)0244 \
++#define xref_roman  (eight_bits)'\233'
++#define xref_wildcard  (eight_bits)'\234'
++#define xref_typewriter  (eight_bits)'\235'
++#define TeX_string  (eight_bits)'\236'
++#define ascii_constant  (eight_bits)'\237'
++#define join  (eight_bits)'\240'
++#define thin_space  (eight_bits)'\241'
++#define math_break  (eight_bits)'\242'
++#define line_break  (eight_bits)'\243'
++#define ln_break_outdent  (eight_bits)'\244' \
+ 
+-#define big_line_break  (eight_bits)0245
+-#define no_line_break  (eight_bits)0246
+-#define pseudo_semi  (eight_bits)0247
+-#define defd_at  (eight_bits)0250 \
++#define big_line_break  (eight_bits)'\245'
++#define no_line_break  (eight_bits)'\246'
++#define pseudo_semi  (eight_bits)'\247'
++#define defd_at  (eight_bits)'\250' \
+ 
+-#define begin_meta  (eight_bits)0251
+-#define end_meta  (eight_bits)0252 \
++#define begin_meta  (eight_bits)'\251'
++#define end_meta  (eight_bits)'\252' \
+ 
+-#define macro_space  (eight_bits)0253
+-#define copy_mode  (eight_bits)0254 \
++#define macro_space  (eight_bits)'\253'
++#define copy_mode  (eight_bits)'\254' \
+ 
+-#define toggle_output  (eight_bits)0255
+-#define turn_output_on  (eight_bits)0255
+-#define turn_output_off  (eight_bits)0256
+-#define Turn_output_on  (eight_bits)0257
+-#define Turn_output_off  (eight_bits)0260 \
++#define toggle_output  (eight_bits)'\255'
++#define turn_output_on  (eight_bits)'\255'
++#define turn_output_off  (eight_bits)'\256'
++#define Turn_output_on  (eight_bits)'\257'
++#define Turn_output_off  (eight_bits)'\260' \
+ 
+-#define left_preproc  (eight_bits)0261
+-#define right_preproc  (eight_bits)0262 \
++#define left_preproc  (eight_bits)'\261'
++#define right_preproc  (eight_bits)'\262' \
+ 
+-#define Cont_Char  (eight_bits)0263 \
++#define Cont_Char  (eight_bits)'\263' \
+ 
+-#define Compiler_Directive  (eight_bits)0264
+-#define new_output_file  (eight_bits)0265 \
++#define Compiler_Directive  (eight_bits)'\264'
++#define new_output_file  (eight_bits)'\265' \
+ 
+-#define implicit_reserved  (eight_bits)0266 \
++#define implicit_reserved  (eight_bits)'\266' \
+ 
+-#define trace  (eight_bits)0267 \
++#define trace  (eight_bits)'\267' \
+  \
+  \
+ 
+-#define invisible_cmnt  (eight_bits)0272 \
++#define invisible_cmnt  (eight_bits)'\272' \
+ 
+-#define pseudo_expr  (eight_bits)0273
+-#define pseudo_colon  (eight_bits)0274 \
++#define pseudo_expr  (eight_bits)'\273'
++#define pseudo_colon  (eight_bits)'\274' \
+ 
+-#define begin_bp  (eight_bits)0275
+-#define insert_bp  (eight_bits)0276 \
++#define begin_bp  (eight_bits)'\275'
++#define insert_bp  (eight_bits)'\276' \
+ 
+-#define no_index  (eight_bits)0277
+-#define yes_index  (eight_bits)0300 \
++#define no_index  (eight_bits)'\277'
++#define yes_index  (eight_bits)'\300' \
+ 
+-#define no_mac_expand  (eight_bits)0301
+-#define protect_code  (eight_bits)0302
+-#define set_line_info  (eight_bits)0303 \
++#define no_mac_expand  (eight_bits)'\301'
++#define protect_code  (eight_bits)'\302'
++#define set_line_info  (eight_bits)'\303' \
+ 
+-#define short_fcn  (eight_bits)0304
+-#define keyword_name  (eight_bits)0305 \
++#define short_fcn  (eight_bits)'\304'
++#define keyword_name  (eight_bits)'\305' \
+  \
+ 
+-#define formatt  (eight_bits)0310 \
++#define formatt  (eight_bits)'\310' \
+ 
+-#define limbo_text  (eight_bits)0313
+-#define op_def  (eight_bits)0314
+-#define macro_def  (eight_bits)0315 \
++#define limbo_text  (eight_bits)'\313'
++#define op_def  (eight_bits)'\314'
++#define macro_def  (eight_bits)'\315' \
+ 
+-#define definition  (eight_bits)0320
+-#define undefinition  (eight_bits)0321
+-#define WEB_definition  (eight_bits)0322 \
++#define definition  (eight_bits)'\320'
++#define undefinition  (eight_bits)'\321'
++#define WEB_definition  (eight_bits)'\322' \
+  \
+ 
+-#define m_ifdef  (eight_bits)0330
+-#define m_ifndef  (eight_bits)0331
+-#define m_if  (eight_bits)0332
+-#define m_else  (eight_bits)0333
+-#define m_elif  (eight_bits)0334
+-#define m_endif  (eight_bits)0335
+-#define m_for  (eight_bits)0336
+-#define m_endfor  (eight_bits)0337
+-#define m_line  (eight_bits)0340
+-#define m_undef  (eight_bits)0341 \
++#define m_ifdef  (eight_bits)'\330'
++#define m_ifndef  (eight_bits)'\331'
++#define m_if  (eight_bits)'\332'
++#define m_else  (eight_bits)'\333'
++#define m_elif  (eight_bits)'\334'
++#define m_endif  (eight_bits)'\335'
++#define m_for  (eight_bits)'\336'
++#define m_endfor  (eight_bits)'\337'
++#define m_line  (eight_bits)'\340'
++#define m_undef  (eight_bits)'\341' \
+  \
+ 
+-#define begin_code  (eight_bits)0350
+-#define module_name  (eight_bits)0351 \
++#define begin_code  (eight_bits)'\350'
++#define module_name  (eight_bits)'\351' \
+  \
+ 
+-#define new_module  (eight_bits)0352 \
++#define new_module  (eight_bits)'\352' \
+  \
+  \
+ 
+-#define constant  (eight_bits)0230
+-#define stringg  (eight_bits)0231
+-#define identifier  (eight_bits)0232 \
++#define constant  (eight_bits)'\230'
++#define stringg  (eight_bits)'\231'
++#define identifier  (eight_bits)'\232' \
+ 
+ #define ordinary_space  01 \
+  \
+@@ -293,7 +293,7 @@ xref_ptr->Language= (boolean)language; \
+ #define COMPOUND(c,n)if(loc<=limit){loc+= n;assignment_token= c; \
+ return(eight_bits)compound_assignment;} \
+ 
+-#define CA_START  (eight_bits)0100 \
++#define CA_START  (eight_bits)'\100' \
+  \
+ 
+ #define plus_eq  0
+@@ -308,20 +308,20 @@ return(eight_bits)compound_assignment;} \
+ #define lt_lt_eq  011
+ #define or_or_or  012 \
+ 
+-#define BINARY_CODE  046
+-#define OCTAL_CODE  0176
+-#define HEX_CODE  0140 \
++#define BINARY_CODE  '&'
++#define OCTAL_CODE  '~'
++#define HEX_CODE  '`' \
+ 
+-#define CONSTANT_CODE  043
+-#define FLOAT_CODE  060
+-#define LONG_CODE  061
+-#define UNSIGNED_CODE  062
+-#define ULONG_CODE  063 \
++#define CONSTANT_CODE  '#'
++#define FLOAT_CODE  '0'
++#define LONG_CODE  '1'
++#define UNSIGNED_CODE  '2'
++#define ULONG_CODE  '3' \
+ 
+-#define EXP_CODE  0136
+-#define HOLLERITH_CODE  045 \
++#define EXP_CODE  '^'
++#define HOLLERITH_CODE  '%' \
+ 
+-#define discretionary_break  (eight_bits)0177
++#define discretionary_break  (eight_bits)'\177'
+ #define NBREAK  25 \
+ 
+ #define change_params  prms[incl_depth].input_params \
+@@ -331,7 +331,7 @@ return(eight_bits)compound_assignment;} \
+ #define KILL_XREFS(name)no_xref|= !defn_mask.name
+ #define INDEX_SHORT  index_short= index_flag= YES \
+ 
+-#define QUICK_FORMAT  056 \
++#define QUICK_FORMAT  '.' \
+ 
+ #define IS_ON(flag,bits)((flag)&(bits)) \
+ 
+@@ -412,27 +412,27 @@ NO,cat,(CONST outer_char*)NULL) \
+ #define ALL_LANGUAGES  (ONLY_C_like|ONLY_N_like|(int)LITERAL) \
+  \
+ 
+-#define math_bin  (eight_bits)0345
+-#define math_rel  (eight_bits)0346 \
++#define math_bin  (eight_bits)'\345'
++#define math_rel  (eight_bits)'\346' \
+ 
+-#define toggle_meta  (eight_bits)0347 \
++#define toggle_meta  (eight_bits)'\347' \
+  \
+ 
+-#define big_cancel  (eight_bits)0360
+-#define cancel  (eight_bits)0361 \
++#define big_cancel  (eight_bits)'\360'
++#define cancel  (eight_bits)'\361' \
+  \
+ 
+-#define indent  (eight_bits)0362
+-#define outdent  (eight_bits)0363
+-#define opt  (eight_bits)0364
+-#define backup  (eight_bits)0365
+-#define break_space  (eight_bits)0366
+-#define force  (eight_bits)0367
+-#define big_force  (eight_bits)0370 \
++#define indent  (eight_bits)'\362'
++#define outdent  (eight_bits)'\363'
++#define opt  (eight_bits)'\364'
++#define backup  (eight_bits)'\365'
++#define break_space  (eight_bits)'\366'
++#define force  (eight_bits)'\367'
++#define big_force  (eight_bits)'\370' \
+ 
+-#define out_force  (eight_bits)0371 \
++#define out_force  (eight_bits)'\371' \
+ 
+-#define end_translation  (eight_bits)0377
++#define end_translation  (eight_bits)'\377'
+ #define inner  0
+ #define outer  1 \
+ 
+@@ -441,8 +441,8 @@ NO,cat,(CONST outer_char*)NULL) \
+ #define cur_mode  cur_state.mode_field
+ #define ini_stack  stck_ptr= stack;cur_mode= outer \
+ 
+-#define res_word  (eight_bits)0201
+-#define mod_name  (eight_bits)0200 \
++#define res_word  (eight_bits)'\201'
++#define mod_name  (eight_bits)'\200' \
+ 
+ #define ALL_UC  (all_uc&&length(cur_name)>1) \
+  \
+@@ -499,7 +499,11 @@ OVERFLW("Esc_buf:temp","") \
+ #define ENCAP  YES
+ #define NO_ENCAP  NO \
+ 
++/* 1: */
++#line 32 "./fweave.web"
+ 
++/* 5: */
++#line 16 "./typedefs.hweb"
+ 
+ 
+ #ifndef part
+@@ -511,6 +515,9 @@ OVERFLW("Esc_buf:temp","") \
+ #endif 
+ 
+ 
++/* :5 */
++/* 6: */
++#line 42 "./typedefs.hweb"
+ 
+ 
+ #if(part == 0 || part == 1)
+@@ -524,19 +531,31 @@ OVERFLW("Esc_buf:temp","") \
+ #endif
+ 
+ 
++/* :6 */
++#line 33 "./fweave.web"
+ 
+ 
++/* 34: */
++#line 440 "./typedefs.hweb"
+ 
+ #include "typedefs.h"
+ 
+ 
+ 
++#line 84 "./fweave.web"
+ 
++/* :34 */
++/* 357: */
++#line 10244 "./fweave.web"
+ 
+ 
+ #include "map.h" 
+ 
++/* :357 */
++#line 35 "./fweave.web"
+ 
++/* 42: */
++#line 79 "./xrefs.hweb"
+ 
+ 
+ typedef struct xref_info0
+@@ -552,12 +571,18 @@ typedef ASCII HUGE*XREF_POINTER;
+ 
+ 
+ 
++/* :42 */
++/* 49: */
++#line 27 "./tokens.hweb"
+ 
+ 
+ typedef sixteen_bits Token;
+ typedef Token HUGE*token_pointer;
+ typedef token_pointer HUGE*text_pointer;
+ 
++/* :49 */
++/* 191: */
++#line 44 "./scraps.hweb"
+ 
+ 
+ typedef struct
+@@ -569,16 +594,23 @@ eight_bits mathness;
+ union
+ {
+ text_pointer Trans;
++/* 332: */
++#line 9552 "./fweave.web"
+ 
+ 
+ name_pointer Head;
+ 
++/* :332 */
++#line 55 "./scraps.hweb"
+ 
+ }trans_plus;
+ }scrap;
+ 
+ typedef scrap HUGE*scrap_pointer;
+ 
++/* :191 */
++/* 239: */
++#line 6944 "./fweave.web"
+ 
+ 
+ typedef int mode;
+@@ -591,13 +623,22 @@ boolean mode_field;
+ 
+ typedef output_state HUGE*stack_pointer;
+ 
++/* :239 */
++#line 36 "./fweave.web"
+ 
++/* 39: */
++#line 168 "./fweave.web"
+ 
+ 
+ #include "w_type.h" 
+ 
++#line 8 "./xrefs.hweb"
+ 
++/* :39 */
++#line 37 "./fweave.web"
+ 
++/* 33: */
++#line 426 "./typedefs.hweb"
+ 
+ 
+ 
+@@ -611,10 +652,16 @@ typedef output_state HUGE*stack_pointer;
+ 
+ 
+ 
++/* :33 */
++/* 41: */
++#line 47 "./xrefs.hweb"
+ 
+ 
+ EXTERN boolean change_exists;
+ 
++/* :41 */
++/* 43: */
++#line 111 "./xrefs.hweb"
+ 
+ 
+ #ifndef COMMON_FCNS_
+@@ -632,7 +679,11 @@ EXTERN boolean defd_switch;
+ EXTERN NAME_TYPE defd_type SET(NEVER_DEFINED);
+ EXTERN boolean typd_switch;
+ EXTERN boolean index_short;
++#line 173 "./fweave.web"
+ 
++/* :43 */
++/* 50: */
++#line 37 "./tokens.hweb"
+ 
+ 
+ EXTERN long max_toks;
+@@ -650,12 +701,19 @@ EXTERN text_pointer text_ptr;
+ 
+ EXTERN token_pointer mx_tok_ptr;
+ EXTERN text_pointer mx_text_ptr;
++#line 386 "./fweave.web"
+ 
++/* :50 */
++/* 58: */
++#line 685 "./fweave.web"
+ 
+ 
+ IN_STYLE eight_bits ccode[128];
+ 
+ 
++/* :58 */
++/* 66: */
++#line 954 "./fweave.web"
+ 
+ 
+ EXTERN name_pointer cur_module;
+@@ -671,24 +729,39 @@ EXTERN boolean empty_line SET(NO);
+ 
+ EXTERN ASCII c;
+ 
++/* :66 */
++/* 84: */
++#line 1587 "./fweave.web"
+ 
+ 
+ EXTERN eight_bits assignment_token;
+ 
+ 
++/* :84 */
++/* 95: */
++#line 2063 "./fweave.web"
+ 
+ 
+ EXTERN boolean insert_breaks SET(YES);
+ 
+ 
++/* :95 */
++/* 105: */
++#line 2291 "./fweave.web"
+ 
+ 
+ EXTERN boolean doing_cdir SET(NO);
+ 
++/* :105 */
++/* 113: */
++#line 2621 "./fweave.web"
+ 
+ 
+ EXTERN eight_bits next_control;
+ 
++/* :113 */
++/* 119: */
++#line 2838 "./fweave.web"
+ 
+ 
+ IN_COMMON outer_char wbprefix[MAX_FILE_NAME_LENGTH];
+@@ -703,20 +776,32 @@ EXTERN boolean qtd_file;
+ EXTERN outer_char temp_in[L_tmpnam],temp_out[L_tmpnam];
+ 
+ 
++/* :119 */
++/* 136: */
++#line 3558 "./fweave.web"
+ 
+ 
+ EXTERN name_pointer lhs,rhs;
+ 
+ 
++/* :136 */
++/* 147: */
++#line 4062 "./fweave.web"
+ 
+ 
+ EXTERN boolean unnamed_section SET(NO);
+ 
++/* :147 */
++/* 149: */
++#line 4140 "./fweave.web"
+ 
+ 
+ EXTERN xref_pointer cur_xref;
+ IN_COMMON boolean mod_warning_flag;
+ 
++/* :149 */
++/* 153: */
++#line 4275 "./fweave.web"
+ 
+ 
+ EXTERN BUF_SIZE line_length;
+@@ -726,18 +811,30 @@ EXTERN ASCII HUGE*out_end;
+ EXTERN ASCII HUGE*out_ptr;
+ EXTERN LINE_NUMBER out_line;
+ 
++/* :153 */
++/* 158: */
++#line 4408 "./fweave.web"
+ 
+ 
+ EXTERN boolean output_on SET(YES);
+ 
++/* :158 */
++/* 175: */
++#line 4966 "./fweave.web"
+ 
+ 
+ EXTERN boolean strt_off SET(NO),ending_off SET(NO);
+ 
++/* :175 */
++/* 183: */
++#line 5108 "./fweave.web"
+ 
+ 
+ EXTERN boolean in_comment;
+ 
++/* :183 */
++/* 192: */
++#line 67 "./scraps.hweb"
+ 
+ 
+ EXTERN long max_scraps;
+@@ -752,10 +849,16 @@ EXTERN scrap_pointer hi_ptr;
+ 
+ EXTERN scrap_pointer mx_scr_ptr;
+ 
++/* :192 */
++/* 198: */
++#line 5383 "./fweave.web"
+ 
+ 
+ EXTERN boolean scanning_meta SET(NO);
+ 
++/* :198 */
++/* 202: */
++#line 5515 "./fweave.web"
+ 
+ 
+ EXTERN boolean overloaded[NUM_LANGUAGES];
+@@ -765,18 +868,30 @@ EXTERN OPERATOR HUGE*op,HUGE*op_end;
+ 
+ EXTERN OPERATOR HUGE*op_ptr;
+ 
++/* :202 */
++/* 207: */
++#line 5740 "./fweave.web"
+ 
+ 
+ EXTERN eight_bits last_control;
+ 
++/* :207 */
++/* 211: */
++#line 5913 "./fweave.web"
+ 
+ 
+ EXTERN boolean did_arg;
+ 
++/* :211 */
++/* 227: */
++#line 6574 "./fweave.web"
+ 
+ 
+ EXTERN boolean the_type SET(NO_TYPE);
+ 
++/* :227 */
++/* 240: */
++#line 6962 "./fweave.web"
+ 
+ 
+ EXTERN output_state cur_state;
+@@ -790,10 +905,16 @@ EXTERN stack_pointer stck_ptr;
+ 
+ EXTERN stack_pointer mx_stck_ptr;
+ 
++/* :240 */
++/* 245: */
++#line 7031 "./fweave.web"
+ 
+ 
+ EXTERN name_pointer cur_name;
+ 
++/* :245 */
++/* 272: */
++#line 7837 "./fweave.web"
+ 
+ 
+ EXTERN LINE_NUMBER save_line;
+@@ -801,10 +922,16 @@ EXTERN ASCII HUGE*save_place;
+ EXTERN boolean in_module SET(NO);
+ EXTERN boolean yskipped SET(NO);
+ 
++/* :272 */
++/* 275: */
++#line 7894 "./fweave.web"
+ 
+ 
+ IN_COMMON outer_char last_include_file[],this_include_file[];
+ 
++/* :275 */
++/* 278: */
++#line 7998 "./fweave.web"
+ 
+ 
+ EXTERN boolean ok_to_define SET(YES);
+@@ -812,21 +939,33 @@ EXTERN boolean q_protected SET(NO);
+ EXTERN boolean suppress_defn SET(NO);
+ EXTERN boolean output_protect SET(NO);
+ 
++/* :278 */
++/* 299: */
++#line 8724 "./fweave.web"
+ 
+ 
+ EXTERN name_pointer this_module;
+ EXTERN name_pointer the_module;
+ 
+ 
++/* :299 */
++/* 315: */
++#line 9124 "./fweave.web"
+ 
+ 
+ EXTERN xref_pointer next_xref,this_xref,first_xref,mid_xref;
+ 
+ 
++/* :315 */
++/* 326: */
++#line 9458 "./fweave.web"
+ 
+ 
+ EXTERN sixteen_bits k_module;
+ 
++/* :326 */
++/* 328: */
++#line 9494 "./fweave.web"
+ 
+ 
+ EXTERN name_pointer bucket[128];
+@@ -839,6 +978,9 @@ EXTERN name_pointer HUGE*blink;
+ EXTERN ASCII last_letter SET('\0');
+ 
+ 
++/* :328 */
++/* 333: */
++#line 9565 "./fweave.web"
+ 
+ 
+ EXTERN eight_bits cur_depth;
+@@ -847,11 +989,17 @@ EXTERN sixteen_bits cur_val;
+ 
+ EXTERN sort_pointer mx_sort_ptr;
+ 
++/* :333 */
++/* 335: */
++#line 9583 "./fweave.web"
+ 
+ 
+ EXTERN ASCII collate[128];
+ EXTERN int max_collate;
+ 
++/* :335 */
++/* 347: */
++#line 9953 "./fweave.web"
+ 
+ 
+ EXTERN FILE*mx_file;
+@@ -861,11 +1009,15 @@ EXTERN boolean output_type;
+ EXTERN outer_char HUGE*temp_ndx,HUGE*temp_mds;
+ IN_COMMON outer_char wbflnm0[];
+ 
++/* :347 */
++#line 38 "./fweave.web"
+ 
+ 
+ 
+ 
+ #if(part == 0 || part == 1)
++/* 2: */
++#line 57 "./fweave.web"
+ 
+ 
+ int main FCN((ac,av))
+@@ -882,13 +1034,20 @@ argc= ac;argv= av;
+ ini_program(weave);
+ 
+ common_init();
++/* 38: */
++#line 163 "./fweave.web"
+ 
+ 
++/* 44: */
++#line 175 "./fweave.web"
+ 
+ 
+ ALLOC(xref_info,xmem,"r",max_refs,0);
+ xmem_end= xmem+max_refs-1;
+ 
++/* :44 */
++/* 51: */
++#line 388 "./fweave.web"
+ 
+ 
+ ALLOC(Token,tok_mem,"tw",max_toks,1);
+@@ -899,17 +1058,27 @@ tok_m_end= tok_mem+max_toks-1;
+ ALLOC(token_pointer,tok_start,"x",max_texts,0);
+ tok_end= tok_start+max_texts-1;
+ 
++/* :51 */
++/* 154: */
++#line 4285 "./fweave.web"
+ 
+ 
+ ALLOC(ASCII,out_buf,"ll",line_length,1);
+ 
+ out_end= out_buf+line_length;
+ 
++/* :154 */
++/* 196: */
++#line 5358 "./fweave.web"
+ 
++#line 5359 "./fweave.web"
+ 
+ ALLOC(scrap,scrp_info,"s",max_scraps,0);
+ scrp_end= scrp_info+max_scraps-1;
+ 
++/* :196 */
++/* 203: */
++#line 5551 "./fweave.web"
+ 
+ {
+ int l;
+@@ -921,53 +1090,55 @@ ALLOC(OPERATOR,op,"op",op_entries,0);
+ op_end= op+op_entries;
+ op_ptr= op+128;
+ 
++/* 204: */
++#line 5567 "./fweave.web"
+ 
+ 
+-INIT_OP(041,"NOT",ALL_LANGUAGES,"\\WR",unop);
++INIT_OP('!',"NOT",ALL_LANGUAGES,"\\WR",unop);
+ INIT_DOT("NOT",ALL_BUT_C_like,"\\WR",unop);
+ 
+ 
+-INIT_OP(045,"MOD",ALL_LANGUAGES,"\\WMOD",binop);
++INIT_OP('%',"MOD",ALL_LANGUAGES,"\\WMOD",binop);
+ 
+ 
+-INIT_OP(046,"LAND",C,"\\amp",unorbinop);
+-INIT_OP(046,"LAND",C_PLUS_PLUS,"\\amp",reference);
++INIT_OP('&',"LAND",C,"\\amp",unorbinop);
++INIT_OP('&',"LAND",C_PLUS_PLUS,"\\amp",reference);
+ 
+-INIT_OP(046,"LAND",ALL_BUT_C_like,"\\WAND",binop);
++INIT_OP('&',"LAND",ALL_BUT_C_like,"\\WAND",binop);
+ 
+ 
+-INIT_OP(053,"PLUS",ALL_LANGUAGES,"+",unorbinop);
+-INIT_OP(055,"MINUS",ALL_LANGUAGES,"-",unorbinop);
++INIT_OP('+',"PLUS",ALL_LANGUAGES,"+",unorbinop);
++INIT_OP('-',"MINUS",ALL_LANGUAGES,"-",unorbinop);
+ 
+-INIT_OP(052,"STAR",ALL_LANGUAGES,"\\ast",unorbinop);
++INIT_OP('*',"STAR",ALL_LANGUAGES,"\\ast",unorbinop);
+ 
+ 
+ 
+ 
+ 
+-INIT_OP(057,"SLASH",ALL_BUT_N_like,"\\WSl",binop);
+-INIT_OP(057,"SLASH",ONLY_N_like,"/",binop);
++INIT_OP('/',"SLASH",ALL_BUT_N_like,"\\WSl",binop);
++INIT_OP('/',"SLASH",ONLY_N_like,"/",binop);
+ 
+-INIT_OP(074,"LT",ALL_BUT_Cpp,"<",binop);
+-INIT_OP(074,"LT",C_PLUS_PLUS,"<",langle);
++INIT_OP('<',"LT",ALL_BUT_Cpp,"<",binop);
++INIT_OP('<',"LT",C_PLUS_PLUS,"<",langle);
+ INIT_DOT("LT",ALL_BUT_C_like,"<",binop);
+ 
+ 
+-INIT_OP(075,"EQUALS",ALL_LANGUAGES,"=",binop);
++INIT_OP('=',"EQUALS",ALL_LANGUAGES,"=",binop);
+ 
+-INIT_OP(076,"GT",ALL_BUT_Cpp,">",binop);
+-INIT_OP(076,"GT",C_PLUS_PLUS,">",rangle);
++INIT_OP('>',"GT",ALL_BUT_Cpp,">",binop);
++INIT_OP('>',"GT",C_PLUS_PLUS,">",rangle);
+ INIT_DOT("GT",ALL_BUT_C_like,">",binop);
+ 
+ 
+-INIT_OP(077,"QUESTION",ONLY_C_like,"\\?",question);
++INIT_OP('?',"QUESTION",ONLY_C_like,"\\?",question);
+ 
+-INIT_OP(0136,"CARET",ALL_LANGUAGES,"\\Caret",binop);
++INIT_OP('^',"CARET",ALL_LANGUAGES,"\\Caret",binop);
+ 
+ 
+-INIT_OP(0174,"OR",ALL_LANGUAGES,"\\WOR",binop);
++INIT_OP('|',"OR",ALL_LANGUAGES,"\\WOR",binop);
+ 
+-INIT_OP(0176,"TILDE",ONLY_C_like,"\\TLD",unop);
++INIT_OP('~',"TILDE",ONLY_C_like,"\\TLD",unop);
+ 
+ 
+ INIT_OP(not_eq,"NE",ALL_LANGUAGES,"\\WI",binop);
+@@ -1024,7 +1195,11 @@ INIT_DOT("FALSE",ALL_BUT_C_like,"\\WFALSE",expr);
+ INIT_DOT("TRUE",ALL_BUT_C_like,"\\WTRUE",expr)
+ 
+ 
++/* :204 */
++#line 5562 "./fweave.web"
+ ;
++/* 205: */
++#line 5671 "./fweave.web"
+ 
+ 
+ INIT_CA(plus_eq,"Wcp",ALL_LANGUAGES,"\\Wcp",binop);
+@@ -1048,28 +1223,46 @@ INIT_CA(gt_gt_eq,"Wcg",ONLY_C_like,"\\Wcg",binop);
+ INIT_CA(lt_lt_eq,"Wcl",ONLY_C_like,"\\Wcl",binop)
+ 
+ 
++/* :205 */
++#line 5563 "./fweave.web"
+ ;
+ }
+ 
++/* :203 */
++/* 241: */
++#line 6976 "./fweave.web"
+ 
+ 
+ ALLOC(output_state,stack,"kw",stck_size,0);
+ stck_end= stack+stck_size-1;
+ 
++/* :241 */
++/* 329: */
++#line 9507 "./fweave.web"
+ 
+ 
+ ALLOC(name_pointer,blink,"n",max_names,0);
+ 
++/* :329 */
++#line 165 "./fweave.web"
+ 
+ 
++/* :38 */
++/* 45: */
++#line 181 "./fweave.web"
+ 
+ 
+ name_dir->xref= (XREF_POINTER)(xref_ptr= xmem);
+ xref_switch= mod_xref_switch= defd_switch= index_short= NO;
+ xmem->num= 0;
+ 
++/* :45 */
++/* 52: */
++#line 399 "./fweave.web"
+ 
+ 
++/* 53: */
++#line 405 "./fweave.web"
+ 
+ {
+ tok_ptr= tok_mem+1;
+@@ -1077,15 +1270,22 @@ tok_start[0]= tok_start[1]= tok_ptr;
+ text_ptr= tok_start+1;
+ }
+ 
++/* :53 */
++#line 401 "./fweave.web"
+ 
+ mx_tok_ptr= tok_ptr;mx_text_ptr= text_ptr;
+ 
++/* :52 */
++/* 59: */
++#line 695 "./fweave.web"
+ 
+ 
+ zero_ccodes();
+-ccode[057]= line_break;
++ccode['/']= line_break;
+ 
+ 
++/* 60: */
++#line 706 "./fweave.web"
+ 
+ {
+ 
+@@ -1218,6 +1418,8 @@ ini_ccode((outer_char*)"yes_index",(outer_char*)"+",yes_index);
+ 
+ ini_ccode((outer_char*)"protect_code",(outer_char*)"p",protect_code);
+ 
++/* 61: */
++#line 792 "./fweave.web"
+ 
+ 
+ #if(DEBUG)
+@@ -1225,16 +1427,26 @@ ini_ccode((outer_char*)"protect_code",(outer_char*)"p",protect_code);
+ ini_ccode((outer_char*)"trace",(outer_char*)"012",trace);
+ #endif 
+ 
++/* :61 */
++#line 786 "./fweave.web"
+ 
+ }
+ 
++/* :60 */
++#line 701 "./fweave.web"
+ 
+ prn_codes();
+ 
++/* :59 */
++/* 108: */
++#line 2475 "./fweave.web"
+ 
+ 
+-mod_text[0]= 040;
++mod_text[0]= ' ';
+ 
++/* :108 */
++/* 157: */
++#line 4391 "./fweave.web"
+ 
+ {
+ out_ptr= out_buf;out_line= 1;
+@@ -1248,29 +1460,46 @@ OUT_STR(*fwebmac?fwebmac:w_style.misc.macros);
+ }
+ }
+ 
++/* :157 */
++/* 162: */
++#line 4518 "./fweave.web"
+ 
+ 
+-out_buf[0]= 0134;
++out_buf[0]= '\\';
+ 
++/* :162 */
++/* 197: */
++#line 5364 "./fweave.web"
+ 
+ 
+ scrp_base= scrp_info+1;
+ 
+ mx_scr_ptr= scrp_ptr= scrp_info;
+ 
++/* :197 */
++/* 242: */
++#line 6982 "./fweave.web"
+ 
+ 
+ mx_stck_ptr= stack;
+ 
++/* :242 */
++/* 334: */
++#line 9574 "./fweave.web"
+ 
+ 
+ mx_sort_ptr= scrp_info;
+ 
+ 
++/* :334 */
++/* 336: */
++#line 9591 "./fweave.web"
+ 
+ 
+ collate[0]= 0;
+ 
++/* :336 */
++#line 73 "./fweave.web"
+ ;
+ 
+ 
+@@ -1281,9 +1510,14 @@ phase3();
+ return wrap_up();
+ }
+ 
++#line 1 "./typedefs.hweb"
+ 
+ 
++#line 8 "./formats.hweb"
+ 
++/* :2 */
++/* 35: */
++#line 88 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -1293,6 +1527,8 @@ if(STRCMP(tex_fname,"stdout")==0)
+ tex_file= stdout;
+ else
+ {
++/* 36: */
++#line 118 "./fweave.web"
+ 
+ {
+ if(tex_file= FOPEN(tex_fname,"r"))
+@@ -1320,6 +1556,8 @@ fclose(tex_file);
+ }
+ 
+ 
++/* :36 */
++#line 98 "./fweave.web"
+ 
+ 
+ if((tex_file= FOPEN(tex_fname,"w"))==NULL)
+@@ -1328,6 +1566,8 @@ if((tex_file= FOPEN(tex_fname,"w"))==NULL)
+ fatal(ERR_W,OC("ABORTING:  "),OC("Can't open output file %s."),tex_fname);
+ }
+ else
++/* 37: */
++#line 155 "./fweave.web"
+ 
+ {
+ fprintf(tex_file,"%s v%s (%s)\n\n",
+@@ -1335,10 +1575,15 @@ FWEAVE_HDR,(char*)version,(char*)release_date);
+ }
+ 
+ 
++/* :37 */
++#line 108 "./fweave.web"
+ 
+ }
+ }
+ 
++/* :35 */
++/* 46: */
++#line 196 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -1437,6 +1682,8 @@ xref_ptr->xlink= q;p->xref= (XREF_POINTER)xref_ptr;
+ 
+ check_implicit:
+ if(typd_switch)
++/* 47: */
++#line 299 "./fweave.web"
+ 
+ {
+ NAME_INFO rs_wd;
+@@ -1446,6 +1693,8 @@ rhs->ilk= int_like;
+ rhs->reserved_word= rhs->Language= BOOLEAN(language);
+ rhs->intrinsic_word= rhs->keyword= NO;
+ 
++/* 140: */
++#line 3738 "./fweave.web"
+ 
+ {
+ lhs->ilk= rhs->ilk;
+@@ -1463,8 +1712,13 @@ RST_BIT(keyword);
+ #undef RST_BIT
+ }
+ 
++/* :140 */
++#line 308 "./fweave.web"
+ 
+ 
++/* :47 */
++/* 47: */
++#line 318 "./fweave.web"
+ 
+ 
+ for(q= (xref_pointer)p->xref;q>xmem;q= q->xlink)
+@@ -1473,9 +1727,14 @@ if(q->num<def_flag)q->num+= def_flag;
+ typd_switch= NO;
+ }
+ 
++/* :47 */
++#line 294 "./fweave.web"
+ 
+ }
+ 
++/* :46 */
++/* 48: */
++#line 333 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -1484,6 +1743,9 @@ name_pointer p C1("")
+ {
+ xref_pointer q,r;
+ 
++/* :48 */
++/* 48: */
++#line 345 "./fweave.web"
+ 
+ q= (xref_pointer)p->xref;r= xmem;
+ 
+@@ -1524,7 +1786,11 @@ else
+ r->xlink= xref_ptr;
+ }
+ 
++#line 8 "./tokens.hweb"
+ 
++/* :48 */
++/* 54: */
++#line 415 "./fweave.web"
+ 
+ 
+ boolean
+@@ -1543,6 +1809,9 @@ return NO;
+ return(boolean)(!STRNCMP(first,p->byte_start,l));
+ }
+ 
++/* :54 */
++/* 55: */
++#line 436 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -1569,6 +1838,8 @@ CONST name_pointer node C1("")
+ {
+ node->xref= (XREF_POINTER)xmem;
+ 
++/* 24: */
++#line 193 "./typedefs.hweb"
+ 
+ {
+ 
+@@ -1583,10 +1854,16 @@ node->Language= (boolean)language;
+ }
+ 
+ 
++/* :24 */
++#line 462 "./fweave.web"
+ 
+ }
+ 
++#line 8 "./ccodes.hweb"
+ 
++/* :55 */
++/* 64: */
++#line 842 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -1597,10 +1874,10 @@ WHILE()
+ if(loc>limit&&!get_line())
+ return;
+ 
+-*(limit+1)= 0100;
++*(limit+1)= '@';
+ 
+ 
+-while(*loc!=0100)
++while(*loc!='@')
+ loc++;
+ 
+ 
+@@ -1608,8 +1885,12 @@ if(loc++<=limit)
+ switch(ccode[*loc++])
+ {
+ 
++/* 62: */
++#line 803 "./fweave.web"
+ 
+ 
++/* 9: */
++#line 80 "./typedefs.hweb"
+ 
+ 
+ case begin_C:
+@@ -1619,46 +1900,72 @@ case begin_LITERAL
+ 
+ 
+ 
++/* :9 */
++#line 805 "./fweave.web"
+ :
+ loc--;
+ 
+ 
+ case L_switch:
++/* 63: */
++#line 821 "./fweave.web"
+ 
+ {
++/* 20: */
++#line 139 "./typedefs.hweb"
+ 
+ {
+ ASCII l= *loc++;
+ 
+ switch(l)
+ {
++/* 10: */
++#line 95 "./typedefs.hweb"
+ 
+-case 0143
++case 'c'
+ 
++/* :10 */
++#line 145 "./typedefs.hweb"
+ :
+-Cpp= BOOLEAN(*loc==053);
++Cpp= BOOLEAN(*loc=='+');
+ break;
+ 
++/* 11: */
++#line 98 "./typedefs.hweb"
+ 
+-case 0162
++case 'r'
+ 
++/* :11 */
++#line 149 "./typedefs.hweb"
+ :
++/* 12: */
++#line 101 "./typedefs.hweb"
+ 
+-case 0156
++case 'n'
+ 
++/* :12 */
++#line 150 "./typedefs.hweb"
+ :
+-Fortran88= BOOLEAN(*loc==071);
++Fortran88= BOOLEAN(*loc=='9');
+ break;
+ 
++/* 14: */
++#line 107 "./typedefs.hweb"
+ 
+-case 0166
++case 'v'
+ 
+ 
+ 
++/* :14 */
++#line 154 "./typedefs.hweb"
+ :
++/* 13: */
++#line 104 "./typedefs.hweb"
+ 
+-case 0170
++case 'x'
+ 
++/* :13 */
++#line 155 "./typedefs.hweb"
+ :
+ break;
+ 
+@@ -1673,12 +1980,16 @@ opt_args(l);
+ }
+ 
+ 
++/* :20 */
++#line 823 "./fweave.web"
+ 
+ 
+ if(module_count==0)
+ global_params= params;
+ 
+ ini0_language();
++/* 308: */
++#line 8966 "./fweave.web"
+ 
+ 
+ if(Fortran88&&(auto_semi&&!free_Fortran))
+@@ -1688,9 +1999,13 @@ chk_end= NO;
+ }
+ 
+ 
++/* :308 */
++#line 829 "./fweave.web"
+ 
+ }
+ 
++/* :63 */
++#line 810 "./fweave.web"
+ 
+ break;
+ 
+@@ -1701,6 +2016,8 @@ if(module_count==0)
+ global_params= params;
+ break;
+ 
++/* :62 */
++#line 863 "./fweave.web"
+ 
+ 
+ case invisible_cmnt:
+@@ -1711,9 +2028,15 @@ case new_module:
+ return;
+ }
+ 
++/* :64 */
++/* 64: */
++#line 876 "./fweave.web"
+ }
+ }
+ 
++/* :64 */
++/* 65: */
++#line 884 "./fweave.web"
+ 
+ 
+ eight_bits
+@@ -1724,13 +2047,13 @@ WHILE()
+ if(loc>limit&&!get_line())
+ return new_module;
+ 
+-*(limit+1)= 0100;
++*(limit+1)= '@';
+ 
+-while(*loc!=0100&&*loc!=0174)
++while(*loc!='@'&&*loc!='|')
+ loc++;
+ 
+-if(*loc++==0174)
+-return 0174;
++if(*loc++=='|')
++return '|';
+ 
+ if(loc<=limit)
+ {
+@@ -1742,6 +2065,9 @@ return ccode[*(loc++)];
+ DUMMY_RETURN(0);
+ }
+ 
++/* :65 */
++/* 67: */
++#line 974 "./fweave.web"
+ 
+ 
+ eight_bits
+@@ -1753,6 +2079,8 @@ GOTO_CODE pcode;
+ 
+ WHILE()
+ {
++/* 82: */
++#line 1490 "./fweave.web"
+ 
+ {
+ if(preprocessing&&at_beginning)
+@@ -1762,17 +2090,21 @@ at_beginning= NO;
+ 
+ 
+ for(;loc<limit;loc++)
+-if(!(*loc==040||*loc==tab_mark))
++if(!(*loc==' '||*loc==tab_mark))
+ break;
+ 
+-*(loc-1)= 043;
++*(loc-1)= '#';
+ 
+ 
+ return(eight_bits)prs_regular_code(GOTO_GET_IDENTIFIER);
+ }
+ }
+ 
++/* :82 */
++#line 985 "./fweave.web"
+ ;
++/* 83: */
++#line 1513 "./fweave.web"
+ 
+ 
+ chk_the_end:
+@@ -1797,7 +2129,7 @@ return right_preproc;
+ else if(Fortran88
+ &&parsing_mode==OUTER
+ &&(auto_semi&&!free_Fortran)&&(limit>cur_buffer)
+-&&!(limit[0]==0100&&limit[1]==0155))
++&&!(limit[0]=='@'&&limit[1]=='m'))
+ {
+ loc= limit+1;
+ chk_end= NO;
+@@ -1819,13 +2151,18 @@ goto chk_the_end;
+ }
+ continue;
+ }
++#line 1559 "./fweave.web"
+ }
+ }
+ 
++/* :83 */
++#line 986 "./fweave.web"
+ ;
+ 
+ chk_end= YES;
+ 
++/* 68: */
++#line 1044 "./fweave.web"
+ 
+ {
+ if(loc>limit)
+@@ -1835,6 +2172,8 @@ if(terminate)
+ terminator[0]= *limit;terminator[1]= *(limit+1);
+ }
+ 
++/* 69: */
++#line 1086 "./fweave.web"
+ 
+ {
+ if(just_inserted)
+@@ -1844,12 +2183,14 @@ else
+ if(free_Fortran&&auto_semi&&!empty_line&&the_part==CODE)
+ {
+ just_inserted= YES;
+-return auto_pseudo_semis?ccode[073]:073;
++return auto_pseudo_semis?ccode[';']:';';
+ 
+ }
+ }
+ }
+ 
++/* :69 */
++#line 1053 "./fweave.web"
+ 
+ 
+ empty_line= NO;
+@@ -1859,6 +2200,8 @@ return new_module;
+ 
+ if(eat_blank_lines)
+ {
++/* 70: */
++#line 1104 "./fweave.web"
+ 
+ {
+ while(loc>=limit)
+@@ -1869,6 +2212,8 @@ return new_module;
+ }
+ }
+ 
++/* :70 */
++#line 1062 "./fweave.web"
+ 
+ eat_blank_lines= NO;
+ }
+@@ -1886,25 +2231,35 @@ else if(parsing_mode==OUTER)
+ at_beginning= NO;
+ }
+ 
++/* :68 */
++#line 990 "./fweave.web"
+ 
++/* 71: */
++#line 1117 "./fweave.web"
+ 
+ 
+ if(preprocessing)
++/* 72: */
++#line 1137 "./fweave.web"
+ 
+ {
+ do
+ {
+-if((c= *loc++)!=040||c!=tab_mark)
++if((c= *loc++)!=' '||c!=tab_mark)
+ break;
+ }
+ while(loc<limit);
+ 
+-if(c==040||c==tab_mark)
++if(c==' '||c==tab_mark)
+ return macro_space;
+ }
+ 
++/* :72 */
++#line 1121 "./fweave.web"
+ 
+ else
++/* 73: */
++#line 1151 "./fweave.web"
+ 
+ {
+ if(language==TEX)
+@@ -1917,22 +2272,24 @@ do
+ {
+ c= *loc++;
+ }
+-while(loc<=limit&&(c==040||c==tab_mark));
++while(loc<=limit&&(c==' '||c==tab_mark));
+ 
+ if(nuweb_mode)
+ {
+-if(!(c==0100&&*loc==043))
++if(!(c=='@'&&*loc=='#'))
+ {
+ loc= loc0;
+ c= *loc++;
+ if(phase==1&&c==tab_mark)
+-c= 040;
++c= ' ';
+ }
+ }
+ }
+ }
+ 
+ 
++/* :73 */
++#line 1123 "./fweave.web"
+ 
+ 
+ if(c==cont_char&&loc==limit)
+@@ -1946,6 +2303,8 @@ terminate= YES;
+ continue;
+ }
+ 
++/* :71 */
++#line 991 "./fweave.web"
+ 
+ 
+ 
+@@ -1995,6 +2354,9 @@ break;
+ return(eight_bits)pcode;
+ }
+ 
++/* :67 */
++/* 74: */
++#line 1188 "./fweave.web"
+ 
+ GOTO_CODE
+ prs_TeX_code(VOID)
+@@ -2002,9 +2364,9 @@ prs_TeX_code(VOID)
+ GOTO_CODE icode;
+ 
+ if(loc>limit)
+-return 073;
++return ';';
+ 
+-if(c==0100)
++if(c=='@')
+ {
+ if((icode= get_control_code())==GOTO_MISTAKE)
+ return prs_regular_code(GOTO_MISTAKE);
+@@ -2016,12 +2378,14 @@ else if(TeX[c]==TeX_comment)
+ long_comment= YES;
+ return begin_comment;
+ }
+-else if(c==0174&&parsing_mode==INNER)
+-return 0174;
++else if(c=='|'&&parsing_mode==INNER)
++return '|';
+ else
+ if(phase==1)
+ {
+ if(TeX[c]==TeX_escape)
++/* 75: */
++#line 1228 "./fweave.web"
+ 
+ {
+ id_first= id_loc= mod_text+1;
+@@ -2030,9 +2394,9 @@ id_first= id_loc= mod_text+1;
+ 
+ if(TeX[*loc]!=TeX_letter)
+ {
+-if(*loc==0100)
++if(*loc=='@')
+ {
+-if(*(loc+1)!=0100)
++if(*(loc+1)!='@')
+ err0_print(ERR_W,OC("You should say `\\@@'"),0);
+ else loc++;
+ }
+@@ -2040,9 +2404,9 @@ else loc++;
+ }
+ else while(TeX[*loc]==TeX_letter)
+ {
+-if(*loc==0100)
++if(*loc=='@')
+ {
+-if(*(loc+1)!=0100)
++if(*(loc+1)!='@')
+ err0_print(ERR_W,OC("You should say `@@'"),0);
+ else loc++;
+ }
+@@ -2052,11 +2416,15 @@ else loc++;
+ return identifier;
+ }
+ 
++/* :75 */
++#line 1215 "./fweave.web"
+ 
+ else
+ return MORE_PARSE;
+ }
+ else
++/* 76: */
++#line 1263 "./fweave.web"
+ 
+ {
+ loc--;
+@@ -2064,19 +2432,19 @@ id_first= id_loc= mod_text+1;
+ 
+ while(loc<limit)
+ {
+-if(*loc==0100)
+-if(*(loc+1)==0100)*id_loc++= *loc++;
++if(*loc=='@')
++if(*(loc+1)=='@')*id_loc++= *loc++;
+ else break;
+ 
+ if(TeX[*loc]==TeX_comment)break;
+-if(*loc==0174&&parsing_mode==INNER)break;
++if(*loc=='|'&&parsing_mode==INNER)break;
+ 
+ if(TeX[*loc]==TeX_escape)
+ {
+ if(TeX[*(loc+1)]!=TeX_letter)
+ {
+-if(*(loc+1)==0100)
+-if(*(loc+2)!=0100)
++if(*(loc+1)=='@')
++if(*(loc+2)!='@')
+ 
+ err0_print(ERR_W,OC("You should say \\@@"),0);
+ else*id_loc++= *loc++;
+@@ -2107,10 +2475,16 @@ continue;
+ return stringg;
+ }
+ 
++/* :76 */
++#line 1220 "./fweave.web"
+ 
+ 
++#line 1223 "./fweave.web"
+ }
+ 
++/* :74 */
++/* 77: */
++#line 1313 "./fweave.web"
+ 
+ 
+ GOTO_CODE
+@@ -2127,7 +2501,7 @@ default:break;
+ }
+ 
+ 
+-if(c==056&&*loc==056&&*(loc+1)==056)
++if(c=='.'&&*loc=='.'&&*(loc+1)=='.')
+ {
+ ++loc;
+ compress(ellipsis);
+@@ -2136,6 +2510,8 @@ compress(ellipsis);
+ 
+ else if(FORTRAN_LIKE(language)&&dot_constants&&
+ (c==wt_style.dot_delimiter.begin)&&!isDigit(*loc))
++/* 78: */
++#line 1412 "./fweave.web"
+ 
+ {
+ ASCII HUGE*p0;
+@@ -2158,7 +2534,7 @@ goto mistake;
+ if((dcode= dot_code(dots,uppercase(p0,n),loc,dot_const))!=0)
+ {
+ if(Fortran88)
+-upcoming_kind= BOOLEAN(loc[1]==0137);
++upcoming_kind= BOOLEAN(loc[1]=='_');
+ 
+ compress(dcode);
+ }
+@@ -2168,10 +2544,14 @@ loc= p0;
+ goto mistake;
+ }
+ 
++/* :78 */
++#line 1338 "./fweave.web"
+ 
+ 
+ 
+-else if(isDigit(c)||c==0134||c==056||(upcoming_kind&&c==0137))
++else if(isDigit(c)||c=='\\'||c=='.'||(upcoming_kind&&c=='_'))
++/* 88: */
++#line 1833 "./fweave.web"
+ 
+ {
+ boolean decimal_point= NO;
+@@ -2182,7 +2562,7 @@ id_first= id_loc= mod_text+1;
+ 
+ if(Fortran88)
+ {
+-*id_loc++= 040;
++*id_loc++= ' ';
+ 
+ 
+ if(upcoming_kind)
+@@ -2193,12 +2573,12 @@ upcoming_kind= NO;
+ }
+ }
+ 
+-if(c!=0137)
+-if(c==0134)
++if(c!='_')
++if(c=='\\')
+ {
+ ASCII*loc0;
+ 
+-if(*loc==057)
++if(*loc=='/')
+ goto mistake;
+ 
+ *id_loc++= OCTAL_CODE;
+@@ -2210,17 +2590,19 @@ while(isOdigit(*loc))
+ if(loc==loc0)
+ return(eight_bits)c;
+ }
+-else if(c==060)
++else if(c=='0')
++/* 89: */
++#line 1887 "./fweave.web"
+ 
+ {
+-if(*loc==0170||*loc==0130)
++if(*loc=='x'||*loc=='X')
+ {
+ *id_loc++= HEX_CODE;
+ loc++;
+ while(isXdigit(*loc))
+ *id_loc++= *loc++;
+ }
+-else if(*loc==0142||*loc==0102)
++else if(*loc=='b'||*loc=='B')
+ {
+ *id_loc++= BINARY_CODE;
+ loc++;
+@@ -2237,22 +2619,26 @@ else
+ goto dec;
+ }
+ 
++/* :89 */
++#line 1872 "./fweave.web"
+ 
+ else
++/* 90: */
++#line 1915 "./fweave.web"
+ 
+ {
+-if(c==056&&!isDigit(*loc))
++if(c=='.'&&!isDigit(*loc))
+ goto mistake;
+ 
+ dec:
+ *id_loc++= c;
+-while(isDigit(*loc)||*loc==056)
++while(isDigit(*loc)||*loc=='.')
+ *id_loc++= *loc++;
+ 
+ 
+ 
+ 
+-decimal_point= BOOLEAN(*(loc-1)==056);
++decimal_point= BOOLEAN(*(loc-1)=='.');
+ 
+ if(FORTRAN_LIKE(language))
+ if(decimal_point)
+@@ -2265,7 +2651,9 @@ loc--;
+ return constant;
+ }
+ }
+-else if(*loc==0150||*loc==0110)
++else if(*loc=='h'||*loc=='H')
++/* 92: */
++#line 1973 "./fweave.web"
+ 
+ {
+ int k,n;
+@@ -2282,6 +2670,8 @@ for(k= 0;k<n;++k)
+ return constant;
+ }
+ 
++/* :92 */
++#line 1942 "./fweave.web"
+ ;
+ 
+ if(in_format)
+@@ -2289,9 +2679,11 @@ return constant;
+ 
+ prec_char= *loc;
+ 
+-if(prec_char==0145||prec_char==0105||(FORTRAN_LIKE(language)&&
+-(prec_char==0144||prec_char==0104||
+-prec_char==0161||prec_char==0121)))
++if(prec_char=='e'||prec_char=='E'||(FORTRAN_LIKE(language)&&
++(prec_char=='d'||prec_char=='D'||
++prec_char=='q'||prec_char=='Q')))
++/* 91: */
++#line 1958 "./fweave.web"
+ 
+ {
+ *id_loc++= EXP_CODE;
+@@ -2299,29 +2691,35 @@ prec_char==0161||prec_char==0121)))
+ 
+ loc++;
+ 
+-if(*loc==053||*loc==055)
++if(*loc=='+'||*loc=='-')
+ *id_loc++= *loc++;
+ 
+ while(isDigit(*loc))
+ *id_loc++= *loc++;
+ }
+ 
++/* :91 */
++#line 1952 "./fweave.web"
+ 
+ }
+ 
++/* :90 */
++#line 1874 "./fweave.web"
+ 
+ 
++/* 93: */
++#line 1991 "./fweave.web"
+ 
+ 
+ if(C_LIKE(language))
+ {
+ switch(*loc)
+ {
+-case 0154:
+-case 0114:
++case 'l':
++case 'L':
+ *id_loc++= CONSTANT_CODE;
+ loc++;
+-if(*loc==0165||*loc==0125)
++if(*loc=='u'||*loc=='U')
+ {
+ *id_loc++= ULONG_CODE;
+ loc++;
+@@ -2330,11 +2728,11 @@ else
+ *id_loc++= LONG_CODE;
+ break;
+ 
+-case 0165:
+-case 0125:
++case 'u':
++case 'U':
+ *id_loc++= CONSTANT_CODE;
+ loc++;
+-if(*loc==0154||*loc==0114)
++if(*loc=='l'||*loc=='L')
+ {
+ *id_loc++= ULONG_CODE;
+ loc++;
+@@ -2342,8 +2740,8 @@ loc++;
+ else*id_loc++= UNSIGNED_CODE;
+ break;
+ 
+-case 0146:
+-case 0106:
++case 'f':
++case 'F':
+ *id_loc++= CONSTANT_CODE;
+ *id_loc++= FLOAT_CODE;
+ loc++;
+@@ -2351,14 +2749,16 @@ break;
+ }
+ }
+ else if(Fortran88)
++/* 94: */
++#line 2036 "./fweave.web"
+ 
+ {
+-if(*loc==0137)
++if(*loc=='_')
+ {
+-*id_first= 0173;
++*id_first= '{';
+ 
+ 
+-*id_loc++= 0175;
++*id_loc++= '}';
+ 
+ while(is_kind(*loc))
+ *id_loc++= *loc++;
+@@ -2367,39 +2767,49 @@ else
+ id_first++;
+ }
+ 
++/* :94 */
++#line 2031 "./fweave.web"
+ 
+ 
++/* :93 */
++#line 1876 "./fweave.web"
+ 
+ 
+ if(!decimal_point&&at_beginning&&
+ ((is_FORTRAN_(language)&&!last_was_continued)||
+-(is_RATFOR_(language)&&*loc==072)))
++(is_RATFOR_(language)&&*loc==':')))
+ return stmt_label;
+ 
+ return constant;
+ }
+ 
++/* :88 */
++#line 1342 "./fweave.web"
+ 
+ 
+ 
+-else if(in_data&&Fortran88&&(*loc==042||*loc==047)&&
+-(c==0102||c==0117||c==0132))
++else if(in_data&&Fortran88&&(*loc=='"'||*loc=='\'')&&
++(c=='B'||c=='O'||c=='Z'))
+ return get_string(*loc++,c);
+ 
+ 
+ else if(is_identifier(c))
++/* 29: */
++#line 317 "./typedefs.hweb"
+ 
+ {
+ IN_COMMON ASCII HUGE*pformat,HUGE*pdata;
+ 
+ get_identifier:
++/* 30: */
++#line 353 "./typedefs.hweb"
+ 
+ {
+ id_first= --loc;
+ 
+ 
+ for(++loc;isAlpha(*loc)||isDigit(*loc)
+-||*loc==0137||*loc==044||(in_format&&*loc==056);loc++)
++||*loc=='_'||*loc=='$'||(in_format&&*loc=='.');loc++)
+ ;
+ 
+ upcoming_kind= BOOLEAN(Fortran88&&(*loc=='"'||*loc=='\'')
+@@ -2410,6 +2820,8 @@ id_loc= loc-upcoming_kind;
+ }
+ 
+ 
++/* :30 */
++#line 322 "./typedefs.hweb"
+ 
+ 
+ if(FORTRAN_LIKE(language))
+@@ -2440,16 +2852,18 @@ return identifier;
+ }
+ 
+ 
++/* :29 */
++#line 1351 "./fweave.web"
+ 
+ 
+ 
+-else if(c==047||c==042
++else if(c=='\''||c=='"'
+ ||(sharp_include_line&&!in_comment&&
+-(c==050||(C_LIKE(language)&&c==074))))
++(c=='('||(C_LIKE(language)&&c=='<'))))
+ return get_string(c,'\0');
+ 
+ 
+-else if(c==0100)
++else if(c=='@')
+ {
+ if((icode= get_control_code())==GOTO_MISTAKE)
+ goto mistake;
+@@ -2459,13 +2873,18 @@ return icode;
+ 
+ 
+ 
+-else if(c==040||c==tab_mark)
++else if(c==' '||c==tab_mark)
++/* :77 */
++/* 77: */
++#line 1381 "./fweave.web"
+ if(nuweb_mode)
+ return c;else
+ return MORE_PARSE;
+ 
+ 
+-if(c==043&&at_beginning&&C_LIKE(language))
++if(c=='#'&&at_beginning&&C_LIKE(language))
++/* 80: */
++#line 1456 "./fweave.web"
+ 
+ {
+ IN_COMMON ASCII HUGE*pinclude,HUGE*ppragma;
+@@ -2473,10 +2892,12 @@ IN_COMMON ASCII HUGE*pinclude,HUGE*ppragma;
+ 
+ 
+ preprocessing= YES;
++/* 81: */
++#line 1474 "./fweave.web"
+ 
+ {
+ 
+-while(*loc==040||*loc==011)
++while(*loc==' '||*loc=='\t')
+ loc++;
+ 
+ if(STRNCMP(loc,pinclude,7)==0)
+@@ -2485,22 +2906,28 @@ else if(STRNCMP(loc,ppragma,7)==0)
+ sharp_pragma_line= YES;
+ }
+ 
++/* :81 */
++#line 1463 "./fweave.web"
+ ;
+ return left_preproc;
+ }
+ 
++/* :80 */
++#line 1388 "./fweave.web"
+ 
+ 
+ 
+ 
+-else if(in_format&&c==073)
++else if(in_format&&c==';')
+ {
+ in_format= NO;
+ return end_format_stmt;
+ }
+ 
+ 
+-mistake:
++mistake:/* 85: */
++#line 1593 "./fweave.web"
++
+ 
+ switch(c)
+ {
+@@ -2512,22 +2939,24 @@ case(ASCII)begin_comment1:
+ long_comment= NO;
+ return begin_comment;
+ 
+-case 0134:
+-if(*loc==057&&!in_format&&FORTRAN_LIKE(language))
++case '\\':
++if(*loc=='/'&&!in_format&&FORTRAN_LIKE(language))
+ {
+ compress(slash_slash);
+ }
+ break;
+ 
+-case 057:
++case '/':
++/* 86: */
++#line 1740 "./fweave.web"
+ 
+ 
+-if(*loc==052)
++if(*loc=='*')
+ {
+ long_comment= YES;
+ compress(begin_comment);
+ }
+-else if(*loc==057)
++else if(*loc=='/')
+ {
+ if(C_LIKE(language)||language==TEX||(Cpp_comments&&
+ !in_format&&FORTRAN_LIKE(language)))
+@@ -2543,164 +2972,172 @@ compress(slash_slash);
+ 
+ }
+ }
+-else if(*loc==051&&!in_format)
++else if(*loc==')'&&!in_format)
+ {compress(right_array);
+ }
+-else if(*loc==075)
++else if(*loc=='=')
+ {COMPOUND(slash_eq,1);
+ }
+ 
++/* :86 */
++#line 1613 "./fweave.web"
+ 
+ break;
+ 
+-case 050:
+-if(*loc==057&&!in_format)compress(left_array);
++case '(':
++if(*loc=='/'&&!in_format)compress(left_array);
+ break;
+ 
+-case 053:
+-if(*loc==053){compress(plus_plus);
++case '+':
++if(*loc=='+'){compress(plus_plus);
+ }
+-else if(*loc==075){COMPOUND(plus_eq,1);
++else if(*loc=='='){COMPOUND(plus_eq,1);
+ 
+ }
+ break;
+ 
+-case 055:
+-if(*loc==055){compress(minus_minus);
++case '-':
++if(*loc=='-'){compress(minus_minus);
+ }
+-else if(*loc==076){compress(minus_gt);
++else if(*loc=='>'){compress(minus_gt);
+ 
+ }
+-else if(*loc==075){COMPOUND(minus_eq,1);
++else if(*loc=='='){COMPOUND(minus_eq,1);
+ 
+ }
+ break;
+ 
+-case 075:
+-if(*loc==075){compress(eq_eq);
++case '=':
++if(*loc=='='){compress(eq_eq);
+ }
+-else if(*loc==076){compress(eq_gt);
++else if(*loc=='>'){compress(eq_gt);
+ 
+ }
+ break;
+ 
+-case 076:
+-if(*loc==075){compress(gt_eq);
++case '>':
++if(*loc=='='){compress(gt_eq);
+ }
+-else if(*loc==076)
+-if(*(loc+1)==075){COMPOUND(gt_gt_eq,2);
++else if(*loc=='>')
++if(*(loc+1)=='='){COMPOUND(gt_gt_eq,2);
+ 
+ }
+ else{compress(gt_gt);
+ }
+ break;
+ 
+-case 074:
+-if(*loc==075){compress(lt_eq);
++case '<':
++if(*loc=='='){compress(lt_eq);
+ }
+-else if(*loc==074)
+-if(*(loc+1)==075)
++else if(*loc=='<')
++if(*(loc+1)=='=')
+ {COMPOUND(lt_lt_eq,2);
+ 
+ }
+ else{compress(lt_lt);
+ }
+-else if(*loc==076){compress(not_eq);
++else if(*loc=='>'){compress(not_eq);
+ 
+ }
+ break;
+ 
+-case 045:
+-if(*loc==075){COMPOUND(mod_eq,1);
++case '%':
++if(*loc=='='){COMPOUND(mod_eq,1);
+ }
+ break;
+ 
+-case 046:
+-if(*loc==046){compress(and_and);
++case '&':
++if(*loc=='&'){compress(and_and);
+ }
+-else if(*loc==075)
++else if(*loc=='=')
+ {
+ COMPOUND(and_eq,1);
+ }
+ break;
+ 
+-case 0174:
+-if(*loc==0174)
++case '|':
++if(*loc=='|')
+ {
+-if(*(loc+1)==0174)
++if(*(loc+1)=='|')
+ {
+ COMPOUND(or_or_or,2);
+ }
+ else compress(or_or);
+ }
+-else if(*loc==075&&!FORTRAN_LIKE(language))
++else if(*loc=='='&&!FORTRAN_LIKE(language))
+ {
+ COMPOUND(or_eq,1);
+ }
+ break;
+ 
+-case 041:
+-if(!in_format&&(point_comments||*loc==041))
++case '!':
++if(!in_format&&(point_comments||*loc=='!'))
+ {
+-if(*loc!=041)loc--;
++if(*loc!='!')loc--;
+ long_comment= NO;
+ compress(begin_comment);
+ }
+-else if(*loc==075){compress(not_eq);
++else if(*loc=='='){compress(not_eq);
+ }
+ break;
+ 
+-case 052:
+-if(FORTRAN_LIKE(language)&&(*loc==052))
++case '*':
++if(FORTRAN_LIKE(language)&&(*loc=='*'))
+ {compress(star_star);
+ }
+-else if(*loc==075){COMPOUND(star_eq,1);
++else if(*loc=='='){COMPOUND(star_eq,1);
+ }
+ break;
+ 
+-case 0136:
+-if(*loc==0136){compress(star_star);}
++case '^':
++if(*loc=='^'){compress(star_star);}
+ else if(FORTRAN_LIKE(language)&&(loc<limit))
+ return star_star;
+-else if(*loc==075){COMPOUND(xor_eq,1);
++else if(*loc=='='){COMPOUND(xor_eq,1);
+ }
+ break;
+ 
+-case 072:
+-if(*loc==072)compress(colon_colon);
++case ':':
++if(*loc==':')compress(colon_colon);
+ break;
+ 
+-case 043:
++case '#':
++/* 87: */
++#line 1771 "./fweave.web"
+ 
+ 
+ switch(*loc)
+ {
+-case 043:
++case '#':
+ compress(paste);
+ break;
+ 
+-case 041:
++case '!':
+ compress(dont_expand);
+ break;
+ 
+-case 072:
++case ':':
+ compress(auto_label);
+ break;
+ 
+-case 056:
++case '.':
+ compress(all_variable_args);
+ break;
+ 
+-case 074:
++case '<':
+ loc++;
+ mac_mod_name= YES;
++/* 107: */
++#line 2437 "./fweave.web"
+ 
+ {
+ ASCII HUGE*k;
+-static ASCII ell[]= "\56\56\56";
+-static ASCII bad_mod_name[]= "\41\41\41\40\173\134\151\164\40\111\156\143\157\155\160\141\164\151\142\154\145\175\40\41\41\41";
++static ASCII ell[]= "...";
++static ASCII bad_mod_name[]= "!!! {\\it Incompatible} !!!";
+ 
+ 
++/* 109: */
++#line 2486 "./fweave.web"
+ 
+ {
+ mod_level= 1;
+@@ -2718,20 +3155,22 @@ loc= cur_buffer+1;break;
+ }
+ 
+ c= *loc;
++/* 110: */
++#line 2537 "./fweave.web"
+ 
+ 
+-if(c==0100)
++if(c=='@')
+ {
+ c= *(loc+1);
+ 
+-if(c==076)
++if(c=='>')
+ {
+ if(--mod_level==0)
+ {
+ loc+= 2;break;
+ }
+ }
+-else if(c==074)mod_level++;
++else if(c=='<')mod_level++;
+ 
+ if(ccode[c]==new_module)
+ {
+@@ -2740,10 +3179,12 @@ err0_print(ERR_W,OC("Section name didn't end"),0);break;
+ 
+ }
+ 
+-*(++k)= 0100;loc++;
++*(++k)= '@';loc++;
+ }
+ 
+ 
++/* :110 */
++#line 2502 "./fweave.web"
+ ;
+ loc++;
+ 
+@@ -2751,12 +3192,12 @@ if(k<mod_end)k++;
+ 
+ switch(c)
+ {
+-case 040:
++case ' ':
+ case tab_mark:
+-c= 040;if(*(k-1)==040)k--;
++c= ' ';if(*(k-1)==' ')k--;
+ break;
+ 
+-case 073:
++case ';':
+ c= interior_semi;
+ break;
+ }
+@@ -2774,10 +3215,12 @@ printf("...");
+ mark_harmless;
+ }
+ 
+-if(*k==040&&k>mod_text)
++if(*k==' '&&k>mod_text)
+ k--;
+ }
+ 
++/* :109 */
++#line 2444 "./fweave.web"
+ 
+ 
+ if(k-mod_text>3&&STRNCMP(k-2,ell,3)==0)
+@@ -2789,6 +3232,9 @@ cur_module= mod_lookup(bad_mod_name,bad_mod_name+STRLEN(bad_mod_name)-1);
+ 
+ if(cur_module)
+ {
++/* :107 */
++/* 107: */
++#line 2458 "./fweave.web"
+ params= cur_module->mod_info->params;
+ frz_params();
+ }
+@@ -2800,24 +3246,33 @@ xref_switch= NO;
+ 
+ }
+ 
++/* :107 */
++#line 1794 "./fweave.web"
+ ;
+ return macro_module_name;
+ 
+-case 047:
+-case 042:
++case '\'':
++case '"':
+ if(phase==1)loc++;
+ break;
+ }
+ 
++/* :87 */
++#line 1734 "./fweave.web"
+ 
+ break;
+ }
+ 
+ 
++/* :85 */
++#line 1399 "./fweave.web"
+ 
+ return(eight_bits)c;
+ }
+ 
++/* :77 */
++/* 96: */
++#line 2071 "./fweave.web"
+ 
+ 
+ eight_bits
+@@ -2834,24 +3289,26 @@ id_first= mod_text+1;
+ id_loc= mod_text;
+ 
+ 
+-if(delim==047&&*(loc-2)==0100){*++id_loc= 0100;*++id_loc= 0100;}
++if(delim=='\''&&*(loc-2)=='@'){*++id_loc= '@';*++id_loc= '@';}
+ *++id_loc= delim;
+ 
++/* 97: */
++#line 2140 "./fweave.web"
+ 
+ {
+ switch(delim)
+ {
+-case 074:
+-right_delim= 076;
++case '<':
++right_delim= '>';
+ break;
+ 
+-case 050:
+-right_delim= 051;
++case '(':
++right_delim= ')';
+ sharp_include_line= NO;
+ break;
+ 
+-case 0133:
+-right_delim= 0135;
++case '[':
++right_delim= ']';
+ break;
+ }
+ 
+@@ -2860,18 +3317,22 @@ level= 1;
+ equal_delims= BOOLEAN(right_delim==delim);
+ }
+ 
++/* :97 */
++#line 2090 "./fweave.web"
+ 
+ 
+ kount= 0;
+ 
+ WHILE()
+ {
+-if(loc>=limit)
++if(loc>=limit)/* 98: */
++#line 2164 "./fweave.web"
++
+ {
+ if((equal_delims||chk_ifelse)&&*(limit-1)!=cont_char)
+ {
+ 
+-err0_print(ERR_W,OC("String %s with %s'%s%c'%s didn't end"),5,BTRANS,SSET_COLOR(character),delim==047?"\\":"",XCHR(delim),SSET_COLOR(error));
++err0_print(ERR_W,OC("String %s with %s'%s%c'%s didn't end"),5,BTRANS,SSET_COLOR(character),delim=='\''?"\\":"",XCHR(delim),SSET_COLOR(error));
+ loc= limit;break;
+ 
+ }
+@@ -2892,7 +3353,7 @@ else
+ if(bslash_continued_strings)
+ {
+ for(;loc<limit;loc++)
+-if(*loc!=040&&*loc!=tab_mark)break;
++if(*loc!=' '&&*loc!=tab_mark)break;
+ 
+ if(*loc==cont_char)loc++;
+ else
+@@ -2902,9 +3363,13 @@ string"),1,XCHR(cont_char));
+ }
+ }
+ 
++/* :98 */
++#line 2096 "./fweave.web"
++
+ 
++if((c= *loc++)==delim)/* 99: */
++#line 2203 "./fweave.web"
+ 
+-if((c= *loc++)==delim)
+ {
+ level++;
+ 
+@@ -2917,6 +3382,8 @@ if(FORTRAN_LIKE(language)&&(*loc==delim))
+ else break;
+ }
+ 
++/* :99 */
++#line 2098 "./fweave.web"
+ 
+ 
+ if(c==right_delim)
+@@ -2938,16 +3405,20 @@ else if(++id_loc<=mod_end)
+ 
+ if(++id_loc<=mod_end)*id_loc= c;
+ 
++/* 100: */
++#line 2221 "./fweave.web"
+ 
+ 
+ if(insert_breaks)
+-if(c==054)kount= 0;
+-else if(++kount>=NBREAK&&c!=0100&&++id_loc<=mod_end)
++if(c==',')kount= 0;
++else if(++kount>=NBREAK&&c!='@'&&++id_loc<=mod_end)
+ {
+ kount= 0;
+ *id_loc= discretionary_break;
+ }
+ 
++/* :100 */
++#line 2119 "./fweave.web"
+ 
+ }
+ 
+@@ -2963,23 +3434,27 @@ mark_error;
+ 
+ id_loc++;
+ 
++/* 101: */
++#line 2236 "./fweave.web"
+ 
+ {
+ if(FORTRAN_LIKE(language))
+ if(boz)
++/* 102: */
++#line 2246 "./fweave.web"
+ 
+ {
+ switch(boz)
+ {
+-case 0102:
++case 'B':
+ *id_first= BINARY_CODE;
+ break;
+ 
+-case 0117:
++case 'O':
+ *id_first= OCTAL_CODE;
+ break;
+ 
+-case 0132:
++case 'Z':
+ *id_first= HEX_CODE;
+ break;
+ }
+@@ -2988,42 +3463,61 @@ id_loc--;
+ return constant;
+ }
+ 
++/* :102 */
++#line 2240 "./fweave.web"
+ 
+ else
++/* 103: */
++#line 2269 "./fweave.web"
+ 
+ {
+-if(*loc==0130||*loc==0170)
++if(*loc=='X'||*loc=='x')
+ {
+ *id_first= HEX_CODE;
++/* 104: */
++#line 2284 "./fweave.web"
+ 
+ 
+ loc++;
+ id_loc--;
+ return constant;
+ 
++/* :104 */
++#line 2274 "./fweave.web"
+ 
+ }
+-else if(*loc==0117||*loc==0157)
++else if(*loc=='O'||*loc=='o')
+ {
+ *id_first= OCTAL_CODE;
++/* 104: */
++#line 2284 "./fweave.web"
+ 
+ 
+ loc++;
+ id_loc--;
+ return constant;
+ 
++/* :104 */
++#line 2279 "./fweave.web"
+ 
+ }
+ }
+ 
++/* :103 */
++#line 2242 "./fweave.web"
+ 
+ }
+ 
++/* :101 */
++#line 2134 "./fweave.web"
+ 
+ 
+ return stringg;
+ }
+ 
++/* :96 */
++/* 106: */
++#line 2301 "./fweave.web"
+ 
+ 
+ GOTO_CODE
+@@ -3036,11 +3530,11 @@ c= *loc++;
+ SET_CASE(c);
+ 
+ 
+-if((c==057&&(*loc==052||*loc==057))||
++if((c=='/'&&(*loc=='*'||*loc=='/'))||
+ c==(ASCII)begin_comment0||c==(ASCII)begin_comment1)
+ return GOTO_MISTAKE;
+ 
+-if(c==076&&mod_level==0)
++if(c=='>'&&mod_level==0)
+ {
+ 
+ err0_print(ERR_W,OC("Unmatched `@>' ignored"),0);
+@@ -3081,7 +3575,7 @@ case switch_math_flag:math_flag= !math_flag;
+ return MORE_PARSE;
+ 
+ #ifdef DEBUG
+-case trace:tracing= c-060;
++case trace:tracing= c-'0';
+ return MORE_PARSE;
+ #endif 
+ 
+@@ -3089,6 +3583,8 @@ return MORE_PARSE;
+ 
+ 
+ 
++/* 9: */
++#line 80 "./typedefs.hweb"
+ 
+ 
+ case begin_C:
+@@ -3098,46 +3594,72 @@ case begin_LITERAL
+ 
+ 
+ 
++/* :9 */
++#line 2365 "./fweave.web"
+ :
+ loc--;
+ 
+ case L_switch:
+ {
++/* 63: */
++#line 821 "./fweave.web"
+ 
+ {
++/* 20: */
++#line 139 "./typedefs.hweb"
+ 
+ {
+ ASCII l= *loc++;
+ 
+ switch(l)
+ {
++/* 10: */
++#line 95 "./typedefs.hweb"
+ 
+-case 0143
++case 'c'
+ 
++/* :10 */
++#line 145 "./typedefs.hweb"
+ :
+-Cpp= BOOLEAN(*loc==053);
++Cpp= BOOLEAN(*loc=='+');
+ break;
+ 
++/* 11: */
++#line 98 "./typedefs.hweb"
+ 
+-case 0162
++case 'r'
+ 
++/* :11 */
++#line 149 "./typedefs.hweb"
+ :
++/* 12: */
++#line 101 "./typedefs.hweb"
+ 
+-case 0156
++case 'n'
+ 
++/* :12 */
++#line 150 "./typedefs.hweb"
+ :
+-Fortran88= BOOLEAN(*loc==071);
++Fortran88= BOOLEAN(*loc=='9');
+ break;
+ 
++/* 14: */
++#line 107 "./typedefs.hweb"
+ 
+-case 0166
++case 'v'
+ 
+ 
+ 
++/* :14 */
++#line 154 "./typedefs.hweb"
+ :
++/* 13: */
++#line 104 "./typedefs.hweb"
+ 
+-case 0170
++case 'x'
+ 
++/* :13 */
++#line 155 "./typedefs.hweb"
+ :
+ break;
+ 
+@@ -3152,12 +3674,16 @@ opt_args(l);
+ }
+ 
+ 
++/* :20 */
++#line 823 "./fweave.web"
+ 
+ 
+ if(module_count==0)
+ global_params= params;
+ 
+ ini0_language();
++/* 308: */
++#line 8966 "./fweave.web"
+ 
+ 
+ if(Fortran88&&(auto_semi&&!free_Fortran))
+@@ -3167,9 +3693,13 @@ chk_end= NO;
+ }
+ 
+ 
++/* :308 */
++#line 829 "./fweave.web"
+ 
+ }
+ 
++/* :63 */
++#line 2370 "./fweave.web"
+ 
+ return begin_language;
+ }
+@@ -3181,12 +3711,14 @@ return MORE_PARSE;
+ 
+ case xref_roman:case xref_wildcard:case xref_typewriter:
+ case TeX_string:case keyword_name:
++/* 111: */
++#line 2565 "./fweave.web"
+ 
+ {
+ cc= ccode[*(loc-1)];
+-id_first= loc;*(limit+1)= 0100;
++id_first= loc;*(limit+1)= '@';
+ 
+-while(*loc!=0100)
++while(*loc!='@')
+ loc++;
+ 
+ id_loc= loc;
+@@ -3200,7 +3732,7 @@ return cc;
+ 
+ }
+ 
+-if(*loc++!=076)
++if(*loc++!='>')
+ 
+ err0_print(ERR_W,OC("Control codes are forbidden in control text"),0);
+ 
+@@ -3208,19 +3740,25 @@ err0_print(ERR_W,OC("Control codes are forbidden in control text"),0);
+ return cc;
+ }
+ 
++/* :111 */
++#line 2380 "./fweave.web"
+ 
+ 
+ 
+ 
+ case module_name:
+ mac_mod_name= NO;
++/* 107: */
++#line 2437 "./fweave.web"
+ 
+ {
+ ASCII HUGE*k;
+-static ASCII ell[]= "\56\56\56";
+-static ASCII bad_mod_name[]= "\41\41\41\40\173\134\151\164\40\111\156\143\157\155\160\141\164\151\142\154\145\175\40\41\41\41";
++static ASCII ell[]= "...";
++static ASCII bad_mod_name[]= "!!! {\\it Incompatible} !!!";
+ 
+ 
++/* 109: */
++#line 2486 "./fweave.web"
+ 
+ {
+ mod_level= 1;
+@@ -3238,20 +3776,22 @@ loc= cur_buffer+1;break;
+ }
+ 
+ c= *loc;
++/* 110: */
++#line 2537 "./fweave.web"
+ 
+ 
+-if(c==0100)
++if(c=='@')
+ {
+ c= *(loc+1);
+ 
+-if(c==076)
++if(c=='>')
+ {
+ if(--mod_level==0)
+ {
+ loc+= 2;break;
+ }
+ }
+-else if(c==074)mod_level++;
++else if(c=='<')mod_level++;
+ 
+ if(ccode[c]==new_module)
+ {
+@@ -3260,10 +3800,12 @@ err0_print(ERR_W,OC("Section name didn't end"),0);break;
+ 
+ }
+ 
+-*(++k)= 0100;loc++;
++*(++k)= '@';loc++;
+ }
+ 
+ 
++/* :110 */
++#line 2502 "./fweave.web"
+ ;
+ loc++;
+ 
+@@ -3271,12 +3813,12 @@ if(k<mod_end)k++;
+ 
+ switch(c)
+ {
+-case 040:
++case ' ':
+ case tab_mark:
+-c= 040;if(*(k-1)==040)k--;
++c= ' ';if(*(k-1)==' ')k--;
+ break;
+ 
+-case 073:
++case ';':
+ c= interior_semi;
+ break;
+ }
+@@ -3294,10 +3836,12 @@ printf("...");
+ mark_harmless;
+ }
+ 
+-if(*k==040&&k>mod_text)
++if(*k==' '&&k>mod_text)
+ k--;
+ }
+ 
++/* :109 */
++#line 2444 "./fweave.web"
+ 
+ 
+ if(k-mod_text>3&&STRNCMP(k-2,ell,3)==0)
+@@ -3309,6 +3853,9 @@ cur_module= mod_lookup(bad_mod_name,bad_mod_name+STRLEN(bad_mod_name)-1);
+ 
+ if(cur_module)
+ {
++/* :107 */
++/* 107: */
++#line 2458 "./fweave.web"
+ params= cur_module->mod_info->params;
+ frz_params();
+ }
+@@ -3320,10 +3867,14 @@ xref_switch= NO;
+ 
+ }
+ 
++/* :107 */
++#line 2386 "./fweave.web"
+ 
+ return module_name;
+ 
+ case new_output_file:
++/* 31: */
++#line 371 "./typedefs.hweb"
+ 
+ {
+ while(*loc==' '||*loc==tab_mark)
+@@ -3346,11 +3897,13 @@ id_loc= id_first+MAX_FILE_NAME_LENGTH-1;
+ }
+ 
+ 
++/* :31 */
++#line 2390 "./fweave.web"
+ 
+ return cc;
+ 
+ case invisible_cmnt:
+-if(*loc==045)
++if(*loc=='%')
+ eat_blank_lines= YES;
+ loc= limit+1;
+ return MORE_PARSE;
+@@ -3360,13 +3913,15 @@ long_comment= NO;
+ doing_cdir= YES;
+ return begin_comment;
+ 
+-case verbatim:
++case verbatim:/* 112: */
++#line 2595 "./fweave.web"
++
+ {
+ id_first= loc++;
+ 
+-*(limit+1)= 0100;*(limit+2)= 076;
++*(limit+1)= '@';*(limit+2)= '>';
+ 
+-while(*loc!=0100||*(loc+1)!=076)loc++;
++while(*loc!='@'||*(loc+1)!='>')loc++;
+ 
+ if(loc>=limit)
+ err0_print(ERR_W,OC("Verbatim string didn't end"),0);
+@@ -3377,6 +3932,8 @@ id_loc= loc;loc+= 2;
+ return(verbatim);
+ }
+ 
++/* :112 */
++#line 2404 "./fweave.web"
+ 
+ 
+ case ascii_constant:return get_string(c,'\0');
+@@ -3385,6 +3942,8 @@ case big_line_break:
+ if(loc>=limit)
+ return cc;
+ 
++/* 32: */
++#line 399 "./typedefs.hweb"
+ 
+ {
+ boolean mcode;
+@@ -3397,7 +3956,7 @@ loc++;
+ 
+ if((mcode= is_mcmd(mcmds,id_first,loc))!=0)
+ {
+-while(loc<limit&&(*loc==040||*loc==tab_mark))
++while(loc<limit&&(*loc==' '||*loc==tab_mark))
+ loc++;
+ 
+ #ifdef _FWEAVE_h
+@@ -3411,11 +3970,13 @@ loc= id_first;
+ }
+ 
+ 
++/* :32 */
++#line 2412 "./fweave.web"
+ ;
+ return cc;
+ 
+ case begin_bp:
+-return 0173;
++return '{';
+ 
+ case USED_BY_NEITHER:
+ if(phase==1)
+@@ -3425,7 +3986,7 @@ err0_print(ERR_W,OC("Invalid `@%c' ignored"),1,XCHR(c));
+ return ignore;
+ 
+ case USED_BY_OTHER:
+-if(c==0161)
++if(c=='q')
+ loc++;
+ 
+ return cc;
+@@ -3434,6 +3995,9 @@ default:return cc;
+ }
+ }
+ 
++/* :106 */
++/* 114: */
++#line 2628 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -3459,6 +4023,8 @@ fin_language();
+ global_params= params;
+ 
+ while(!input_has_ended)
++/* 115: */
++#line 2663 "./fweave.web"
+ 
+ {
+ the_part= TEX_;
+@@ -3474,6 +4040,8 @@ progress();
+ params= global_params;
+ frz_params();
+ 
++/* 135: */
++#line 3476 "./fweave.web"
+ 
+ {
+ the_part= TEX_;
+@@ -3484,6 +4052,8 @@ WHILE()
+ {
+ switch(next_control= skip_TeX())
+ {
++/* 9: */
++#line 80 "./typedefs.hweb"
+ 
+ 
+ case begin_C:
+@@ -3493,46 +4063,72 @@ case begin_LITERAL
+ 
+ 
+ 
++/* :9 */
++#line 3486 "./fweave.web"
+ :
+ loc--;
+ 
+ case L_switch:
+ {
++/* 63: */
++#line 821 "./fweave.web"
+ 
+ {
++/* 20: */
++#line 139 "./typedefs.hweb"
+ 
+ {
+ ASCII l= *loc++;
+ 
+ switch(l)
+ {
++/* 10: */
++#line 95 "./typedefs.hweb"
+ 
+-case 0143
++case 'c'
+ 
++/* :10 */
++#line 145 "./typedefs.hweb"
+ :
+-Cpp= BOOLEAN(*loc==053);
++Cpp= BOOLEAN(*loc=='+');
+ break;
+ 
++/* 11: */
++#line 98 "./typedefs.hweb"
+ 
+-case 0162
++case 'r'
+ 
++/* :11 */
++#line 149 "./typedefs.hweb"
+ :
++/* 12: */
++#line 101 "./typedefs.hweb"
+ 
+-case 0156
++case 'n'
+ 
++/* :12 */
++#line 150 "./typedefs.hweb"
+ :
+-Fortran88= BOOLEAN(*loc==071);
++Fortran88= BOOLEAN(*loc=='9');
+ break;
+ 
++/* 14: */
++#line 107 "./typedefs.hweb"
+ 
+-case 0166
++case 'v'
+ 
+ 
+ 
++/* :14 */
++#line 154 "./typedefs.hweb"
+ :
++/* 13: */
++#line 104 "./typedefs.hweb"
+ 
+-case 0170
++case 'x'
+ 
++/* :13 */
++#line 155 "./typedefs.hweb"
+ :
+ break;
+ 
+@@ -3547,12 +4143,16 @@ opt_args(l);
+ }
+ 
+ 
++/* :20 */
++#line 823 "./fweave.web"
+ 
+ 
+ if(module_count==0)
+ global_params= params;
+ 
+ ini0_language();
++/* 308: */
++#line 8966 "./fweave.web"
+ 
+ 
+ if(Fortran88&&(auto_semi&&!free_Fortran))
+@@ -3562,9 +4162,13 @@ chk_end= NO;
+ }
+ 
+ 
++/* :308 */
++#line 829 "./fweave.web"
+ 
+ }
+ 
++/* :63 */
++#line 3491 "./fweave.web"
+ ;
+ continue;
+ }
+@@ -3574,6 +4178,8 @@ nuweb_mode= !NUWEB_MODE;
+ continue;
+ 
+ case toggle_output:
++/* 176: */
++#line 4971 "./fweave.web"
+ 
+ {
+ static int outer_include_depth;
+@@ -3593,6 +4199,8 @@ output_on= YES;
+ }
+ }
+ 
++/* :176 */
++#line 3500 "./fweave.web"
+ 
+ continue;
+ 
+@@ -3601,20 +4209,20 @@ xref_switch= def_flag;
+ continue;
+ 
+ #ifdef DEBUG
+-case trace:tracing= next_control-060;continue;
++case trace:tracing= next_control-'0';continue;
+ #endif 
+ 
+-case 0174:
++case '|':
+ while(next_control<=module_name)
+ {
+ C_xref(TEX_,INNER);
+ 
+-if(next_control==0174||next_control==new_module)
++if(next_control=='|'||next_control==new_module)
+ break;
+ 
+ next_control= get_next();
+ 
+-if(next_control==0174)
++if(next_control=='|')
+ break;
+ }
+ 
+@@ -3641,7 +4249,11 @@ break;
+ }
+ }
+ 
++/* :135 */
++#line 2678 "./fweave.web"
+ ;
++/* 137: */
++#line 3568 "./fweave.web"
+ 
+ {
+ boolean no_xref0= no_xref;
+@@ -3698,6 +4310,8 @@ pr_format(YES,YES);
+ break;
+ 
+ case limbo_text:
++/* 144: */
++#line 3850 "./fweave.web"
+ 
+ {
+ LANGUAGE language0= language;
+@@ -3716,9 +4330,9 @@ else
+ {
+ for(id_first++,id_loc--;id_first<id_loc;)
+ {
+-if(*id_first==0100)
++if(*id_first=='@')
+ {
+-if(*(id_first+1)==0100)
++if(*(id_first+1)=='@')
+ id_first++;
+ else
+ 
+@@ -3726,7 +4340,7 @@ err0_print(ERR_W,OC("Double @ should be used in strings"),0);
+ }
+ 
+ 
+-if(*id_first==0134)
++if(*id_first=='\\')
+ {
+ id_first++;
+ 
+@@ -3747,10 +4361,14 @@ insert_breaks= YES;
+ language= language0;
+ }
+ 
++/* :144 */
++#line 3624 "./fweave.web"
+ 
+ break;
+ 
+ case op_def:
++/* 145: */
++#line 3900 "./fweave.web"
+ 
+ {
+ OPERATOR HUGE*p,HUGE*p1;
+@@ -3789,7 +4407,7 @@ q->defn= GET_MEM("q->defn",n+1,outer_char);
+ *(id_loc-1)= '\0';
+ 
+ for(s= q->defn,id_first++;*id_first;s++)
+-if(*id_first==0134)
++if(*id_first=='\\')
+ {
+ id_first++;
+ *s= XCHR(esc_achar((CONST ASCII HUGE
+@@ -3825,10 +4443,14 @@ q->cat= (p?p->info[k].cat:(eight_bits)expr);
+ }
+ }
+ 
++/* :145 */
++#line 3628 "./fweave.web"
+ 
+ break;
+ 
+ case macro_def:
++/* 146: */
++#line 3977 "./fweave.web"
+ 
+ {
+ if((next_control= get_next())!=identifier)
+@@ -3854,7 +4476,7 @@ id_loc0= id_loc;
+ 
+ switch(next_control= get_next())
+ {
+-case 0134:
++case '\\':
+ if((next_control= get_next())!=identifier)
+ {
+ 
+@@ -3888,10 +4510,10 @@ fmt_like_string:
+ p->wv_macro= w= GET_MEM("wv_macro",1,WV_MACRO);
+ w->text= GET_MEM("w->text",n+1,outer_char);
+ 
+-if(offset)*w->text= 0134;
++if(offset)*w->text= '\\';
+ 
+ for(s= w->text+offset;*id_first;s++)
+-if(*id_first==0134)
++if(*id_first=='\\')
+ {
+ id_first++;
+ *s= esc_achar((CONST ASCII HUGE
+@@ -3914,6 +4536,8 @@ break;
+ }
+ }
+ 
++/* :146 */
++#line 3632 "./fweave.web"
+ 
+ break;
+ 
+@@ -3930,7 +4554,11 @@ no_xref= no_xref0;
+ }
+ }
+ 
++/* :137 */
++#line 2679 "./fweave.web"
+ ;
++/* 148: */
++#line 4067 "./fweave.web"
+ 
+ {
+ the_part= CODE;
+@@ -3974,11 +4602,13 @@ if(beginning_module)
+ if(mod_xref_switch)
+ next_control= get_next();
+ else
+-next_control= 075;
++next_control= '=';
+ 
+-if(next_control==075)
++if(next_control=='=')
+ if(!nuweb_mode&&((FORTRAN_LIKE(language)&&!free_form_input)
+ ||(language==TEX)))
++/* 309: */
++#line 8977 "./fweave.web"
+ 
+ {
+ loc= limit+1;
+@@ -3986,6 +4616,8 @@ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 4115 "./fweave.web"
+ 
+ 
+ beginning_module= NO;
+@@ -4002,6 +4634,8 @@ unnamed_section= NO;
+ }
+ }
+ 
++/* :148 */
++#line 2680 "./fweave.web"
+ ;
+ 
+ if(chngd_module[module_count])
+@@ -4010,11 +4644,15 @@ change_exists= YES;
+ typd_switch= defd_switch= NO;
+ }
+ 
++/* :115 */
++#line 2653 "./fweave.web"
+ ;
+ 
+ chngd_module[module_count]= change_exists;
+ 
+ 
++/* 152: */
++#line 4259 "./fweave.web"
+ 
+ {
+ if(mod_check(root)&&msg_level<SHORT_INFO)
+@@ -4023,9 +4661,14 @@ else
+ fflush(stdout);
+ }
+ 
++/* :152 */
++#line 2659 "./fweave.web"
+ 
+ }
+ 
++/* :114 */
++/* 117: */
++#line 2700 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -4046,15 +4689,17 @@ parse_params0= parse_params;
+ }
+ 
+ if(language==LITERAL)
+-if(next_control==0174)
++if(next_control=='|')
+ {
++/* 118: */
++#line 2813 "./fweave.web"
+ 
+ {
+ WHILE()
+ {
+ if(loc<limit)
+ {
+-if(*loc==0174)
++if(*loc=='|')
+ {
+ next_control= *loc++;
+ break;
+@@ -4067,12 +4712,14 @@ else if(!get_line())
+ 
+ err0_print(ERR_W,OC("Missing '|'.  File ended while skipping a \
+ verbatim scrap"),0);
+-next_control= 0174;
++next_control= '|';
+ break;
+ }
+ }
+ }
+ 
++/* :118 */
++#line 2722 "./fweave.web"
+ 
+ goto end_xref;
+ }
+@@ -4086,6 +4733,8 @@ while(next_control<formatt)
+ switch(next_control)
+ {
+ case begin_language:
++/* 132: */
++#line 3400 "./fweave.web"
+ 
+ 
+ switch(language)
+@@ -4099,6 +4748,8 @@ case FORTRAN_90:
+ case RATFOR:
+ case RATFOR_90:
+ if(mode0==OUTER&&!free_form_input)
++/* 309: */
++#line 8977 "./fweave.web"
+ 
+ {
+ loc= limit+1;
+@@ -4106,17 +4757,23 @@ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 3413 "./fweave.web"
+ 
+ break;
+ 
+ case TEX:
+-if(mode0==OUTER)
++if(mode0==OUTER)/* 309: */
++#line 8977 "./fweave.web"
++
+ {
+ loc= limit+1;
+ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 3417 "./fweave.web"
+ 
+ break;
+ 
+@@ -4133,10 +4790,14 @@ confusion(OC("handle possible language switch"),OC("Langage %i is invalid"),lang
+ }
+ 
+ 
++/* :132 */
++#line 2735 "./fweave.web"
+ 
+ break;
+ 
+ case toggle_output:
++/* 176: */
++#line 4971 "./fweave.web"
+ 
+ {
+ static int outer_include_depth;
+@@ -4156,11 +4817,15 @@ output_on= YES;
+ }
+ }
+ 
++/* :176 */
++#line 2739 "./fweave.web"
+ 
+ break;
+ 
+ case begin_meta:
+ if(language==LITERAL)
++/* 128: */
++#line 3230 "./fweave.web"
+ 
+ {
+ WHILE()
+@@ -4171,19 +4836,21 @@ next_control= new_module;
+ break;
+ }
+ 
+-if(loc[0]==0100)
++if(loc[0]=='@')
+ switch(loc[1])
+ {
+-case 056:
+-case 0136:
+-case 071:
+-case 052:
+-case 040:
+-case 074:
++case '.':
++case '^':
++case '9':
++case '*':
++case ' ':
++case '<':
+ goto done_meta;
+ 
+-case 0100:
++case '@':
+ loc+= 2;
++default:
++loc++;
+ }
+ else
+ loc++;
+@@ -4192,8 +4859,12 @@ loc++;
+ done_meta:;
+ }
+ 
++/* :128 */
++#line 2744 "./fweave.web"
+ 
+ else
++/* 127: */
++#line 3210 "./fweave.web"
+ 
+ {
+ WHILE()
+@@ -4205,7 +4876,7 @@ err0_print(ERR_W,OC("Input ended during meta-comment"),0);
+ break;
+ }
+ 
+-if(loc[0]==0100&&loc[1]==051)
++if(loc[0]=='@'&&loc[1]==')')
+ {
+ get_line();
+ break;
+@@ -4213,6 +4884,8 @@ break;
+ }
+ }
+ 
++/* :127 */
++#line 2746 "./fweave.web"
+ 
+ break;
+ 
+@@ -4247,6 +4920,8 @@ defd_switch= NO;
+ if(C_LIKE(language)&&parsing_mode==OUTER)
+ {
+ if(p->ilk==typedef_like)
++/* 129: */
++#line 3267 "./fweave.web"
+ 
+ {
+ int brace_level= 0;
+@@ -4265,13 +4940,13 @@ while(next_control<=module_name)
+ {
+ switch(next_control)
+ {
+-case 0173:
+-case 074:
++case '{':
++case '<':
+ brace_level++;
+ break;
+ 
+-case 0175:
+-case 076:
++case '}':
++case '>':
+ if(brace_level--==0)
+ {
+ 
+@@ -4319,25 +4994,27 @@ break;
+ case module_name:
+ if(cur_module)new_mod_xref(cur_module);
+ next_control= get_next();
+-if(next_control==075)
++if(next_control=='=')
+ {
+ 
+ err0_print(ERR_W,OC("'=' not allowed after @<...@> \
+ inside typedef; check typedef syntax.  Inserted ';'"),0);
+-next_control= 073;
++next_control= ';';
+ }
+ continue;
+ 
+-case 073:
++case ';':
+ if(brace_level==0)goto done;
+ break;
+ 
+ case begin_comment:
++/* 134: */
++#line 3451 "./fweave.web"
+ 
+ {
+ int bal;
+ 
+-bal= copy_comment(1);next_control= 0174;
++bal= copy_comment(1);next_control= '|';
+ 
+ doing_cdir= NO;
+ 
+@@ -4346,13 +5023,15 @@ while(bal>0)
+ in_comment= YES;
+ C_xref(part0,INNER);
+ 
+-if(next_control==0174)
++if(next_control=='|')
+ bal= copy_comment(bal);
+ else
+ bal= 0;
+ }
+ }
+ 
++/* :134 */
++#line 3352 "./fweave.web"
+ 
+ break;
+ }
+@@ -4371,8 +5050,12 @@ goto end_xref;
+ }
+ }
+ 
++/* :129 */
++#line 2780 "./fweave.web"
+ 
+ else if(p->ilk==class_like)
++/* 131: */
++#line 3382 "./fweave.web"
+ 
+ {
+ if((next_control= get_next())==identifier)
+@@ -4389,6 +5072,8 @@ typd_switch= NO;
+ }
+ }
+ 
++/* :131 */
++#line 2782 "./fweave.web"
+ 
+ }
+ break;
+@@ -4403,7 +5088,7 @@ break;
+ 
+ next_control= get_next();
+ 
+-if(next_control==0174||next_control==begin_comment)
++if(next_control=='|'||next_control==begin_comment)
+ break;
+ }
+ 
+@@ -4417,6 +5102,9 @@ parsing_mode= OUTER;
+ }
+ }
+ 
++/* :117 */
++/* 120: */
++#line 2863 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -4459,12 +5147,16 @@ qtd_file= BOOLEAN(file_name[0]=='"');
+ fprintf(ftemp_in,"#include %s\n",file_name);
+ fclose(ftemp_in);
+ 
++/* 121: */
++#line 2947 "./fweave.web"
+ 
+ {
+ outer_char*temp,*temp_I;
+ BUF_SIZE temp_len,ntemp;
+ IN_COMMON outer_char*extra_args;
+ 
++/* 122: */
++#line 2984 "./fweave.web"
+ 
+ {
+ IN_COMMON INCL_PATHS hdr_incl;
+@@ -4491,6 +5183,8 @@ STRCAT(temp_I,p);
+ STRCAT(temp_I," -I.");
+ }
+ 
++/* :122 */
++#line 2953 "./fweave.web"
+ 
+ 
+ temp= GET_MEM("temp",ntemp= temp_len+STRLEN(RUN_CPP)+4+3*3+temp_len
+@@ -4515,8 +5209,12 @@ FREE_MEM(temp_I,"temp_I",temp_len,outer_char);
+ FREE_MEM(temp,"temp",ntemp,outer_char);
+ }
+ 
++/* :121 */
++#line 2905 "./fweave.web"
+ 
+ 
++/* 123: */
++#line 3013 "./fweave.web"
+ 
+ {
+ if(++incl_depth>=(int)max_include_depth)
+@@ -4566,6 +5264,8 @@ incl_depth--;
+ }
+ }
+ 
++/* :123 */
++#line 2907 "./fweave.web"
+ 
+ 
+ if(new_depth!=incl_depth||!get_line())
+@@ -4589,6 +5289,8 @@ p= id_lookup(id_first,id_loc,
+ (eight_bits)(next_control-identifier));
+ 
+ if(p->ilk==typedef_like)
++/* 129: */
++#line 3267 "./fweave.web"
+ 
+ {
+ int brace_level= 0;
+@@ -4607,13 +5309,13 @@ while(next_control<=module_name)
+ {
+ switch(next_control)
+ {
+-case 0173:
+-case 074:
++case '{':
++case '<':
+ brace_level++;
+ break;
+ 
+-case 0175:
+-case 076:
++case '}':
++case '>':
+ if(brace_level--==0)
+ {
+ 
+@@ -4661,25 +5363,27 @@ break;
+ case module_name:
+ if(cur_module)new_mod_xref(cur_module);
+ next_control= get_next();
+-if(next_control==075)
++if(next_control=='=')
+ {
+ 
+ err0_print(ERR_W,OC("'=' not allowed after @<...@> \
+ inside typedef; check typedef syntax.  Inserted ';'"),0);
+-next_control= 073;
++next_control= ';';
+ }
+ continue;
+ 
+-case 073:
++case ';':
+ if(brace_level==0)goto done;
+ break;
+ 
+ case begin_comment:
++/* 134: */
++#line 3451 "./fweave.web"
+ 
+ {
+ int bal;
+ 
+-bal= copy_comment(1);next_control= 0174;
++bal= copy_comment(1);next_control= '|';
+ 
+ doing_cdir= NO;
+ 
+@@ -4688,13 +5392,15 @@ while(bal>0)
+ in_comment= YES;
+ C_xref(part0,INNER);
+ 
+-if(next_control==0174)
++if(next_control=='|')
+ bal= copy_comment(bal);
+ else
+ bal= 0;
+ }
+ }
+ 
++/* :134 */
++#line 3352 "./fweave.web"
+ 
+ break;
+ }
+@@ -4713,8 +5419,12 @@ goto end_xref;
+ }
+ }
+ 
++/* :129 */
++#line 2930 "./fweave.web"
+ 
+ else if(p->ilk==class_like)
++/* 131: */
++#line 3382 "./fweave.web"
+ 
+ {
+ if((next_control= get_next())==identifier)
+@@ -4731,6 +5441,8 @@ typd_switch= NO;
+ }
+ }
+ 
++/* :131 */
++#line 2932 "./fweave.web"
+ 
+ 
+ break;
+@@ -4744,6 +5456,9 @@ restore:
+ preprocessing= sharp_include_line= YES;
+ }
+ 
++/* :120 */
++/* 124: */
++#line 3063 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -4756,6 +5471,9 @@ remove((CONST char*)temp_out);
+ }
+ }
+ 
++/* :124 */
++/* 125: */
++#line 3079 "./fweave.web"
+ 
+ 
+ outer_char*
+@@ -4789,6 +5507,9 @@ return file_name;
+ }
+ 
+ 
++/* :125 */
++/* 130: */
++#line 3373 "./fweave.web"
+ 
+ SRTN
+ cant_do FCN((the_part))
+@@ -4798,6 +5519,9 @@ outer_char*the_part C1("")
+ err0_print(ERR_W,OC("You can't do that inside %s text"),1,the_part);
+ }
+ 
++/* :130 */
++/* 133: */
++#line 3437 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -4808,11 +5532,13 @@ while(next_control<formatt)
+ if(next_control!=begin_comment)
+ C_xref(part0,OUTER);
+ else
++/* 134: */
++#line 3451 "./fweave.web"
+ 
+ {
+ int bal;
+ 
+-bal= copy_comment(1);next_control= 0174;
++bal= copy_comment(1);next_control= '|';
+ 
+ doing_cdir= NO;
+ 
+@@ -4821,16 +5547,21 @@ while(bal>0)
+ in_comment= YES;
+ C_xref(part0,INNER);
+ 
+-if(next_control==0174)
++if(next_control=='|')
+ bal= copy_comment(bal);
+ else
+ bal= 0;
+ }
+ }
+ 
++/* :134 */
++#line 3447 "./fweave.web"
+ 
+ }
+ 
++/* :133 */
++/* 138: */
++#line 3658 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -4855,6 +5586,8 @@ last_control= next_control= get_next();
+ 
+ 
+ if(next_control==identifier||next_control==module_name)
++/* 139: */
++#line 3693 "./fweave.web"
+ 
+ {
+ if(next_control==identifier)
+@@ -4877,6 +5610,8 @@ rhs= id_lookup(id_first,id_loc,normal);
+ if(lhs!=NULL)
+ {
+ if(last_control==identifier)
++/* 140: */
++#line 3738 "./fweave.web"
+ 
+ {
+ lhs->ilk= rhs->ilk;
+@@ -4894,6 +5629,8 @@ RST_BIT(keyword);
+ #undef RST_BIT
+ }
+ 
++/* :140 */
++#line 3715 "./fweave.web"
+ 
+ else
+ lhs->mod_ilk= rhs->ilk;
+@@ -4916,8 +5653,12 @@ next_control= get_next();
+ }
+ }
+ 
++/* :139 */
++#line 3682 "./fweave.web"
+ 
+-else if(next_control==0140)
++else if(next_control=='`')
++/* 141: */
++#line 3758 "./fweave.web"
+ 
+ {
+ if((next_control= get_TeX())!=constant)
+@@ -4950,12 +5691,17 @@ next_control= get_next();
+ }
+ }
+ 
++/* :141 */
++#line 3684 "./fweave.web"
+ 
+ 
+ if(saved_language==TEX)
+ language= saved_language;
+ }
+ 
++/* :138 */
++/* 142: */
++#line 3792 "./fweave.web"
+ 
+ 
+ eight_bits
+@@ -4970,14 +5716,14 @@ return ignore;
+ 
+ id_first= id_loc= mod_text+1;
+ 
+-if(*loc==0134)*id_loc++= *loc++;
+-else if(*loc==0136&&*(loc+1)==0136)
++if(*loc=='\\')*id_loc++= *loc++;
++else if(*loc=='^'&&*(loc+1)=='^')
+ {
+ *id_loc++= *loc++;*id_loc++= *loc++;
+ }
+ 
+-if(*loc==0100)
+-if(*(loc+1)==0100)loc++;
++if(*loc=='@')
++if(*(loc+1)=='@')loc++;
+ else
+ err0_print(ERR_W,OC("You should say `@@"),0);
+ 
+@@ -4990,6 +5736,9 @@ to_outer(id_first);
+ return constant;
+ }
+ 
++/* :142 */
++/* 143: */
++#line 3826 "./fweave.web"
+ 
+ 
+ int
+@@ -4997,9 +5746,9 @@ TeX_char(VOID)
+ {
+ int c;
+ 
+-while(*id_first==0134)id_first++;
++while(*id_first=='\\')id_first++;
+ 
+-if(*id_first==0136&&*(id_first+1)==0136)
++if(*id_first=='^'&&*(id_first+1)=='^')
+ {
+ c= *(id_first+2);
+ if(c>=64)c-= 64;
+@@ -5010,6 +5759,9 @@ else c= *id_first;
+ return c;
+ }
+ 
++/* :143 */
++/* 150: */
++#line 4149 "./fweave.web"
+ 
+ 
+ int
+@@ -5099,6 +5851,9 @@ status|= mod_check(p->rlink);
+ return status;
+ }
+ 
++/* :150 */
++/* 151: */
++#line 4239 "./fweave.web"
+ 
+ int
+ mod_warn FCN((p,msg))
+@@ -5117,6 +5872,9 @@ mark_harmless;
+ return YES;
+ }
+ 
++/* :151 */
++/* 155: */
++#line 4310 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -5135,7 +5893,7 @@ j= b;
+ 
+ 
+ if(!per_cent)
+-while(j>out_buf&&*j==040)
++while(j>out_buf&&*j==' ')
+ j--;
+ 
+ ASCII_LINE_WRITE(j-out_buf);
+@@ -5143,14 +5901,14 @@ ASCII_LINE_WRITE(j-out_buf);
+ if(per_cent)
+ TEX_PUTXCHAR('%');
+ 
+-if(*b!=012)
++if(*b!='\n')
+ TEX_NEW_LINE;
+ 
+ out_line++;
+ 
+ if(b<out_ptr)
+ {
+-if(*out_start==045)
++if(*out_start=='%')
+ out_start++;
+ 
+ STRNCPY(out_start,b+1,PTR_DIFF(size_t,out_ptr,b));
+@@ -5162,6 +5920,9 @@ else
+ out_ptr= out_buf;
+ }
+ 
++/* :155 */
++/* 156: */
++#line 4363 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -5175,13 +5936,16 @@ else
+ {
+ 
+ for(k= cur_buffer;k<=limit;k++)
+-if(*k!=040&&*k!=tab_mark)
++if(*k!=' '&&*k!=tab_mark)
+ return;
+ 
+ flush_buffer(out_buf,NO);
+ }
+ }
+ 
++/* :156 */
++/* 159: */
++#line 4434 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -5219,6 +5983,9 @@ while(*s)
+ out(XORD(*s++));
+ }
+ 
++/* :159 */
++/* 160: */
++#line 4473 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -5233,27 +6000,42 @@ a= XORD(*s++);
+ 
+ switch(a)
+ {
++/* 223: */
++#line 6548 "./fweave.web"
+ 
+ 
++/* 224: */
++#line 6554 "./fweave.web"
+ 
+ 
+-case 0134:case 0173:case 0175
++case '\\':case '{':case '}'
+ 
++/* :224 */
++#line 6550 "./fweave.web"
+ :
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 6551 "./fweave.web"
+ 
+ 
++/* :223 */
++#line 4487 "./fweave.web"
+ :
+-out(0134);
++out('\\');
+ break;
+ }
+ out(a);
+ }
+ }
+ 
++/* :160 */
++/* 161: */
++#line 4496 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -5264,39 +6046,56 @@ while(*s)
+ {
+ switch(*s)
+ {
++/* 223: */
++#line 6548 "./fweave.web"
+ 
+ 
++/* 224: */
++#line 6554 "./fweave.web"
+ 
+ 
+-case 0134:case 0173:case 0175
++case '\\':case '{':case '}'
+ 
++/* :224 */
++#line 6550 "./fweave.web"
+ :
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 6551 "./fweave.web"
+ 
+ 
++/* :223 */
++#line 4506 "./fweave.web"
+ :
+-out(0134);
++out('\\');
+ break;
+ }
+ out(*s++);
+ }
+ }
+ 
++/* :161 */
++/* 163: */
++#line 4526 "./fweave.web"
+ 
+ 
+ SRTN
+ break_out(VOID)
+ {
+ ASCII HUGE*k= out_ptr;
+-boolean is_tex_comment= BOOLEAN(*(out_buf+1)==045);
++boolean is_tex_comment= BOOLEAN(*(out_buf+1)=='%');
+ 
+ if(nuweb_mode)
+ WHILE()
+ {
+ if(k==out_buf)
++/* 164: */
++#line 4587 "./fweave.web"
+ 
+ {
+ SET_COLOR(warning);
+@@ -5309,6 +6108,8 @@ flush_buffer(out_ptr-1,YES);
+ return;
+ }
+ 
++/* :164 */
++#line 4538 "./fweave.web"
+ ;
+ 
+ if(STRNCMP(k,"\\WEM ",4)==0)
+@@ -5317,7 +6118,7 @@ flush_buffer(k+= 4,NO);
+ break;
+ }
+ 
+-if(*(k--)==012)
++if(*(k--)=='\n')
+ {
+ flush_buffer(++k,NO);
+ break;
+@@ -5327,6 +6128,8 @@ else
+ WHILE()
+ {
+ if(k==out_buf)
++/* 164: */
++#line 4587 "./fweave.web"
+ 
+ {
+ SET_COLOR(warning);
+@@ -5339,22 +6142,24 @@ flush_buffer(out_ptr-1,YES);
+ return;
+ }
+ 
++/* :164 */
++#line 4556 "./fweave.web"
+ ;
+ 
+-if(*k==040)
++if(*k==' ')
+ {
+ flush_buffer(k,NO);
+ break;
+ }
+ 
+-if(*k==012&&k[-1]!=012)
++if(*k=='\n'&&k[-1]!='\n')
+ {
+-*k= 045;
++*k= '%';
+ flush_buffer(k,NO);
+ break;
+ }
+ 
+-if(*(k--)==0134&&*k!=0134&&*k!=012)
++if(*(k--)=='\\'&&*k!='\\'&&*k!='\n')
+ {
+ flush_buffer(k,YES);
+ break;
+@@ -5362,9 +6167,12 @@ break;
+ }
+ 
+ if(is_tex_comment)
+-*(++out_ptr)= 045;
++*(++out_ptr)= '%';
+ }
+ 
++/* :163 */
++/* 165: */
++#line 4604 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -5400,6 +6208,9 @@ fprintf(mx_file,"%u",n);
+ }
+ }
+ 
++/* :165 */
++/* 166: */
++#line 4647 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -5419,12 +6230,12 @@ return;
+ multi_char= BOOLEAN(k_end-p->byte_start>1);
+ 
+ if(multi_char&&surround)
+-out(0173);
++out('{');
+ 
+-non_TeX_macro= BOOLEAN(is_id&&*p->byte_start==0134&&language!=TEX);
++non_TeX_macro= BOOLEAN(is_id&&*p->byte_start=='\\'&&language!=TEX);
+ 
+ if(non_TeX_macro)
+-out(044);
++out('$');
+ 
+ 
+ for(k= p->byte_start;k<k_end;k++)
+@@ -5432,8 +6243,8 @@ for(k= p->byte_start;k<k_end;k++)
+ if(is_id)
+ switch(*k)
+ {
+-case 0134:
+-case 0173:case 0175:
++case '\\':
++case '{':case '}':
+ 
+ 
+ 
+@@ -5441,22 +6252,26 @@ case 0173:case 0175:
+ if(non_TeX_macro)
+ break;
+ 
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 4688 "./fweave.web"
+ :
+-out(0134);
++out('\\');
+ }
+ 
+ out(*k);
+ }
+ 
+ if(non_TeX_macro)
+-out(044);
++out('$');
+ 
+ if(multi_char&&surround)
+-out(0175);
++out('}');
+ 
+ if(m_temp&&makeindex)
+ {
+@@ -5467,6 +6282,8 @@ m_temp[n]= '\0';
+ }
+ 
+ if(p->wv_macro)
++/* 167: */
++#line 4727 "./fweave.web"
+ 
+ {
+ WV_MACRO HUGE*w= p->wv_macro;
+@@ -5477,9 +6294,11 @@ OUT_STR("\\WTeX{");
+ while(*s)
+ out(*s++);
+ 
+-out(0175);
++out('}');
+ }
+ 
++/* :167 */
++#line 4710 "./fweave.web"
+ 
+ 
+ 
+@@ -5496,10 +6315,14 @@ OUT_STR(temp);
+ }
+ }
+ 
++/* :166 */
++#line 43 "./fweave.web"
+ 
+ #endif 
+ 
+ #if(part == 0 || part == 2)
++/* 169: */
++#line 4763 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -5507,6 +6330,8 @@ copy_limbo(VOID)
+ {
+ ASCII c;
+ 
++/* 170: */
++#line 4831 "./fweave.web"
+ 
+ {
+ int k;
+@@ -5535,6 +6360,8 @@ for(p= op;p<op_ptr;p++)
+ OP_INFO HUGE*q= p->info+k;
+ 
+ if(q->overloaded)
++/* 171: */
++#line 4870 "./fweave.web"
+ 
+ {
+ #define TEMP_LEN 1000
+@@ -5565,6 +6392,8 @@ OUT_STR(temp);
+ #undef TEMP_LEN
+ }
+ 
++/* :171 */
++#line 4859 "./fweave.web"
+ 
+ }
+ 
+@@ -5572,7 +6401,11 @@ flush_buffer(out_ptr,NO);
+ }
+ }
+ 
++/* :170 */
++#line 4770 "./fweave.web"
+ 
++/* 172: */
++#line 4901 "./fweave.web"
+ 
+ {
+ text_pointer t= tok_start+1;
+@@ -5603,6 +6436,8 @@ out_del_tokens(*t,*(t+1));
+ flush_buffer(out_ptr,NO);
+ }
+ 
++/* 53: */
++#line 405 "./fweave.web"
+ 
+ {
+ tok_ptr= tok_mem+1;
+@@ -5610,9 +6445,13 @@ tok_start[0]= tok_start[1]= tok_ptr;
+ text_ptr= tok_start+1;
+ }
+ 
++/* :53 */
++#line 4931 "./fweave.web"
+ 
+ }
+ 
++/* :172 */
++#line 4771 "./fweave.web"
+ 
+ 
+ OUT_STR("\n% --- Beginning of user's limbo section ---");
+@@ -5623,9 +6462,9 @@ WHILE()
+ if(loc>limit&&(fin_line(),!get_line()))
+ break;
+ 
+-*(limit+1)= 0100;
++*(limit+1)= '@';
+ 
+-while(*loc!=0100)
++while(*loc!='@')
+ out(*(loc++));
+ 
+ if(loc++<=limit)
+@@ -5635,11 +6474,15 @@ c= *loc++;
+ if(ccode[c]==new_module)
+ break;
+ 
+-if(c!=0172&&c!=0132)
++if(c!='z'&&c!='Z')
+ switch(ccode[c])
+ {
++/* 62: */
++#line 803 "./fweave.web"
+ 
+ 
++/* 9: */
++#line 80 "./typedefs.hweb"
+ 
+ 
+ case begin_C:
+@@ -5649,46 +6492,72 @@ case begin_LITERAL
+ 
+ 
+ 
++/* :9 */
++#line 805 "./fweave.web"
+ :
+ loc--;
+ 
+ 
+ case L_switch:
++/* 63: */
++#line 821 "./fweave.web"
+ 
+ {
++/* 20: */
++#line 139 "./typedefs.hweb"
+ 
+ {
+ ASCII l= *loc++;
+ 
+ switch(l)
+ {
++/* 10: */
++#line 95 "./typedefs.hweb"
+ 
+-case 0143
++case 'c'
+ 
++/* :10 */
++#line 145 "./typedefs.hweb"
+ :
+-Cpp= BOOLEAN(*loc==053);
++Cpp= BOOLEAN(*loc=='+');
+ break;
+ 
++/* 11: */
++#line 98 "./typedefs.hweb"
+ 
+-case 0162
++case 'r'
+ 
++/* :11 */
++#line 149 "./typedefs.hweb"
+ :
++/* 12: */
++#line 101 "./typedefs.hweb"
+ 
+-case 0156
++case 'n'
+ 
++/* :12 */
++#line 150 "./typedefs.hweb"
+ :
+-Fortran88= BOOLEAN(*loc==071);
++Fortran88= BOOLEAN(*loc=='9');
+ break;
+ 
++/* 14: */
++#line 107 "./typedefs.hweb"
+ 
+-case 0166
++case 'v'
+ 
+ 
+ 
++/* :14 */
++#line 154 "./typedefs.hweb"
+ :
++/* 13: */
++#line 104 "./typedefs.hweb"
+ 
+-case 0170
++case 'x'
+ 
++/* :13 */
++#line 155 "./typedefs.hweb"
+ :
+ break;
+ 
+@@ -5703,12 +6572,16 @@ opt_args(l);
+ }
+ 
+ 
++/* :20 */
++#line 823 "./fweave.web"
+ 
+ 
+ if(module_count==0)
+ global_params= params;
+ 
+ ini0_language();
++/* 308: */
++#line 8966 "./fweave.web"
+ 
+ 
+ if(Fortran88&&(auto_semi&&!free_Fortran))
+@@ -5718,9 +6591,13 @@ chk_end= NO;
+ }
+ 
+ 
++/* :308 */
++#line 829 "./fweave.web"
+ 
+ }
+ 
++/* :63 */
++#line 810 "./fweave.web"
+ 
+ break;
+ 
+@@ -5731,6 +6608,8 @@ if(module_count==0)
+ global_params= params;
+ break;
+ 
++/* :62 */
++#line 4796 "./fweave.web"
+ 
+ 
+ case toggle_output:
+@@ -5741,16 +6620,20 @@ case invisible_cmnt:
+ loc= limit+1;
+ break;
+ 
+-case 0100:
+-out(0100);
++case '@':
++out('@');
+ break;
+ 
+ case keyword_name:
+ loc-= 2;get_next();
++/* 229: */
++#line 6647 "./fweave.web"
+ 
+ {
+ ASCII*id_start,*id_end;
+ 
++/* 230: */
++#line 6662 "./fweave.web"
+ 
+ {
+ while(IS_WHITE(*id_first))
+@@ -5760,6 +6643,8 @@ while(IS_WHITE(id_loc[-1]))
+ id_loc--;
+ }
+ 
++/* :230 */
++#line 6651 "./fweave.web"
+ 
+ 
+ id_start= id_end= mod_text+1;
+@@ -5770,6 +6655,8 @@ upper_case_code?WEB_FILE:CUR_FILE);
+ out_del_str(id_start,id_end);
+ }
+ 
++/* :229 */
++#line 4812 "./fweave.web"
+ 
+ break;
+ 
+@@ -5782,6 +6669,8 @@ outside of sections"),0);
+ }
+ }
+ 
++/* 173: */
++#line 4935 "./fweave.web"
+ 
+ {
+ if(*w_style.misc.limbo_end)
+@@ -5794,9 +6683,14 @@ flush_buffer(out_ptr,NO);
+ }
+ }
+ 
++/* :173 */
++#line 4823 "./fweave.web"
+ 
+ }
+ 
++/* :169 */
++/* 181: */
++#line 5027 "./fweave.web"
+ 
+ eight_bits
+ copy_TeX(VOID)
+@@ -5807,18 +6701,22 @@ WHILE()
+ {
+ if(loc>limit)
+ {
++/* 182: */
++#line 5095 "./fweave.web"
+ 
+ {
+ ASCII HUGE*b;
+ 
+ for(b= out_buf+1;b<=out_ptr;b++)
+-if(*b!=040)
++if(*b!=' ')
+ break;
+ 
+ if(b>out_ptr)
+ out_ptr= out_buf;
+ }
+ 
++/* :182 */
++#line 5038 "./fweave.web"
+ 
+ fin_line();
+ 
+@@ -5826,48 +6724,52 @@ if(!get_line())
+ return new_module;
+ }
+ 
+-*(limit+1)= 0100;
++*(limit+1)= '@';
+ 
+ scan:
+-while((c= *(loc++))!=0174&&c!=0100)
++while((c= *(loc++))!='|'&&c!='@')
+ {
+ if(c==interior_semi)
+-c= 073;
++c= ';';
+ out(c);
+ 
+ #if(0)
+-if(out_ptr==out_buf+1&&(c==040
++if(out_ptr==out_buf+1&&(c==' '
+ ||c==tab_mark
+ ))out_ptr--;
+ #endif
+ }
+ 
+-if(c==0174)
+-return 0174;
++if(c=='|')
++return '|';
+ 
+ if(loc<=limit)
+ {
+ eight_bits cc;
+ 
+-if(*loc==0100)
++if(*loc=='@')
+ {
+-out(0100);
++out('@');
+ loc++;
+ goto scan;
+ }
+ 
++/* 182: */
++#line 5095 "./fweave.web"
+ 
+ {
+ ASCII HUGE*b;
+ 
+ for(b= out_buf+1;b<=out_ptr;b++)
+-if(*b!=040)
++if(*b!=' ')
+ break;
+ 
+ if(b>out_ptr)
+ out_ptr= out_buf;
+ }
+ 
++/* :182 */
++#line 5075 "./fweave.web"
+ 
+ 
+ SET_CASE(*loc);
+@@ -5878,6 +6780,8 @@ return cc;
+ if(loc>=limit)
+ return cc;
+ 
++/* 32: */
++#line 399 "./typedefs.hweb"
+ 
+ {
+ boolean mcode;
+@@ -5890,7 +6794,7 @@ loc++;
+ 
+ if((mcode= is_mcmd(mcmds,id_first,loc))!=0)
+ {
+-while(loc<limit&&(*loc==040||*loc==tab_mark))
++while(loc<limit&&(*loc==' '||*loc==tab_mark))
+ loc++;
+ 
+ #ifdef _FWEAVE_h
+@@ -5904,6 +6808,8 @@ loc= id_first;
+ }
+ 
+ 
++/* :32 */
++#line 5085 "./fweave.web"
+ ;
+ return cc;
+ }
+@@ -5912,6 +6818,9 @@ return cc;
+ DUMMY_RETURN(ignore);
+ }
+ 
++/* :181 */
++/* 184: */
++#line 5126 "./fweave.web"
+ 
+ 
+ int
+@@ -5926,7 +6835,7 @@ in_comment= YES;
+ 
+ terminator[0]= *limit;terminator[1]= *(limit+1);
+ 
+-*limit= 040;
++*limit= ' ';
+ 
+ 
+ 
+@@ -5941,47 +6850,55 @@ app_tok(copy_mode);
+ WHILE()
+ {
+ if(loc>limit)
++/* 185: */
++#line 5194 "./fweave.web"
+ 
+ {
+ if(!(long_comment||language==TEX))
+ {
+-if((auto_semi&&!free_Fortran)&&*(tok_ptr-2)==073
+-&&*(tok_ptr-1)==040)
++if((auto_semi&&!free_Fortran)&&*(tok_ptr-2)==';'
++&&*(tok_ptr-1)==' ')
+ tok_ptr-= 2;
+ 
+ 
+-while(*(tok_ptr-1)==040)
++while(*(tok_ptr-1)==' ')
+ tok_ptr--;
+ 
+ 
+-if(*(tok_ptr-1)==0134&&*(tok_ptr-2)!=0134)
++if(*(tok_ptr-1)=='\\'&&*(tok_ptr-2)!='\\')
+ tok_ptr--;
+ 
+ 
+-if(*(tok_ptr-2)==052&&*(tok_ptr-1)==057)
++if(*(tok_ptr-2)=='*'&&*(tok_ptr-1)=='/')
+ tok_ptr-= 2;
+ 
++/* 187: */
++#line 5286 "./fweave.web"
+ 
+ 
+ if(bal==1)
+ {
+ if(phase==2)
+ {
+-if(language==TEX)
++if(language==TEX)/* 188: */
++#line 5306 "./fweave.web"
++
+ {
+ token_pointer t;
+ 
+ for(t= tok_ptr-1;t>tok_ptr0;t--)
+-if(*t!=040)break;
++if(*t!=' ')break;
+ 
+-if(t==tok_ptr0&&*(t-4)==0134&&*(t-3)==0127&&*(t-2)==0103&&
+-*(t-1)==0173)
+-*(tok_ptr0-2)= 0170;
++if(t==tok_ptr0&&*(t-4)=='\\'&&*(t-3)=='W'&&*(t-2)=='C'&&
++*(t-1)=='{')
++*(tok_ptr0-2)= 'x';
+ }
+ 
+ 
++/* :188 */
++#line 5292 "./fweave.web"
+ 
+-app_tok(0175);
++app_tok('}');
+ }
+ bal= 0;
+ break;
+@@ -5991,19 +6908,26 @@ else
+ 
+ err0_print(ERR_W,OC("Braces don't balance in comment"),0);
+ 
++/* 190: */
++#line 5346 "./fweave.web"
+ 
+ 
+-app_tok(040);
++app_tok(' ');
+ 
+-while(bal-->0)app_tok(0175);
++while(bal-->0)app_tok('}');
+ 
+ bal= 0;
+ break;
+ 
++#line 8 "./scraps.hweb"
+ 
++/* :190 */
++#line 5302 "./fweave.web"
+ ;
+ }
+ 
++/* :187 */
++#line 5214 "./fweave.web"
+ 
+ }
+ 
+@@ -6013,16 +6937,21 @@ if(language!=TEX)
+ 
+ err0_print(ERR_W,OC("Input ended in mid-comment"),0);
+ 
+-loc= cur_buffer+1;
++loc= cur_buffer+1;/* 190: */
++#line 5346 "./fweave.web"
++
+ 
+-app_tok(040);
++app_tok(' ');
+ 
+-while(bal-->0)app_tok(0175);
++while(bal-->0)app_tok('}');
+ 
+ bal= 0;
+ break;
+ 
++#line 8 "./scraps.hweb"
+ 
++/* :190 */
++#line 5222 "./fweave.web"
+ ;
+ }
+ 
+@@ -6030,27 +6959,33 @@ break;
+ 
+ if(language==TEX)
+ {
+-if(loc==limit)
++if(loc==limit)/* 187: */
++#line 5286 "./fweave.web"
++
+ 
+ if(bal==1)
+ {
+ if(phase==2)
+ {
+-if(language==TEX)
++if(language==TEX)/* 188: */
++#line 5306 "./fweave.web"
++
+ {
+ token_pointer t;
+ 
+ for(t= tok_ptr-1;t>tok_ptr0;t--)
+-if(*t!=040)break;
++if(*t!=' ')break;
+ 
+-if(t==tok_ptr0&&*(t-4)==0134&&*(t-3)==0127&&*(t-2)==0103&&
+-*(t-1)==0173)
+-*(tok_ptr0-2)= 0170;
++if(t==tok_ptr0&&*(t-4)=='\\'&&*(t-3)=='W'&&*(t-2)=='C'&&
++*(t-1)=='{')
++*(tok_ptr0-2)= 'x';
+ }
+ 
+ 
++/* :188 */
++#line 5292 "./fweave.web"
+ 
+-app_tok(0175);
++app_tok('}');
+ }
+ bal= 0;
+ break;
+@@ -6060,23 +6995,30 @@ else
+ 
+ err0_print(ERR_W,OC("Braces don't balance in comment"),0);
+ 
++/* 190: */
++#line 5346 "./fweave.web"
+ 
+ 
+-app_tok(040);
++app_tok(' ');
+ 
+-while(bal-->0)app_tok(0175);
++while(bal-->0)app_tok('}');
+ 
+ bal= 0;
+ break;
+ 
++#line 8 "./scraps.hweb"
+ 
++/* :190 */
++#line 5302 "./fweave.web"
+ ;
+ }
+ 
++/* :187 */
++#line 5229 "./fweave.web"
+ 
+ 
+ for(;loc<=limit;loc++)
+-if(*loc!=040&&*loc!=tab_mark)break;
++if(*loc!=' '&&*loc!=tab_mark)break;
+ 
+ if(loc>limit)continue;
+ 
+@@ -6084,27 +7026,33 @@ if(TeX[*loc]==TeX_comment)loc++;
+ else
+ {
+ loc= cur_buffer;
++/* 187: */
++#line 5286 "./fweave.web"
+ 
+ 
+ if(bal==1)
+ {
+ if(phase==2)
+ {
+-if(language==TEX)
++if(language==TEX)/* 188: */
++#line 5306 "./fweave.web"
++
+ {
+ token_pointer t;
+ 
+ for(t= tok_ptr-1;t>tok_ptr0;t--)
+-if(*t!=040)break;
++if(*t!=' ')break;
+ 
+-if(t==tok_ptr0&&*(t-4)==0134&&*(t-3)==0127&&*(t-2)==0103&&
+-*(t-1)==0173)
+-*(tok_ptr0-2)= 0170;
++if(t==tok_ptr0&&*(t-4)=='\\'&&*(t-3)=='W'&&*(t-2)=='C'&&
++*(t-1)=='{')
++*(tok_ptr0-2)= 'x';
+ }
+ 
+ 
++/* :188 */
++#line 5292 "./fweave.web"
+ 
+-app_tok(0175);
++app_tok('}');
+ }
+ bal= 0;
+ break;
+@@ -6114,24 +7062,33 @@ else
+ 
+ err0_print(ERR_W,OC("Braces don't balance in comment"),0);
+ 
++/* 190: */
++#line 5346 "./fweave.web"
+ 
+ 
+-app_tok(040);
++app_tok(' ');
+ 
+-while(bal-->0)app_tok(0175);
++while(bal-->0)app_tok('}');
+ 
+ bal= 0;
+ break;
+ 
++#line 8 "./scraps.hweb"
+ 
++/* :190 */
++#line 5302 "./fweave.web"
+ ;
+ }
+ 
++/* :187 */
++#line 5240 "./fweave.web"
+ 
+ }
+ }
+ }
+ 
++/* :185 */
++#line 5155 "./fweave.web"
+ 
+ 
+ 
+@@ -6141,33 +7098,39 @@ else do
+ c= *(loc++);
+ while(c==tab_mark);
+ 
+-if(c==0174)break;
++if(c=='|')break;
+ 
+-if(c==052&&*loc==057&&long_comment)
++if(c=='*'&&*loc=='/'&&long_comment)
+ {
+ loc++;
+ 
++/* 187: */
++#line 5286 "./fweave.web"
+ 
+ 
+ if(bal==1)
+ {
+ if(phase==2)
+ {
+-if(language==TEX)
++if(language==TEX)/* 188: */
++#line 5306 "./fweave.web"
++
+ {
+ token_pointer t;
+ 
+ for(t= tok_ptr-1;t>tok_ptr0;t--)
+-if(*t!=040)break;
++if(*t!=' ')break;
+ 
+-if(t==tok_ptr0&&*(t-4)==0134&&*(t-3)==0127&&*(t-2)==0103&&
+-*(t-1)==0173)
+-*(tok_ptr0-2)= 0170;
++if(t==tok_ptr0&&*(t-4)=='\\'&&*(t-3)=='W'&&*(t-2)=='C'&&
++*(t-1)=='{')
++*(tok_ptr0-2)= 'x';
+ }
+ 
+ 
++/* :188 */
++#line 5292 "./fweave.web"
+ 
+-app_tok(0175);
++app_tok('}');
+ }
+ bal= 0;
+ break;
+@@ -6177,25 +7140,34 @@ else
+ 
+ err0_print(ERR_W,OC("Braces don't balance in comment"),0);
+ 
++/* 190: */
++#line 5346 "./fweave.web"
+ 
+ 
+-app_tok(040);
++app_tok(' ');
+ 
+-while(bal-->0)app_tok(0175);
++while(bal-->0)app_tok('}');
+ 
+ bal= 0;
+ break;
+ 
++#line 8 "./scraps.hweb"
+ 
++/* :190 */
++#line 5302 "./fweave.web"
+ ;
+ }
+ 
++/* :187 */
++#line 5170 "./fweave.web"
+ ;
+ }
+ 
+ 
+ 
+ if(phase==2)
++/* 186: */
++#line 5248 "./fweave.web"
+ 
+ switch(c)
+ {
+@@ -6203,17 +7175,17 @@ case tab_mark:
+ if(language==TEX)
+ APP_STR("\\quad ");
+ else
+-app_tok(040);
++app_tok(' ');
+ 
+ break;
+ 
+ case interior_semi:
+-app_tok(073);
++app_tok(';');
+ break;
+ 
+-case 045:
++case '%':
+ if(language==TEX)
+-app_tok(0134);
++app_tok('\\');
+ 
+ app_tok(c);
+ break;
+@@ -6224,34 +7196,50 @@ default:
+ if(doing_cdir)
+ switch(c)
+ {
++/* 223: */
++#line 6548 "./fweave.web"
+ 
+ 
++/* 224: */
++#line 6554 "./fweave.web"
+ 
+ 
+-case 0134:case 0173:case 0175
++case '\\':case '{':case '}'
+ 
++/* :224 */
++#line 6550 "./fweave.web"
+ :
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 6551 "./fweave.web"
+ 
+ 
++/* :223 */
++#line 5276 "./fweave.web"
+ :
+-app_tok(0134);
++app_tok('\\');
+ }
+ 
+ app_tok(c);
+ break;
+ }
+ 
++/* :186 */
++#line 5176 "./fweave.web"
+ 
+ 
++/* 189: */
++#line 5320 "./fweave.web"
+ 
+ 
+-if(c==0100)
++if(c=='@')
+ {
+-if(*(loc++)!=0100)
++if(*(loc++)!='@')
+ {
+ 
+ err0_print(ERR_W,OC("Illegal use of @ in comment"),0);
+@@ -6261,26 +7249,33 @@ loc-= 2;
+ if(phase==2)
+ tok_ptr--;
+ 
++/* 190: */
++#line 5346 "./fweave.web"
+ 
+ 
+-app_tok(040);
++app_tok(' ');
+ 
+-while(bal-->0)app_tok(0175);
++while(bal-->0)app_tok('}');
+ 
+ bal= 0;
+ break;
+ 
++#line 8 "./scraps.hweb"
+ 
++/* :190 */
++#line 5333 "./fweave.web"
+ ;
+ }
+ }
+-else if(c==0134&&*loc!=0100&&phase==2)
++else if(c=='\\'&&*loc!='@'&&phase==2)
+ app_tok(*(loc++))
+-else if(c==0173)
++else if(c=='{')
+ bal++;
+-else if(c==0175)
++else if(c=='}')
+ bal--;
+ 
++/* :189 */
++#line 5178 "./fweave.web"
+ ;
+ }
+ 
+@@ -6289,13 +7284,16 @@ app_tok(copy_mode);
+ 
+ *limit= terminator[0];*(limit+1)= terminator[1];
+ 
+-if(!long_comment&&*limit==0100&&loc>limit)
++if(!long_comment&&*limit=='@'&&loc>limit)
+ loc= limit;
+ 
+ in_comment= NO;
+ return bal;
+ }
+ 
++/* :184 */
++/* 199: */
++#line 5388 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -6320,6 +7318,8 @@ preprocessing= NO;
+ while(next_control<formatt)
+ {
+ if(nuweb_mode&&parsing_mode==INNER)
++/* 200: */
++#line 5443 "./fweave.web"
+ 
+ {
+ WHILE()
+@@ -6329,7 +7329,7 @@ OVERFLW("tokens","tw");
+ 
+ if(loc<limit)
+ {
+-if(*loc==0174)
++if(*loc=='|')
+ {
+ next_control= *loc++;
+ break;
+@@ -6342,11 +7342,11 @@ else if(!get_line())
+ 
+ err0_print(ERR_W,OC("Missing '|'.  File ended while appending a \
+ verbatim scrap"),0);
+-next_control= 0174;
++next_control= '|';
+ break;
+ }
+ else
+-app(040);
++app(' ');
+ }
+ 
+ if(scrp_ptr==scrp_end)
+@@ -6355,9 +7355,13 @@ OVERFLW("scraps","s");
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
++/* :200 */
++#line 5412 "./fweave.web"
+ 
+ else
+ {
++/* 208: */
++#line 5747 "./fweave.web"
+ 
+ {
+ room_for(6,4,4);
+@@ -6368,7 +7372,9 @@ lst_ampersand= NO;
+ switch(next_control)
+ 
+ {
+-case macro_module_name:
++case macro_module_name:/* 311: */
++#line 9014 "./fweave.web"
++
+ {
+ if(cur_module)
+ {
+@@ -6378,10 +7384,14 @@ app(mod_flag+PTR_DIFF(sixteen_bits,cur_module,name_dir));
+ app_scrap(cur_module!=NULL?cur_module->mod_ilk:expr,maybe_math);
+ }
+ 
++/* :311 */
++#line 5757 "./fweave.web"
+ break;
+ 
+ case stmt_label:
+-case stringg:case constant:case verbatim:
++case stringg:case constant:case verbatim:/* 220: */
++#line 6461 "./fweave.web"
++
+ 
+ if(next_control==stmt_label&&!isDigit(*id_first))
+ {
+@@ -6395,17 +7405,23 @@ if(next_control==constant||next_control==stmt_label)
+ APP_STR("\\WO{");
+ 
+ else if(next_control==stringg)
++/* 221: */
++#line 6489 "./fweave.web"
+ 
+ {
+ APP_STR(pfrmt->typewritr);
+-app_tok(0173);
++app_tok('{');
+ }
+ 
++/* :221 */
++#line 6475 "./fweave.web"
+ 
+ 
+ else APP_STR("\\={");
+ 
+ 
++/* 222: */
++#line 6504 "./fweave.web"
+ 
+ {
+ app_tok(verbatim);
+@@ -6415,33 +7431,45 @@ while(id_first<id_loc)
+ {
+ switch(*id_first)
+ {
+-case 054:*id_first= 061;app(0134);break;
++case ',':*id_first= '1';app('\\');break;
+ 
+ case ordinary_space:
+-*id_first= 062;app(0134);break;
++*id_first= '2';app('\\');break;
+ 
+ case tab_mark:
+-*id_first= 063;app(0134);break;
++*id_first= '3';app('\\');break;
+ 
+-case discretionary_break:*id_first= 060;
++case discretionary_break:*id_first= '0';
+ 
++/* 223: */
++#line 6548 "./fweave.web"
+ 
+ 
++/* 224: */
++#line 6554 "./fweave.web"
+ 
+ 
+-case 0134:case 0173:case 0175
++case '\\':case '{':case '}'
+ 
++/* :224 */
++#line 6550 "./fweave.web"
+ :
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 6551 "./fweave.web"
+ 
+ 
++/* :223 */
++#line 6523 "./fweave.web"
+ :
+-app(0134);break;
++app('\\');break;
+ 
+-case 0100:if(*(id_first+1)==0100)id_first++;
++case '@':if(*(id_first+1)=='@')id_first++;
+ else
+ err0_print(ERR_W,OC("Double %s@%s should be used in strings"),2,SSET_COLOR(character),SSET_COLOR(error));
+ 
+@@ -6453,9 +7481,11 @@ app_tok(*id_first++);
+ 
+ app_tok(verbatim);
+ 
+-app(0175);
++app('}');
+ }
+ 
++/* :222 */
++#line 6480 "./fweave.web"
+ 
+ 
+ if(next_control==stmt_label)
+@@ -6464,14 +7494,21 @@ else
+ {app_scrap(expr,yes_math);}
+ }
+ 
++/* :220 */
++#line 5760 "./fweave.web"
+ ;
+ break;
+ 
+ case begin_format_stmt:in_format= YES;
+-case identifier:
++case identifier:/* 228: */
++#line 6579 "./fweave.web"
++
+ {
+ p= id_lookup(id_first,id_loc,normal);
+ 
++/* :228 */
++/* 228: */
++#line 6595 "./fweave.web"
+ 
+ if(p->wv_macro)
+ {
+@@ -6481,14 +7518,14 @@ ASCII HUGE*s= w->text;
+ if(w->cat)
+ {
+ APP_STR(pfrmt->id);
+-app(0173);
++app('{');
+ }
+ 
+ while(*s)
+ app_tok(*s++);
+ 
+ if(w->cat)
+-app(0175);
++app('}');
+ 
+ app_scrap(p->ilk?p->ilk:expr,w->cat?maybe_math:yes_math);
+ }
+@@ -6523,14 +7560,22 @@ upcoming_kind= NO;
+ the_type= NO_TYPE;
+ }
+ 
++/* :228 */
++#line 5764 "./fweave.web"
+ ;break;
+-case TeX_string:
++case TeX_string:/* 226: */
++#line 6566 "./fweave.web"
++
+ 
+ APP_STR("\\hbox{");while(id_first<id_loc)app_tok(*id_first++);
+-app(0175);app_scrap(expr,maybe_math);
++app('}');app_scrap(expr,maybe_math);
+ 
++/* :226 */
++#line 5765 "./fweave.web"
+ ;break;
+-case begin_language:
++case begin_language:/* 216: */
++#line 6271 "./fweave.web"
++
+ 
+ switch(language)
+ {
+@@ -6547,24 +7592,32 @@ case FORTRAN:
+ case FORTRAN_90:
+ case RATFOR:
+ case RATFOR_90:
+-if(mode0==OUTER&&!free_form_input)
++if(mode0==OUTER&&!free_form_input)/* 309: */
++#line 8977 "./fweave.web"
++
+ {
+ loc= limit+1;
+ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 6288 "./fweave.web"
+ 
+ break;
+ 
+ case TEX:
+-if(mode0==OUTER)
++if(mode0==OUTER)/* 309: */
++#line 8977 "./fweave.web"
++
+ {
+ loc= limit+1;
+ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 6292 "./fweave.web"
+ 
+ break;
+ 
+@@ -6577,9 +7630,13 @@ confusion(OC("append scraps for begin_language"),OC("Language %i is invalid"),la
+ set_language(language);
+ break
+ 
++/* :216 */
++#line 5766 "./fweave.web"
+ ;break;
+ 
+-case new_output_file:
++case new_output_file:/* 231: */
++#line 6672 "./fweave.web"
++
+ {
+ APP_STR(upper_case_code?"\\WOut{":"\\Wout{");
+ 
+@@ -6599,8 +7656,9 @@ id_first= esc_buf(mod_text+1,mod_end,id_first,YES);
+ while(*id_first)
+ app_tok(*id_first++);
+ 
+-app(0175);
++app('}');
+ 
++#line 6695 "./fweave.web"
+ app(force);
+ 
+ app_scrap(ignore_scrap,no_math);
+@@ -6612,9 +7670,13 @@ continue;
+ }
+ }
+ 
++/* :231 */
++#line 5768 "./fweave.web"
+ break;
+ 
+ case toggle_output:
++/* 176: */
++#line 4971 "./fweave.web"
+ 
+ {
+ static int outer_include_depth;
+@@ -6634,7 +7696,11 @@ output_on= YES;
+ }
+ }
+ 
++/* :176 */
++#line 5771 "./fweave.web"
+ 
++/* 180: */
++#line 5007 "./fweave.web"
+ 
+ {
+ if(output_on)app(Turn_output_on);
+@@ -6647,17 +7713,21 @@ app(Turn_output_off);
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
++/* :180 */
++#line 5772 "./fweave.web"
+ 
+ break;
+ 
+ #if 0
+-case macro_space:app(040);app_scrap(space,maybe_math);break;
++case macro_space:app(' ');app_scrap(space,maybe_math);break;
+ #endif
+ case macro_space:app_scrap(ignore_scrap,maybe_math);break;
+ 
++/* 215: */
++#line 6131 "./fweave.web"
+ 
+ 
+-case 0134:
++case '\\':
+ APP_STR("\\WttBS");
+ app_scrap(ignore_scrap,no_math);
+ break;
+@@ -6668,12 +7738,12 @@ app(force);
+ app_scrap(ignore_scrap,no_math);
+ break;
+ 
+-case 012:
+-app(040);
++case '\n':
++app(' ');
+ app_scrap(newline,maybe_math);
+ break;
+ 
+-case 057:
++case '/':
+ if(in_format)
+ {
+ app(next_control);
+@@ -6681,7 +7751,7 @@ app_scrap(expr,no_math);
+ }
+ else if(in_data)
+ {
+-app(0173);app(next_control);app(0175);
++app('{');app(next_control);app('}');
+ app_scrap(slash_like,maybe_math);
+ }
+ else
+@@ -6690,36 +7760,36 @@ app_overload();
+ }
+ break;
+ 
+-case 056:
++case '.':
+ app(next_control);app_scrap(binop,yes_math);break;
+ 
+-case 053:
+-case 074:
+-case 076:
+-case 075:
+-case 045:
+-case 041:
+-case 0176:
+-case 055:
+-case 052:
+-case 0174:
+-case 077:
+-case 0136:
++case '+':
++case '<':
++case '>':
++case '=':
++case '%':
++case '!':
++case '~':
++case '-':
++case '*':
++case '|':
++case '?':
++case '^':
+ app_overload();break;
+ 
+-case 046:
++case '&':
+ lst_ampersand= YES;
+ app_overload();break;
+ 
+-case 043:
++case '#':
+ switch(*loc)
+ {
+-case 047:
++case '\'':
+ APP_STR("\\WNq");
+ loc++;
+ break;
+ 
+-case 042:
++case '"':
+ APP_STR("\\WNQ");
+ loc++;
+ break;
+@@ -6735,28 +7805,28 @@ break;
+ case ignore:case xref_roman:case xref_wildcard:
+ case xref_typewriter:break;
+ 
+-case 050:app(next_control);app_scrap(lpar,yes_math);break;
+-case 051:app(next_control);
++case '(':app(next_control);app_scrap(lpar,yes_math);break;
++case ')':app(next_control);
+ app_scrap(rpar,yes_math);
+ if(preprocessing&&!did_arg)
+ {
+-app(040);
++app(' ');
+ app_scrap(ignore_scrap,no_math);
+ did_arg= YES;
+ }
+ break;
+ 
+-case 0133:app(next_control);app_scrap(lbracket,yes_math);break;
+-case 0135:app(next_control);app_scrap(rbracket,yes_math);break;
++case '[':app(next_control);app_scrap(lbracket,yes_math);break;
++case ']':app(next_control);app_scrap(rbracket,yes_math);break;
+ 
+-case 0173:APP_STR("\\{");app_scrap(lbrace,yes_math);break;
+-case 0175:APP_STR("\\}");app_scrap(rbrace,yes_math);break;
++case '{':APP_STR("\\{");app_scrap(lbrace,yes_math);break;
++case '}':APP_STR("\\}");app_scrap(rbrace,yes_math);break;
+ 
+-case 054:app(054);app_scrap(comma,yes_math);break;
++case ',':app(',');app_scrap(comma,yes_math);break;
+ 
+ case interior_semi:
+ in_data= NO;
+-app(073);
++app(';');
+ app_scrap(semi,maybe_math);
+ break;
+ 
+@@ -6764,25 +7834,32 @@ case end_format_stmt:
+ in_format= NO;
+ 
+ 
+-case 073:
++case ';':
+ in_data= NO;
+ 
+ if(!is_FORTRAN_(language)||prn_semis)
+-app(073);
++app(';');
+ 
+ app_scrap(semi,maybe_math);
+ break;
+ 
+-case 072:
+-app(072);
++case ':':
++app(':');
+ app_scrap(colon,maybe_math);
+ break;
+ 
+-case 0140:
++case '`':
++/* :215 */
++/* 215: */
++#line 6267 "./fweave.web"
+ APP_STR("\\WLQx");app_scrap(expr,maybe_math);
+ break;
+ 
++/* :215 */
++#line 5780 "./fweave.web"
+ 
++/* 210: */
++#line 5821 "./fweave.web"
+ 
+ 
+ 
+@@ -6874,7 +7951,11 @@ APP_STR("\\WSR");
+ app_scrap(rpar,yes_math);
+ break;
+ 
++/* :210 */
++#line 5781 "./fweave.web"
+ 
++/* 212: */
++#line 5918 "./fweave.web"
+ 
+ 
+ case force_line:APP_STR("\\]");app_scrap(ignore_scrap,yes_math);break;
+@@ -6918,6 +7999,8 @@ case no_mac_expand:
+ APP_STR("\\WTLD");app_scrap(expr,maybe_math);break;
+ 
+ case begin_meta:
++/* 213: */
++#line 6023 "./fweave.web"
+ 
+ {
+ if(!nuweb_mode)
+@@ -6933,25 +8016,29 @@ WHILE()
+ {
+ if(loc>=limit)
+ {
+-app(012);
++app('\n');
+ if(!get_line())
+ break;
+ }
+ 
+ while(loc<limit)
+ {
+-if(*loc==0100)
++if(*loc=='@')
++/* 214: */
++#line 6064 "./fweave.web"
+ 
+ {
+ switch(ccode[*(loc+1)])
+ {
+-case 0100:
++case '@':
+ loc++;
+ break;
+ 
+ case end_meta:
+ if(!nuweb_mode&&((FORTRAN_LIKE(language)&&!free_form_input)
+ ||(language==TEX)))
++/* 309: */
++#line 8977 "./fweave.web"
+ 
+ {
+ loc= limit+1;
+@@ -6959,16 +8046,18 @@ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 6075 "./fweave.web"
+ 
+ 
+ get_line();
+ goto done_meta;
+ 
+ case invisible_cmnt:
+-if(*(loc+2)==045)
++if(*(loc+2)=='%')
+ eat_blank_lines= YES;
+ 
+-app(012);
++app('\n');
+ get_line();
+ 
+ if(eat_blank_lines)
+@@ -6986,7 +8075,7 @@ case new_module:
+ goto done_meta;
+ 
+ case line_break:
+-if(loc[2]==052||loc[2]==057)
++if(loc[2]=='*'||loc[2]=='/')
+ {
+ loc++;
+ break;
+@@ -7014,6 +8103,8 @@ break;
+ }
+ }
+ 
++/* :214 */
++#line 6047 "./fweave.web"
+ 
+ app(*loc++);
+ }
+@@ -7030,12 +8121,16 @@ app_scrap(ignore_scrap,no_math);
+ scanning_meta= NO;
+ }
+ 
++/* :213 */
++#line 5961 "./fweave.web"
+ 
+ break;
+ 
+ case end_meta:
+ if(!nuweb_mode&&((FORTRAN_LIKE(language)&&!free_form_input)
+ ||(language==TEX)))
++/* 309: */
++#line 8977 "./fweave.web"
+ 
+ {
+ loc= limit+1;
+@@ -7043,6 +8138,8 @@ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 5967 "./fweave.web"
+ 
+ 
+ get_line();
+@@ -7078,9 +8175,11 @@ break;
+ 
+ case keyword_name:
+ APP_STR("\\WRCS");
+-app(060+upper_case_code);
+-app(0173);
++app('0'+upper_case_code);
++app('{');
+ 
++/* 230: */
++#line 6662 "./fweave.web"
+ 
+ {
+ while(IS_WHITE(*id_first))
+@@ -7090,11 +8189,13 @@ while(IS_WHITE(id_loc[-1]))
+ id_loc--;
+ }
+ 
++/* :230 */
++#line 6005 "./fweave.web"
+ 
+ *id_loc= '\0';
+ app_ASCII_str(id_first);
+ 
+-app(0175);
++app('}');
+ 
+ app_scrap(expr,yes_math);
+ break;
+@@ -7107,17 +8208,21 @@ case next_reserved:
+ the_type= RESERVED_WD;
+ break;
+ 
++/* :212 */
++#line 5782 "./fweave.web"
+ 
+ 
+ default:app(next_control);app_scrap(ignore_scrap,maybe_math);break;
+ }
+ }
+ 
++/* :208 */
++#line 5415 "./fweave.web"
+ ;
+ next_control= get_next();
+ }
+ 
+-if(next_control==0174||next_control==begin_comment)
++if(next_control=='|'||next_control==begin_comment)
+ break;
+ 
+ 
+@@ -7138,6 +8243,9 @@ if(parsing_mode==INNER)
+ parse_params= parse_params0;
+ }
+ 
++/* :199 */
++/* 201: */
++#line 5490 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7162,6 +8270,9 @@ APP_STR(language_line);
+ app_scrap(language_scrap,no_math);
+ }
+ 
++/* :201 */
++/* 232: */
++#line 6711 "./fweave.web"
+ 
+ 
+ text_pointer
+@@ -7194,9 +8305,11 @@ while(next_control<=module_name)
+ {
+ C_parse(INNER);
+ 
+-if(next_control==0174)
++if(next_control=='|')
+ break;
+ 
++/* 310: */
++#line 8985 "./fweave.web"
+ 
+ 
+ if(next_control<module_name)
+@@ -7221,6 +8334,8 @@ next_control= get_next();
+ }
+ else if(next_control==module_name)
+ {
++/* 311: */
++#line 9014 "./fweave.web"
+ 
+ {
+ if(cur_module)
+@@ -7231,13 +8346,17 @@ app(mod_flag+PTR_DIFF(sixteen_bits,cur_module,name_dir));
+ app_scrap(cur_module!=NULL?cur_module->mod_ilk:expr,maybe_math);
+ }
+ 
++/* :311 */
++#line 9009 "./fweave.web"
+ 
+ next_control= (nuweb_mode?begin_meta:get_next());
+ }
+ 
++/* :310 */
++#line 6746 "./fweave.web"
+ ;
+ 
+-if(next_control==0174)
++if(next_control=='|')
+ break;
+ }
+ 
+@@ -7245,7 +8364,7 @@ app_tok(cancel);app_scrap(ignore_scrap,maybe_math);
+ 
+ 
+ if(nuweb_mode)
+-app(0175);
++app('}');
+ #if 0
+ else
+ app_scrap(semi,maybe_math);
+@@ -7258,9 +8377,9 @@ app(protect_code);
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
+-app(0175);app_scrap(ignore_scrap,no_math);
++app('}');app_scrap(ignore_scrap,no_math);
+ 
+-if(next_control!=0174)
++if(next_control!='|')
+ 
+ err0_print(ERR_W,OC("Missing '|' after code text.  \
+ (@ commands that begin definition part, code part, or new module are not \
+@@ -7283,6 +8402,9 @@ parse_params= parse_params0;
+ return p;
+ }
+ 
++/* :232 */
++/* 233: */
++#line 6797 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7296,9 +8418,13 @@ while(next_control<formatt)
+ if(next_control!=begin_comment)
+ C_parse(OUTER);
+ else
++/* 234: */
++#line 6815 "./fweave.web"
+ 
+ {
+ if(doing_cdir)
++/* 235: */
++#line 6856 "./fweave.web"
+ 
+ {
+ outer_char HUGE*s= t_style.cdir_start[language_num];
+@@ -7320,8 +8446,12 @@ FREE_MEM(temp,"temp_cdir",n,ASCII);
+ FREE_MEM(start,"start_cdir",n,ASCII);
+ }
+ 
++/* :235 */
++#line 6818 "./fweave.web"
+ 
+ else
++/* 236: */
++#line 6878 "./fweave.web"
+ 
+ {
+ room_for(8,3,1);
+@@ -7334,7 +8464,7 @@ scrp_ptr--;
+ }
+ else if(!at_beginning&&(auto_semi&&!free_Fortran))
+ {
+-app(073);
++app(';');
+ }
+ last_was_cmnt= YES;
+ }
+@@ -7344,6 +8474,8 @@ APP_STR(long_comment?"\\WC{":"\\Wc{");
+ 
+ }
+ 
++/* :236 */
++#line 6820 "./fweave.web"
+ 
+ 
+ bal= copy_comment(1);
+@@ -7365,7 +8497,7 @@ q= C_translate();
+ 
+ app(tok_flag+PTR_DIFF(sixteen_bits,p,tok_start));app(inner_tok_flag+PTR_DIFF(sixteen_bits,q,tok_start));
+ 
+-if(next_control==0174)
++if(next_control=='|')
+ {
+ bal= copy_comment(bal);
+ next_control= ignore;
+@@ -7378,10 +8510,15 @@ app(force);app_scrap(ignore_scrap,no_math);
+ 
+ }
+ 
++/* :234 */
++#line 6810 "./fweave.web"
+ 
+ }
+ }
+ 
++/* :233 */
++/* 243: */
++#line 6990 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7403,6 +8540,9 @@ if(stck_ptr>mx_stck_ptr)mx_stck_ptr= stck_ptr;
+ cur_tok= *p;cur_end= *(p+1);
+ }
+ 
++/* :243 */
++/* 244: */
++#line 7015 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7412,6 +8552,9 @@ cur_end= (--stck_ptr)->end_field;
+ cur_tok= stck_ptr->tok_field;cur_mode= stck_ptr->mode_field;
+ }
+ 
++/* :244 */
++/* 246: */
++#line 7039 "./fweave.web"
+ 
+ eight_bits
+ get_output(VOID)
+@@ -7444,6 +8587,9 @@ default:return identifier;
+ return(eight_bits)a;
+ }
+ 
++/* :246 */
++/* 247: */
++#line 7086 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7471,6 +8617,9 @@ next_control= save_next_control;
+ 
+ }
+ 
++/* :247 */
++/* 269: */
++#line 7659 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7491,6 +8640,8 @@ writing(YES,tex_fname);if(tex_file==stdout)putchar('\n');
+ 
+ fin_line();
+ 
++/* 270: */
++#line 7705 "./fweave.web"
+ 
+ {
+ IN_COMMON outer_char style_file_name[];
+@@ -7537,6 +8688,8 @@ out_prm(OC("{%s}"),9,OC("{index.name}"),prn_index?w_style.indx.name:OC("NoIndex"
+ fin_line();
+ }
+ 
++/* :270 */
++#line 7679 "./fweave.web"
+ 
+ 
+ module_count= 0;
+@@ -7548,6 +8701,8 @@ flush_buffer(out_buf,NO);
+ math_flag= NO;
+ 
+ while(!input_has_ended)
++/* 273: */
++#line 7845 "./fweave.web"
+ 
+ {
+ the_part= TEX_;
+@@ -7559,8 +8714,12 @@ scanning_meta= NO;
+ 
+ module_count++;
+ 
++/* 274: */
++#line 7876 "./fweave.web"
+ 
+ {
++/* 276: */
++#line 7899 "./fweave.web"
+ 
+ 
+ if(STRCMP(last_include_file,this_include_file)!=0)
+@@ -7571,11 +8730,13 @@ OUT_STR("}%");
+ fin_line();
+ }
+ 
++/* :276 */
++#line 7878 "./fweave.web"
+ ;
+ 
+ if(!in_module&&output_on)
+ {
+-OUT_STR(*(loc-1)==052?"\\WN":"\\WM");
++OUT_STR(*(loc-1)=='*'?"\\WN":"\\WM");
+ 
+ 
+ in_module= YES;
+@@ -7586,6 +8747,8 @@ out_mod(module_count,NO_ENCAP);OUT_STR(". ");
+ progress();
+ }
+ 
++/* :274 */
++#line 7856 "./fweave.web"
+ ;
+ save_position;
+ 
+@@ -7597,10 +8760,14 @@ trns_code();
+ 
+ the_type= NO_TYPE;
+ 
++/* 314: */
++#line 9112 "./fweave.web"
+ 
+ 
+ if(this_module>name_dir&&output_on)
+ {
++/* 316: */
++#line 9134 "./fweave.web"
+ 
+ 
+ first_xref= (xref_pointer)this_module->xref;
+@@ -7634,11 +8801,17 @@ else first_xref->xlink= cur_xref;
+ 
+ cur_xref= first_xref->xlink;
+ 
++/* :316 */
++#line 9116 "./fweave.web"
+ ;
+ footnote(def_flag);footnote(0);
+ }
+ 
++/* :314 */
++#line 7867 "./fweave.web"
+ ;
++/* 319: */
++#line 9223 "./fweave.web"
+ 
+ {
+ if(in_module&&output_on)
+@@ -7658,12 +8831,19 @@ flush_buffer(out_buf,NO);
+ }
+ }
+ 
++/* :319 */
++#line 7868 "./fweave.web"
+ ;
+ }
+ 
++/* :273 */
++#line 7690 "./fweave.web"
+ 
+ }
+ 
++/* :269 */
++/* 271: */
++#line 7768 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7716,6 +8896,9 @@ FREE_MEM(temp1,"temp1",TEMP_LEN,outer_char);
+ #undef TEMP_LEN
+ }
+ 
++/* :271 */
++/* 277: */
++#line 7912 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7730,8 +8913,12 @@ next_control= copy_TeX();
+ 
+ switch(next_control)
+ {
++/* 62: */
++#line 803 "./fweave.web"
+ 
+ 
++/* 9: */
++#line 80 "./typedefs.hweb"
+ 
+ 
+ case begin_C:
+@@ -7741,46 +8928,72 @@ case begin_LITERAL
+ 
+ 
+ 
++/* :9 */
++#line 805 "./fweave.web"
+ :
+ loc--;
+ 
+ 
+ case L_switch:
++/* 63: */
++#line 821 "./fweave.web"
+ 
+ {
++/* 20: */
++#line 139 "./typedefs.hweb"
+ 
+ {
+ ASCII l= *loc++;
+ 
+ switch(l)
+ {
++/* 10: */
++#line 95 "./typedefs.hweb"
+ 
+-case 0143
++case 'c'
+ 
++/* :10 */
++#line 145 "./typedefs.hweb"
+ :
+-Cpp= BOOLEAN(*loc==053);
++Cpp= BOOLEAN(*loc=='+');
+ break;
+ 
++/* 11: */
++#line 98 "./typedefs.hweb"
+ 
+-case 0162
++case 'r'
+ 
++/* :11 */
++#line 149 "./typedefs.hweb"
+ :
++/* 12: */
++#line 101 "./typedefs.hweb"
+ 
+-case 0156
++case 'n'
+ 
++/* :12 */
++#line 150 "./typedefs.hweb"
+ :
+-Fortran88= BOOLEAN(*loc==071);
++Fortran88= BOOLEAN(*loc=='9');
+ break;
+ 
++/* 14: */
++#line 107 "./typedefs.hweb"
+ 
+-case 0166
++case 'v'
+ 
+ 
+ 
++/* :14 */
++#line 154 "./typedefs.hweb"
+ :
++/* 13: */
++#line 104 "./typedefs.hweb"
+ 
+-case 0170
++case 'x'
+ 
++/* :13 */
++#line 155 "./typedefs.hweb"
+ :
+ break;
+ 
+@@ -7795,12 +9008,16 @@ opt_args(l);
+ }
+ 
+ 
++/* :20 */
++#line 823 "./fweave.web"
+ 
+ 
+ if(module_count==0)
+ global_params= params;
+ 
+ ini0_language();
++/* 308: */
++#line 8966 "./fweave.web"
+ 
+ 
+ if(Fortran88&&(auto_semi&&!free_Fortran))
+@@ -7810,9 +9027,13 @@ chk_end= NO;
+ }
+ 
+ 
++/* :308 */
++#line 829 "./fweave.web"
+ 
+ }
+ 
++/* :63 */
++#line 810 "./fweave.web"
+ 
+ break;
+ 
+@@ -7823,20 +9044,22 @@ if(module_count==0)
+ global_params= params;
+ break;
+ 
++/* :62 */
++#line 7926 "./fweave.web"
+ 
+ 
+ case toggle_output:
+ out_skip();
+ break;
+ 
+-case 0174:ini_stack;output_C();break;
++case '|':ini_stack;output_C();break;
+ 
+ case math_break:
+-out(0174);
++out('|');
+ break;
+ 
+-case 0100:
+-out(0100);
++case '@':
++out('@');
+ break;
+ 
+ case invisible_cmnt:loc= limit+1;break;
+@@ -7863,10 +9086,14 @@ break;
+ 
+ case keyword_name:
+ loc-= 2;next_control= get_next();
++/* 229: */
++#line 6647 "./fweave.web"
+ 
+ {
+ ASCII*id_start,*id_end;
+ 
++/* 230: */
++#line 6662 "./fweave.web"
+ 
+ {
+ while(IS_WHITE(*id_first))
+@@ -7876,6 +9103,8 @@ while(IS_WHITE(id_loc[-1]))
+ id_loc--;
+ }
+ 
++/* :230 */
++#line 6651 "./fweave.web"
+ 
+ 
+ id_start= id_end= mod_text+1;
+@@ -7886,6 +9115,8 @@ upper_case_code?WEB_FILE:CUR_FILE);
+ out_del_str(id_start,id_end);
+ }
+ 
++/* :229 */
++#line 7965 "./fweave.web"
+ 
+ break;
+ 
+@@ -7901,7 +9132,7 @@ CANT_DO(TeX);
+ break;
+ 
+ case protect_code:
+-if(*loc!=0174)
++if(*loc!='|')
+ 
+ err0_print(ERR_W,OC("@p should be immediately followed by '|'"),0);
+ 
+@@ -7919,6 +9150,9 @@ while(next_control<formatt);
+ output_protect= NO;
+ }
+ 
++/* :277 */
++/* 279: */
++#line 8010 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -7932,6 +9166,8 @@ parsing_mode= OUTER;
+ if(next_control<begin_code)
+ {
+ emit_space_if_needed;save_position;
++/* 178: */
++#line 4992 "./fweave.web"
+ 
+ {
+ if(output_on)app(Turn_output_on);
+@@ -7945,10 +9181,15 @@ app(turn_output_off);
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
++/* :178 */
++#line 8023 "./fweave.web"
+ 
++#line 8025 "./fweave.web"
+ }
+ 
+ while(next_control<begin_code)
++/* 280: */
++#line 8034 "./fweave.web"
+ 
+ {
+ eight_bits last_control= next_control;
+@@ -7963,6 +9204,8 @@ case invisible_cmnt:
+ break;
+ 
+ default:
++/* 178: */
++#line 4992 "./fweave.web"
+ 
+ {
+ if(output_on)app(Turn_output_on);
+@@ -7976,6 +9219,8 @@ app(turn_output_off);
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
++/* :178 */
++#line 8048 "./fweave.web"
+ 
+ break;
+ }
+@@ -7986,6 +9231,8 @@ nuweb_mode= NO;
+ switch(next_control)
+ {
+ case formatt:
++/* 291: */
++#line 8483 "./fweave.web"
+ 
+ {
+ LANGUAGE saved_language= language;
+@@ -8013,6 +9260,8 @@ language= C;
+ next_control= get_next();
+ 
+ if(next_control==identifier||next_control==module_name)
++/* 292: */
++#line 8525 "./fweave.web"
+ 
+ {
+ if(next_control==identifier)
+@@ -8027,6 +9276,8 @@ next_control= get_next();
+ if(next_control==identifier)
+ {
+ APP_ID;
++/* 293: */
++#line 8544 "./fweave.web"
+ 
+ {
+ app_scrap(expr,maybe_math);
+@@ -8037,25 +9288,35 @@ sharp_include_line= NO;
+ next_control= get_next();
+ }
+ 
++/* :293 */
++#line 8539 "./fweave.web"
+ 
+ }
+ }
+ 
++/* :292 */
++#line 8510 "./fweave.web"
+ 
+-else if(next_control==0140)
++else if(next_control=='`')
++/* 294: */
++#line 8557 "./fweave.web"
+ 
+ {
++/* 221: */
++#line 6489 "./fweave.web"
+ 
+ {
+ APP_STR(pfrmt->typewritr);
+-app_tok(0173);
++app_tok('{');
+ }
+ 
++/* :221 */
++#line 8559 "./fweave.web"
+ 
+-app(0140);
++app('`');
+ if((next_control= get_TeX())==constant)
+ APP_STR((outer_char*)id_first);
+-app(0175);
++app('}');
+ 
+ APP_STR("\\ ");
+ 
+@@ -8068,8 +9329,10 @@ APP_STR("\\WO{");
+ while(id_first<id_loc)
+ app_tok(*id_first++);
+ 
+-app(0175);
++app('}');
+ 
++/* 293: */
++#line 8544 "./fweave.web"
+ 
+ {
+ app_scrap(expr,maybe_math);
+@@ -8080,10 +9343,14 @@ sharp_include_line= NO;
+ next_control= get_next();
+ }
+ 
++/* :293 */
++#line 8578 "./fweave.web"
+ 
+ }
+ }
+ 
++/* :294 */
++#line 8512 "./fweave.web"
+ 
+ 
+ if(scrp_ptr!=scrp_ptr0+3)
+@@ -8097,10 +9364,14 @@ if(saved_language==TEX)
+ language= saved_language;
+ }
+ 
++/* :291 */
++#line 8058 "./fweave.web"
+ 
+ break;
+ 
+ case limbo_text:
++/* 295: */
++#line 8584 "./fweave.web"
+ 
+ {
+ SUPPRESS(limbo);
+@@ -8114,10 +9385,14 @@ if((next_control= get_next())!=stringg)
+ err0_print(ERR_W,OC("A string must follow @l"),0);
+ }
+ 
++/* :295 */
++#line 8062 "./fweave.web"
+ 
+ break;
+ 
+ case op_def:
++/* 296: */
++#line 8599 "./fweave.web"
+ 
+ {
+ SUPPRESS(v);
+@@ -8130,6 +9405,8 @@ app_scrap(expr,maybe_math);
+ 
+ if(valid_op(next_control= get_next()))
+ {
++/* 297: */
++#line 8638 "./fweave.web"
+ 
+ {
+ switch(next_control)
+@@ -8143,43 +9420,55 @@ APP_ID;
+ break;
+ 
+ case dot_const:
++/* 221: */
++#line 6489 "./fweave.web"
+ 
+ {
+ APP_STR(pfrmt->typewritr);
+-app_tok(0173);
++app_tok('{');
+ }
+ 
++/* :221 */
++#line 8650 "./fweave.web"
+ 
+ app(wt_style.dot_delimiter.begin);
+ app_ASCII_str(dot_op.name+1);
+ app(wt_style.dot_delimiter.end);
+-app(0175);
++app('}');
+ break;
+ 
+ default:
+-app(0173);
++app('{');
+ app_overload();
+-app(0175);
++app('}');
+ break;
+ }
+ 
+ app_scrap(expr,yes_math);
+ }
+ 
++/* :297 */
++#line 8611 "./fweave.web"
+ 
+ 
+-app(040);app_scrap(expr,no_math);
++app(' ');app_scrap(expr,no_math);
+ 
+ 
+ if((next_control= get_next())==stringg)
+ {
++/* 221: */
++#line 6489 "./fweave.web"
+ 
+ {
+ APP_STR(pfrmt->typewritr);
+-app_tok(0173);
++app_tok('{');
+ }
+ 
++/* :221 */
++#line 8618 "./fweave.web"
+ 
++/* 222: */
++#line 6504 "./fweave.web"
+ 
+ {
+ app_tok(verbatim);
+@@ -8189,33 +9478,45 @@ while(id_first<id_loc)
+ {
+ switch(*id_first)
+ {
+-case 054:*id_first= 061;app(0134);break;
++case ',':*id_first= '1';app('\\');break;
+ 
+ case ordinary_space:
+-*id_first= 062;app(0134);break;
++*id_first= '2';app('\\');break;
+ 
+ case tab_mark:
+-*id_first= 063;app(0134);break;
++*id_first= '3';app('\\');break;
+ 
+-case discretionary_break:*id_first= 060;
++case discretionary_break:*id_first= '0';
+ 
++/* 223: */
++#line 6548 "./fweave.web"
+ 
+ 
++/* 224: */
++#line 6554 "./fweave.web"
+ 
+ 
+-case 0134:case 0173:case 0175
++case '\\':case '{':case '}'
+ 
++/* :224 */
++#line 6550 "./fweave.web"
+ :
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 6551 "./fweave.web"
+ 
+ 
++/* :223 */
++#line 6523 "./fweave.web"
+ :
+-app(0134);break;
++app('\\');break;
+ 
+-case 0100:if(*(id_first+1)==0100)id_first++;
++case '@':if(*(id_first+1)=='@')id_first++;
+ else
+ err0_print(ERR_W,OC("Double %s@%s should be used in strings"),2,SSET_COLOR(character),SSET_COLOR(error));
+ 
+@@ -8227,17 +9528,21 @@ app_tok(*id_first++);
+ 
+ app_tok(verbatim);
+ 
+-app(0175);
++app('}');
+ }
+ 
++/* :222 */
++#line 8619 "./fweave.web"
+ 
+ app_scrap(expr,yes_math);
+ 
+ 
+ if(valid_op(next_control= get_next()))
+ {
+-app(040);app_scrap(expr,no_math);
++app(' ');app_scrap(expr,no_math);
+ 
++/* 297: */
++#line 8638 "./fweave.web"
+ 
+ {
+ switch(next_control)
+@@ -8251,29 +9556,35 @@ APP_ID;
+ break;
+ 
+ case dot_const:
++/* 221: */
++#line 6489 "./fweave.web"
+ 
+ {
+ APP_STR(pfrmt->typewritr);
+-app_tok(0173);
++app_tok('{');
+ }
+ 
++/* :221 */
++#line 8650 "./fweave.web"
+ 
+ app(wt_style.dot_delimiter.begin);
+ app_ASCII_str(dot_op.name+1);
+ app(wt_style.dot_delimiter.end);
+-app(0175);
++app('}');
+ break;
+ 
+ default:
+-app(0173);
++app('{');
+ app_overload();
+-app(0175);
++app('}');
+ break;
+ }
+ 
+ app_scrap(expr,yes_math);
+ }
+ 
++/* :297 */
++#line 8627 "./fweave.web"
+ 
+ 
+ next_control= get_next();
+@@ -8282,10 +9593,14 @@ next_control= get_next();
+ }
+ }
+ 
++/* :296 */
++#line 8066 "./fweave.web"
+ 
+ break;
+ 
+ case macro_def:
++/* 298: */
++#line 8668 "./fweave.web"
+ 
+ {
+ SUPPRESS(w);
+@@ -8304,12 +9619,12 @@ id_loc0= id_loc;
+ 
+ APP_ID;
+ 
+-app(040);app_scrap(expr,no_math);
++app(' ');app_scrap(expr,no_math);
+ 
+ 
+ switch(next_control= get_next())
+ {
+-case 0134:
++case '\\':
+ if((next_control= get_next())!=identifier)break;
+ goto quick_code1;
+ 
+@@ -8318,29 +9633,39 @@ id_first= id_first0;
+ id_loc= id_loc0;
+ 
+ quick_code1:
++/* 221: */
++#line 6489 "./fweave.web"
+ 
+ {
+ APP_STR(pfrmt->typewritr);
+-app_tok(0173);
++app_tok('{');
+ }
+ 
++/* :221 */
++#line 8700 "./fweave.web"
+ 
+ APP_STR("\\\\");
+ *id_loc= '\0';
+ app_ASCII_str(id_first);
+-app(0175);
++app('}');
+ app_scrap(expr,yes_math);
+ next_control= get_next();
+ break;
+ 
+ case stringg:
++/* 221: */
++#line 6489 "./fweave.web"
+ 
+ {
+ APP_STR(pfrmt->typewritr);
+-app_tok(0173);
++app_tok('{');
+ }
+ 
++/* :221 */
++#line 8710 "./fweave.web"
+ 
++/* 222: */
++#line 6504 "./fweave.web"
+ 
+ {
+ app_tok(verbatim);
+@@ -8350,33 +9675,45 @@ while(id_first<id_loc)
+ {
+ switch(*id_first)
+ {
+-case 054:*id_first= 061;app(0134);break;
++case ',':*id_first= '1';app('\\');break;
+ 
+ case ordinary_space:
+-*id_first= 062;app(0134);break;
++*id_first= '2';app('\\');break;
+ 
+ case tab_mark:
+-*id_first= 063;app(0134);break;
++*id_first= '3';app('\\');break;
+ 
+-case discretionary_break:*id_first= 060;
++case discretionary_break:*id_first= '0';
+ 
++/* 223: */
++#line 6548 "./fweave.web"
+ 
+ 
++/* 224: */
++#line 6554 "./fweave.web"
+ 
+ 
+-case 0134:case 0173:case 0175
++case '\\':case '{':case '}'
+ 
++/* :224 */
++#line 6550 "./fweave.web"
+ :
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 6551 "./fweave.web"
+ 
+ 
++/* :223 */
++#line 6523 "./fweave.web"
+ :
+-app(0134);break;
++app('\\');break;
+ 
+-case 0100:if(*(id_first+1)==0100)id_first++;
++case '@':if(*(id_first+1)=='@')id_first++;
+ else
+ err0_print(ERR_W,OC("Double %s@%s should be used in strings"),2,SSET_COLOR(character),SSET_COLOR(error));
+ 
+@@ -8388,9 +9725,11 @@ app_tok(*id_first++);
+ 
+ app_tok(verbatim);
+ 
+-app(0175);
++app('}');
+ }
+ 
++/* :222 */
++#line 8711 "./fweave.web"
+ 
+ app_scrap(expr,yes_math);
+ next_control= get_next();
+@@ -8399,6 +9738,8 @@ break;
+ }
+ }
+ 
++/* :298 */
++#line 8070 "./fweave.web"
+ 
+ break;
+ 
+@@ -8415,6 +9756,8 @@ while((next_control= get_next())<formatt
+ continue;
+ 
+ default:
++/* 288: */
++#line 8334 "./fweave.web"
+ 
+ {
+ LANGUAGE saved_language= language;
+@@ -8456,16 +9799,20 @@ else
+ {
+ APP_STR("{}");
+ 
+-if(next_control==0133)
++if(next_control=='[')
++/* 289: */
++#line 8407 "./fweave.web"
+ 
+ {
+ APP_STR("\\Wauto");
+-get_string(0133,'\0');
++get_string('[','\0');
+ *id_loc= '\0';
+ app_ASCII_str(id_first);
+ next_control= get_next();
+ }
+ 
++/* :289 */
++#line 8376 "./fweave.web"
+ 
+ }
+ 
+@@ -8476,13 +9823,15 @@ else
+ APP_ID;
+ 
+ 
+-if(*loc==050)
++if(*loc=='(')
++/* 290: */
++#line 8419 "./fweave.web"
+ 
+ {
+-app(044);
++app('$');
+ 
+ #ifdef DBGM 
+-app(065);
++app('5');
+ #endif
+ 
+ reswitch:
+@@ -8491,11 +9840,11 @@ next_control= get_next();
+ the_switch:
+ switch(next_control)
+ {
+-case 050:
++case '(':
+ app(next_control);
+ next_control= get_next();
+ 
+-if(next_control==051)
++if(next_control==')')
+ {
+ APP_STR("\\;");
+ goto done_arg;
+@@ -8503,7 +9852,7 @@ goto done_arg;
+ else
+ goto the_switch;
+ 
+-case 054:
++case ',':
+ app(next_control);goto reswitch;
+ 
+ case identifier:
+@@ -8513,7 +9862,7 @@ goto reswitch;
+ case ellipsis:
+ APP_STR("\\dots");
+ 
+-if((next_control= get_next())!=051)
++if((next_control= get_next())!=')')
+ {
+ 
+ err0_print(ERR_M,OC("Improper macro \
+@@ -8521,7 +9870,7 @@ definition: expected ')' after ellipsis"),0);
+ break;
+ }
+ 
+-case 051:
++case ')':
+ done_arg:
+ app(next_control);
+ next_control= get_next();break;
+@@ -8534,12 +9883,14 @@ break;
+ }
+ 
+ #ifdef DBGM
+-app(066);
++app('6');
+ #endif
+ 
+-app(044);
++app('$');
+ }
+ 
++/* :290 */
++#line 8387 "./fweave.web"
+ 
+ else
+ {
+@@ -8559,6 +9910,8 @@ if(saved_language==TEX)
+ language= saved_language;
+ }
+ 
++/* :288 */
++#line 8086 "./fweave.web"
+ 
+ break;
+ }
+@@ -8576,9 +9929,14 @@ fin_C();
+ ok_to_define= YES;
+ }
+ 
++/* :280 */
++#line 8028 "./fweave.web"
+ 
+ }
+ 
++/* :279 */
++/* 282: */
++#line 8121 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -8589,6 +9947,7 @@ boolean current_output_state= output_on;
+ 
+ if(!suppress_defn)
+ {
++#line 8132 "./fweave.web"
+ column_mode= NO;
+ 
+ app_tok(force);
+@@ -8603,16 +9962,18 @@ app(tok_flag+PTR_DIFF(sixteen_bits,p,tok_start));
+ make_output();
+ 
+ if(out_ptr>out_buf+1)
++/* 283: */
++#line 8179 "./fweave.web"
+ 
+ {
+-if(*(out_ptr-1)==0134)
++if(*(out_ptr-1)=='\\')
+ {
+ 
+ 
+ 
+-if(*out_ptr==066)
++if(*out_ptr=='6')
+ out_ptr-= 2;
+-else if(*out_ptr==067)
++else if(*out_ptr=='7')
+ {
+ out_ptr-= 2;
+ OUT_STR("\\WY");
+@@ -8621,6 +9982,8 @@ OUT_STR("\\WY");
+ }
+ }
+ 
++/* :283 */
++#line 8146 "./fweave.web"
+ 
+ 
+ OUT_STR(the_part==CODE?"\\Wendc":"\\Wendd");
+@@ -8653,6 +10016,9 @@ output_on= YES;
+ output_on= current_output_state;
+ }
+ 
++/* :282 */
++/* 284: */
++#line 8202 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -8666,6 +10032,9 @@ sprintf(temp,"\\W%s{%s}",(char*)letter,(char*)arg);
+ APP_STR(temp);
+ }
+ 
++/* :284 */
++/* 285: */
++#line 8218 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -8674,21 +10043,29 @@ eight_bits next_control C1("")
+ {
+ if(the_part==DEFINITION)
+ {
++/* 281: */
++#line 8105 "./fweave.web"
+ 
+ {
+ APP_STR("\\WP");
+ 
+ }
+ 
++/* :281 */
++#line 8226 "./fweave.web"
+ 
+ 
+ if(yskipped)
+ {
++/* 301: */
++#line 8791 "./fweave.web"
+ 
+ {
+ app_hdr("defs");
+ }
+ 
++/* :301 */
++#line 8230 "./fweave.web"
+ 
+ yskipped= NO;
+ }
+@@ -8758,6 +10135,9 @@ break;
+ 
+ }
+ 
++/* :285 */
++/* 286: */
++#line 8303 "./fweave.web"
+ 
+ SRTN
+ improper FCN((m_type,msg))
+@@ -8768,6 +10148,9 @@ outer_char*msg C1("")
+ err0_print(ERR_W,OC("Improper %s definition:  expected %s"),2,m_type,msg);
+ }
+ 
++/* :286 */
++/* 287: */
++#line 8316 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -8777,6 +10160,9 @@ CONST outer_char*suffix C1("")
+ APP_TEMP(suffix,(CONST outer_char*)(LANGUAGE_SYMBOL(language)));
+ }
+ 
++/* :287 */
++/* 300: */
++#line 8731 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -8788,8 +10174,11 @@ parsing_mode= OUTER;
+ 
+ if(next_control<=module_name)
+ {
++#line 8743 "./fweave.web"
+ OUT_STR("\\WY");
+ ini_stack;
++/* 178: */
++#line 4992 "./fweave.web"
+ 
+ {
+ if(output_on)app(Turn_output_on);
+@@ -8803,13 +10192,19 @@ app(turn_output_off);
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
++/* :178 */
++#line 8745 "./fweave.web"
+ 
++/* 281: */
++#line 8105 "./fweave.web"
+ 
+ {
+ APP_STR("\\WP");
+ 
+ }
+ 
++/* :281 */
++#line 8746 "./fweave.web"
+ 
+ 
+ if(next_control==begin_code)
+@@ -8821,11 +10216,15 @@ params= global_params;
+ nuweb_mode= nuweb_mode0;
+ frz_params();
+ the_module= NULL;
++/* 307: */
++#line 8950 "./fweave.web"
+ 
+ {
+ if(!nuweb_mode&&((FORTRAN_LIKE(language)&&!free_form_input)
+ ||(language==TEX)))
+ {
++/* 309: */
++#line 8977 "./fweave.web"
+ 
+ {
+ loc= limit+1;
+@@ -8833,11 +10232,15 @@ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 8955 "./fweave.web"
+ 
+ next_control= ignore;
+ }
+ else
+ {
++/* 308: */
++#line 8966 "./fweave.web"
+ 
+ 
+ if(Fortran88&&(auto_semi&&!free_Fortran))
+@@ -8847,18 +10250,26 @@ chk_end= NO;
+ }
+ 
+ 
++/* :308 */
++#line 8960 "./fweave.web"
+ 
+ next_control= (nuweb_mode?begin_meta:get_next());
+ }
+ }
+ 
++/* :307 */
++#line 8757 "./fweave.web"
+ 
+ 
++/* 302: */
++#line 8797 "./fweave.web"
+ 
+ {
+ app_hdr("code");
+ }
+ 
++/* :302 */
++#line 8759 "./fweave.web"
+ 
+ }
+ else
+@@ -8873,6 +10284,8 @@ frz_params();
+ this_module= cur_module;
+ }
+ the_module= cur_module;
++/* 304: */
++#line 8827 "./fweave.web"
+ 
+ {
+ LANGUAGE saved_language= language;
+@@ -8883,7 +10296,7 @@ language= C;
+ 
+ do
+ next_control= get_next();
+-while(next_control==053);
++while(next_control=='+');
+ 
+ language= saved_language;
+ 
+@@ -8901,13 +10314,17 @@ break;
+ 
+ 
+ 
+-case 075:
++case '=':
+ case eq_eq:
++/* 307: */
++#line 8950 "./fweave.web"
+ 
+ {
+ if(!nuweb_mode&&((FORTRAN_LIKE(language)&&!free_form_input)
+ ||(language==TEX)))
+ {
++/* 309: */
++#line 8977 "./fweave.web"
+ 
+ {
+ loc= limit+1;
+@@ -8915,11 +10332,15 @@ chk_end= NO;
+ column_mode= YES;
+ }
+ 
++/* :309 */
++#line 8955 "./fweave.web"
+ 
+ next_control= ignore;
+ }
+ else
+ {
++/* 308: */
++#line 8966 "./fweave.web"
+ 
+ 
+ if(Fortran88&&(auto_semi&&!free_Fortran))
+@@ -8929,11 +10350,15 @@ chk_end= NO;
+ }
+ 
+ 
++/* :308 */
++#line 8960 "./fweave.web"
+ 
+ next_control= (nuweb_mode?begin_meta:get_next());
+ }
+ }
+ 
++/* :307 */
++#line 8856 "./fweave.web"
+ 
+ break;
+ 
+@@ -8973,6 +10398,8 @@ app(force);
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
++/* :304 */
++#line 8774 "./fweave.web"
+ ;
+ }
+ 
+@@ -8980,6 +10407,8 @@ app_scrap(ignore_scrap,no_math);
+ while(next_control<=module_name)
+ {
+ outr_parse();
++/* 310: */
++#line 8985 "./fweave.web"
+ 
+ 
+ if(next_control<module_name)
+@@ -9004,6 +10433,8 @@ next_control= get_next();
+ }
+ else if(next_control==module_name)
+ {
++/* 311: */
++#line 9014 "./fweave.web"
+ 
+ {
+ if(cur_module)
+@@ -9014,13 +10445,19 @@ app(mod_flag+PTR_DIFF(sixteen_bits,cur_module,name_dir));
+ app_scrap(cur_module!=NULL?cur_module->mod_ilk:expr,maybe_math);
+ }
+ 
++/* :311 */
++#line 9009 "./fweave.web"
+ 
+ next_control= (nuweb_mode?begin_meta:get_next());
+ }
+ 
++/* :310 */
++#line 8781 "./fweave.web"
+ ;
+ }
+ 
++/* 305: */
++#line 8898 "./fweave.web"
+ 
+ {
+ boolean nuweb_mode0= nuweb_mode;
+@@ -9030,12 +10467,17 @@ nuweb_mode= nuweb_mode0;
+ frz_params();
+ }
+ 
++/* :305 */
++#line 8784 "./fweave.web"
+ 
+ fin_C();
+ unnamed_section= NO;
+ }
+ }
+ 
++/* :300 */
++/* 303: */
++#line 8805 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -9057,6 +10499,9 @@ APP_STR(t_loc);
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
++/* :303 */
++/* 306: */
++#line 8915 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -9091,6 +10536,9 @@ s0= ++s;
+ APP_STR(s0);
+ }
+ 
++/* :306 */
++/* 312: */
++#line 9025 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -9107,6 +10555,8 @@ app_proc(last_control);
+ switch(last_control)
+ {
+ case WEB_definition:
++/* 313: */
++#line 9070 "./fweave.web"
+ 
+ {
+ if((next_control= get_next())!=identifier)
+@@ -9116,27 +10566,27 @@ expected identifier"),0);
+ 
+ else
+ {
+-app(044);APP_ID;
++app('$');APP_ID;
+ 
+-if(*loc==050)
++if(*loc=='(')
+ {
+ reswitch:switch(next_control= get_next())
+ {
+-case 050:case 054:
++case '(':case ',':
+ app(next_control);goto reswitch;
+ case identifier:
+ APP_ID;
+ goto reswitch;
+ case ellipsis:
+ APP_STR("\\dots");
+-if((next_control= get_next())!=051)
++if((next_control= get_next())!=')')
+ {
+ 
+ err0_print(ERR_M,OC("Improper deferred macro \
+ definition: expected ')' after ellipsis"),0);
+ break;
+ }
+-case 051:app(next_control);app(040);
++case ')':app(next_control);app(' ');
+ break;
+ default:
+ err0_print(ERR_M,OC("Improper deferred macro definition: \
+@@ -9144,12 +10594,14 @@ unrecognized token within argument list"),0);break;
+ }
+ }
+ 
+-app(044);app(break_space);
++app('$');app(break_space);
+ app_scrap(ignore_scrap,no_math);
+ 
+ }
+ }
+ 
++/* :313 */
++#line 9041 "./fweave.web"
+ ;
+ break;
+ }
+@@ -9159,7 +10611,7 @@ p= text_ptr;freeze_text;
+ save_base= scrp_base;
+ scrp_base= scrp_ptr+1;
+ 
+-*limit= 0100;*(limit+1)= 0155;
++*limit= '@';*(limit+1)= 'm';
+ next_control= ignore;
+ 
+ if(language==TEX)language= C;
+@@ -9178,10 +10630,14 @@ APP_STR("\\WPs");app(force);
+ app_scrap(ignore_scrap,no_math);
+ }
+ 
++/* :312 */
++#line 47 "./fweave.web"
+ 
+ #endif 
+ 
+ #if(part == 0 || part == 3)
++/* 206: */
++#line 5699 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -9223,6 +10679,9 @@ if(defn)q->defn= (outer_char HUGE*)defn;
+ }
+ }
+ 
++/* :206 */
++/* 209: */
++#line 5790 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -9250,6 +10709,9 @@ OVERFLW("scraps","s");
+ }
+ }
+ 
++/* :209 */
++/* 217: */
++#line 6308 "./fweave.web"
+ 
+ 
+ OPERATOR HUGE*
+@@ -9261,20 +10723,20 @@ OPERATOR HUGE*p;
+ 
+ switch(op_code)
+ {
+-case 057:
+-case 053:
+-case 074:
+-case 076:
+-case 075:
+-case 045:
+-case 041:
+-case 0176:
+-case 055:
+-case 052:
+-case 046:
+-case 0174:
+-case 077:
+-case 0136:
++case '/':
++case '+':
++case '<':
++case '>':
++case '=':
++case '%':
++case '!':
++case '~':
++case '-':
++case '*':
++case '&':
++case '|':
++case '?':
++case '^':
+ case ellipsis:
+ case not_eq:
+ case lt_eq:
+@@ -9296,7 +10758,7 @@ return p;
+ 
+ case compound_assignment:
+ if(assignment_token==or_or_or)
+-return op+0174;
++return op+'|';
+ 
+ p= op+CA_START+assignment_token;
+ if(p>=op+128)
+@@ -9311,6 +10773,8 @@ id_loc= id_first+STRLEN(id_first);
+ case identifier:
+ if(!FORTRAN_LIKE(language))return NULL;
+ 
++/* 218: */
++#line 6377 "./fweave.web"
+ 
+ {
+ ASCII id[255];
+@@ -9329,12 +10793,17 @@ op_ptr++;
+ return p;
+ }
+ 
++/* :218 */
++#line 6370 "./fweave.web"
+ 
+ }
+ 
+ return NULL;
+ }
+ 
++/* :217 */
++/* 219: */
++#line 6405 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -9375,7 +10844,7 @@ APP_STR("\\Wunknown{");
+ app(wt_style.dot_delimiter.begin);
+ app_ASCII_str(p->op_name);
+ app(wt_style.dot_delimiter.end);
+-app(0175);
++app('}');
+ app_scrap(binop,yes_math);
+ return;
+ }
+@@ -9383,6 +10852,9 @@ return;
+ app_scrap(q->cat,yes_math);
+ }
+ 
++/* :219 */
++/* 248: */
++#line 7115 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -9414,6 +10886,8 @@ language= lan_enum(get_output());
+ 
+ continue;
+ 
++/* 250: */
++#line 7223 "./fweave.web"
+ 
+ 
+ case protect_code:
+@@ -9423,25 +10897,31 @@ case copy_mode:
+ copying= BOOLEAN(!copying);break;
+ 
+ case turn_output_off:
++#line 7233 "./fweave.web"
+ output_on= NO;
+ break;
+ 
+ case turn_output_on:
++#line 7238 "./fweave.web"
+ output_on= YES;
+ break;
+ 
+ case Turn_output_off:
+ skip_file();
+ strt_off= YES;
++#line 7245 "./fweave.web"
+ output_on= NO;
+ break;
+ 
+ case Turn_output_on:
+ strt_off= NO;
++#line 7251 "./fweave.web"
+ output_on= YES;
+ break;
+ 
+ 
++/* :250 */
++#line 7146 "./fweave.web"
+ 
+ 
+ case out_force:
+@@ -9452,6 +10932,8 @@ return;
+ 
+ case identifier:case res_word:
+ if(output_on)
++/* 253: */
++#line 7290 "./fweave.web"
+ 
+ {
+ if(nuweb_mode)
+@@ -9464,6 +10946,8 @@ out(*k);
+ }
+ }
+ else
++/* 254: */
++#line 7314 "./fweave.web"
+ 
+ {
+ boolean all_uc= cur_name->info.upper_case;
+@@ -9486,6 +10970,8 @@ OUT_STR(pfrmt->short_id);
+ 
+ 
+ else
++/* 255: */
++#line 7348 "./fweave.web"
+ 
+ switch(DEFINED_TYPE(cur_name))
+ {
+@@ -9505,6 +10991,8 @@ break;
+ 
+ }
+ 
++/* :255 */
++#line 7336 "./fweave.web"
+ 
+ }
+ else
+@@ -9515,19 +11003,27 @@ OUT_STR(ALL_UC?pfrmt->RESERVED:pfrmt->reserved);
+ out_name(NULL,YES,IDENTIFIER,cur_name);
+ }
+ 
++/* :254 */
++#line 7302 "./fweave.web"
+ 
+ }
+ 
+ 
++/* :253 */
++#line 7156 "./fweave.web"
+ 
+ break;
+ 
+ case mod_name:
+ if(output_on)
++/* 261: */
++#line 7494 "./fweave.web"
+ 
+ #if FCN_CALLS
+ out_md_name();
+ #else
++/* 263: */
++#line 7514 "./fweave.web"
+ 
+ {
+ name_pointer cur_mod_name;
+@@ -9553,9 +11049,11 @@ cur_xref= cur_xref->xlink;
+ }
+ }
+ }
+-else out(060);
++else out('0');
+ 
+-out(0175);
++out('}');
++/* 265: */
++#line 7561 "./fweave.web"
+ 
+ {
+ ASCII HUGE*k,HUGE*k_limit;
+@@ -9570,9 +11068,11 @@ while(k<k_limit)
+ {
+ b= *(k++);
+ 
+-if(b==0100)
++if(b=='@')/* 266: */
++#line 7589 "./fweave.web"
++
+ 
+-if(*k++!=0100)
++if(*k++!='@')
+ {
+ SET_COLOR(error);
+ printf("\n! Illegal control code in section name: <");
+@@ -9581,16 +11081,20 @@ prn_id(cur_mod_name);printf("> ");
+ mark_error;
+ }
+ 
++/* :266 */
++#line 7575 "./fweave.web"
+ ;
+ 
+-if(b!=0174)out(b)
++if(b!='|')out(b)
+ else
+ {
++/* 267: */
++#line 7606 "./fweave.web"
+ 
+ {
+ ASCII delim;
+ 
+-j= limit+1;*j= 0174;delim= 0;
++j= limit+1;*j= '|';delim= 0;
+ 
+ WHILE()
+ {
+@@ -9606,22 +11110,26 @@ break;
+ 
+ b= *(k++);
+ 
+-if(b==0100)
++if(b=='@')
++/* 268: */
++#line 7646 "./fweave.web"
+ 
+ {
+ if(j>cur_buffer+buf_size-3)OVERFLW("buffer","");
+ 
+-*(++j)= 0100;*(++j)= *(k++);
++*(++j)= '@';*(++j)= *(k++);
+ }
+ 
++/* :268 */
++#line 7627 "./fweave.web"
+ 
+ else
+ {
+-if(b==047||b==042)
++if(b=='\''||b=='"')
+ if(delim==0)delim= b;
+ else if((eight_bits)delim==b)delim= 0;
+ 
+-if(b!=0174||delim!=0)
++if(b!='|'||delim!=0)
+ {
+ if(j>cur_buffer+buf_size-2)OVERFLW("buffer","");
+ 
+@@ -9632,14 +11140,18 @@ else break;
+ }
+ }
+ 
++/* :267 */
++#line 7580 "./fweave.web"
+ ;
+ save_loc= loc;save_limit= limit;loc= limit+2;limit= j+1;
+-*limit= 0174;output_C();
++*limit= '|';output_C();
+ loc= save_loc;limit= save_limit;
+ }
+ }
+ }
+ 
++/* :265 */
++#line 7542 "./fweave.web"
+ ;
+ OUT_STR("\\X ");
+ 
+@@ -9649,18 +11161,26 @@ LANGUAGE_SYMBOL((LANGUAGE)cur_mod_name->mod_info->language):
+ OUT_STR("\\X");
+ }
+ 
++/* :263 */
++#line 7498 "./fweave.web"
+ 
+ #endif
+ 
++/* :261 */
++#line 7161 "./fweave.web"
+ break;
+ 
+ case math_bin:case math_rel:
++/* 256: */
++#line 7368 "./fweave.web"
+ 
+ 
+ OUT_STR(a==math_bin?"\\mathbin{":"\\mathrel{");
+ 
+ 
+ 
++/* :256 */
++#line 7164 "./fweave.web"
+ ;break;
+ 
+ case toggle_meta:
+@@ -9672,32 +11192,42 @@ c= 0;while((a= get_output())>=indent&&a<=big_force)
+ {
+ if(a==indent)c++;if(a==outdent)c--;
+ }
++/* 260: */
++#line 7482 "./fweave.web"
+ 
+ 
+ for(;c>0;c--)OUT_STR("\\1");
+ 
+ for(;c<0;c++)OUT_STR("\\2");
+ 
++/* :260 */
++#line 7175 "./fweave.web"
+ ;
+ goto reswitch;
+ 
+ case big_cancel:
+ c= 0;
+-while(((a= get_output())>=indent||a==040)&&a<=big_force)
++while(((a= get_output())>=indent||a==' ')&&a<=big_force)
+ {
+ if(a==indent)c++;if(a==outdent)c--;
+ }
++/* 260: */
++#line 7482 "./fweave.web"
+ 
+ 
+ for(;c>0;c--)OUT_STR("\\1");
+ 
+ for(;c<0;c++)OUT_STR("\\2");
+ 
++/* :260 */
++#line 7184 "./fweave.web"
+ ;
+ goto reswitch;
+ 
+ case indent:case outdent:case opt:case backup:case break_space:
+ case force:case big_force:
++/* 257: */
++#line 7377 "./fweave.web"
+ 
+ 
+ if(a<break_space)
+@@ -9706,7 +11236,7 @@ if(cur_mode==outer)
+ {
+ if(output_on)
+ {
+-out(0134);out(a-cancel+060);
++out('\\');out(a-cancel+'0');
+ 
+ }
+ if(a==opt)
+@@ -9723,6 +11253,8 @@ else if(a==opt)
+ b= get_output();
+ }
+ else
++/* 258: */
++#line 7411 "./fweave.web"
+ 
+ {
+ boolean save_mode;
+@@ -9735,17 +11267,23 @@ a= get_output();
+ 
+ if(a==cancel||a==big_cancel)
+ {
++/* 260: */
++#line 7482 "./fweave.web"
+ 
+ 
+ for(;c>0;c--)OUT_STR("\\1");
+ 
+ for(;c<0;c++)OUT_STR("\\2");
+ 
++/* :260 */
++#line 7423 "./fweave.web"
+ ;
+ goto reswitch;
+ }
+ 
+-if((a!=040&&a<indent)||a==backup||a>big_force)
++if((a!=' '&&a<indent)||a==backup||a>big_force)
++/* 259: */
++#line 7445 "./fweave.web"
+ 
+ {
+ if(save_mode==outer)
+@@ -9753,12 +11291,16 @@ if(save_mode==outer)
+ if(out_ptr>out_buf+5&&STRNCMP(out_ptr-5,"\\WY\\WP",6)==0)
+ goto reswitch;
+ 
++/* 260: */
++#line 7482 "./fweave.web"
+ 
+ 
+ for(;c>0;c--)OUT_STR("\\1");
+ 
+ for(;c<0;c++)OUT_STR("\\2");
+ 
++/* :260 */
++#line 7452 "./fweave.web"
+ ;
+ 
+ if(output_on)
+@@ -9772,19 +11314,21 @@ goto reswitch;
+ }
+ else
+ {
+-out(0134);out(b-cancel+060);
++out('\\');out(b-cancel+'0');
+ }
+ if(a!=end_translation)
+ fin_line();
+ }
+ else if(a!=end_translation&&cur_mode==inner)
+ if(output_on)
+-out(040);
++out(' ');
+ 
+ 
+ goto reswitch;
+ }
+ 
++/* :259 */
++#line 7428 "./fweave.web"
+ 
+ 
+ if(a==indent)
+@@ -9801,16 +11345,20 @@ get_output();
+ }
+ }
+ 
++/* :258 */
++#line 7402 "./fweave.web"
+ ;
+ 
+ 
++/* :257 */
++#line 7190 "./fweave.web"
+ ;break;
+ 
+ case interior_semi:
+ if(output_on)out(';');
+ break;
+ 
+-case 052:
++case '*':
+ if(!(copying||nuweb_mode))
+ {
+ OUT_STR("\\ast ");
+@@ -9831,6 +11379,9 @@ flush_buffer(out_ptr,NO);
+ }
+ }
+ 
++/* :248 */
++/* 251: */
++#line 7256 "./fweave.web"
+ 
+ SRTN
+ skip_file(VOID)
+@@ -9849,10 +11400,15 @@ fin_line();
+ #undef TEMP_LEN
+ }
+ 
++/* :251 */
++/* 252: */
++#line 7273 "./fweave.web"
+ 
+ SRTN
+ out_skip(VOID)
+ {
++/* 176: */
++#line 4971 "./fweave.web"
+ 
+ {
+ static int outer_include_depth;
+@@ -9872,6 +11428,8 @@ output_on= YES;
+ }
+ }
+ 
++/* :176 */
++#line 7277 "./fweave.web"
+ ;
+ 
+ if(!output_on)
+@@ -9883,6 +11441,9 @@ output_on= NO;
+ }
+ }
+ 
++/* :252 */
++/* 262: */
++#line 7502 "./fweave.web"
+ 
+ 
+ #if FCN_CALLS
+@@ -9890,6 +11451,8 @@ output_on= NO;
+ SRTN
+ out_md_name(VOID)
+ {
++/* 263: */
++#line 7514 "./fweave.web"
+ 
+ {
+ name_pointer cur_mod_name;
+@@ -9915,9 +11478,11 @@ cur_xref= cur_xref->xlink;
+ }
+ }
+ }
+-else out(060);
++else out('0');
+ 
+-out(0175);
++out('}');
++/* 265: */
++#line 7561 "./fweave.web"
+ 
+ {
+ ASCII HUGE*k,HUGE*k_limit;
+@@ -9932,9 +11497,11 @@ while(k<k_limit)
+ {
+ b= *(k++);
+ 
+-if(b==0100)
++if(b=='@')/* 266: */
++#line 7589 "./fweave.web"
++
+ 
+-if(*k++!=0100)
++if(*k++!='@')
+ {
+ SET_COLOR(error);
+ printf("\n! Illegal control code in section name: <");
+@@ -9943,16 +11510,20 @@ prn_id(cur_mod_name);printf("> ");
+ mark_error;
+ }
+ 
++/* :266 */
++#line 7575 "./fweave.web"
+ ;
+ 
+-if(b!=0174)out(b)
++if(b!='|')out(b)
+ else
+ {
++/* 267: */
++#line 7606 "./fweave.web"
+ 
+ {
+ ASCII delim;
+ 
+-j= limit+1;*j= 0174;delim= 0;
++j= limit+1;*j= '|';delim= 0;
+ 
+ WHILE()
+ {
+@@ -9968,22 +11539,26 @@ break;
+ 
+ b= *(k++);
+ 
+-if(b==0100)
++if(b=='@')
++/* 268: */
++#line 7646 "./fweave.web"
+ 
+ {
+ if(j>cur_buffer+buf_size-3)OVERFLW("buffer","");
+ 
+-*(++j)= 0100;*(++j)= *(k++);
++*(++j)= '@';*(++j)= *(k++);
+ }
+ 
++/* :268 */
++#line 7627 "./fweave.web"
+ 
+ else
+ {
+-if(b==047||b==042)
++if(b=='\''||b=='"')
+ if(delim==0)delim= b;
+ else if((eight_bits)delim==b)delim= 0;
+ 
+-if(b!=0174||delim!=0)
++if(b!='|'||delim!=0)
+ {
+ if(j>cur_buffer+buf_size-2)OVERFLW("buffer","");
+ 
+@@ -9994,14 +11569,18 @@ else break;
+ }
+ }
+ 
++/* :267 */
++#line 7580 "./fweave.web"
+ ;
+ save_loc= loc;save_limit= limit;loc= limit+2;limit= j+1;
+-*limit= 0174;output_C();
++*limit= '|';output_C();
+ loc= save_loc;limit= save_limit;
+ }
+ }
+ }
+ 
++/* :265 */
++#line 7542 "./fweave.web"
+ ;
+ OUT_STR("\\X ");
+ 
+@@ -10011,10 +11590,15 @@ LANGUAGE_SYMBOL((LANGUAGE)cur_mod_name->mod_info->language):
+ OUT_STR("\\X");
+ }
+ 
++/* :263 */
++#line 7509 "./fweave.web"
+ 
+ }
+ #endif
+ 
++/* :262 */
++/* 317: */
++#line 9175 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -10029,13 +11613,15 @@ fin_line();OUT_STR("\\W");
+ 
+ 
+ 
+-out(flag==0?0125:0101);
++out(flag==0?'U':'A');
+ 
+ OUT_STR(" section");
++/* 318: */
++#line 9201 "./fweave.web"
+ 
+ 
+-q= cur_xref;if(q->xlink->num>flag)out(0163);
+-out(0176);
++q= cur_xref;if(q->xlink->num>flag)out('s');
++out('~');
+ 
+ WHILE()
+ {
+@@ -10044,20 +11630,25 @@ cur_xref= cur_xref->xlink;
+ 
+ if(cur_xref->num<=flag)break;
+ 
+-if(cur_xref->xlink->num>flag||cur_xref!=q->xlink)out(054);
++if(cur_xref->xlink->num>flag||cur_xref!=q->xlink)out(',');
+ 
+ 
+-out(040);
++out(' ');
+ 
+ if(cur_xref->xlink->num<=flag)
+ OUT_STR("and~");
+ }
+ 
++/* :318 */
++#line 9192 "./fweave.web"
+ ;
+-out(056);
++out('.');
+ fin_line();
+ }
+ 
++/* :317 */
++/* 320: */
++#line 9260 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -10068,12 +11659,16 @@ language= global_language;
+ if(no_xref&&!prn_contents)
+ {
+ fin_line();
++/* 321: */
++#line 9333 "./fweave.web"
+ 
+ {
+ OUT_STR("\\vfill");fin_line();
+ OUT_STR("\\FWEBend");fin_line();
+ }
+ 
++/* :321 */
++#line 9270 "./fweave.web"
+ 
+ }
+ else
+@@ -10101,6 +11696,8 @@ fin_line();
+ 
+ fin_line();
+ 
++/* 322: */
++#line 9343 "./fweave.web"
+ 
+ {
+ outer_char HUGE*temp;
+@@ -10117,6 +11714,8 @@ if(
+ nsprintf(temp,OC(" {%s}"),1,XLANGUAGE_NAME_PTR(global_language))>=(int)(N_CMD))OVERFLW("temp","");
+ OUT_STR(temp);fin_line();
+ 
++/* 323: */
++#line 9365 "./fweave.web"
+ 
+ {
+ RCS HUGE*prcs;
+@@ -10137,7 +11736,7 @@ fin_line();
+ if(num_keywords>0)
+ {
+ out_str(w_style.modules.kwd);
+-out(0163);
++out('s');
+ fin_line();
+ }
+ 
+@@ -10146,21 +11745,25 @@ for(k= 0;k<num_keywords;k++)
+ prcs= rcs_ptrs[k];
+ 
+ out_str(w_style.modules.kwd);
+-out(0173);
++out('{');
+ out_atext(prcs->keyword);
+-out(0175);
+-out(0173);
++out('}');
++out('{');
+ out_atext(prcs->txt);
+-out(0175);
++out('}');
+ fin_line();
+ }
+ }
+ 
++/* :323 */
++#line 9357 "./fweave.web"
+ 
+ 
+ FREE_MEM(temp,"temp",N_CMD,outer_char);
+ }
+ 
++/* :322 */
++#line 9297 "./fweave.web"
+ 
+ 
+ }
+@@ -10182,15 +11785,21 @@ fin_line();
+ OUT_STR("\\FWEBend");fin_line();
+ }
+ else
++/* 321: */
++#line 9333 "./fweave.web"
+ 
+ {
+ OUT_STR("\\vfill");fin_line();
+ OUT_STR("\\FWEBend");fin_line();
+ }
+ 
++/* :321 */
++#line 9316 "./fweave.web"
+ 
+ 
+ if(prn_index)
++/* 348: */
++#line 9963 "./fweave.web"
+ 
+ {
+ writing(YES,temp_ndx);
+@@ -10202,6 +11811,8 @@ NEW_TeX(temp_ndx);
+ 
+ if(makeindex)
+ {
++/* 349: */
++#line 10010 "./fweave.web"
+ 
+ {
+ mx_open(w_style.indx.m_sty);
+@@ -10336,6 +11947,8 @@ fprintf(mx_file,"%s %i\n","indent_length",w_style.indx.m_indent_length);
+ fclose(mx_file);
+ }
+ 
++/* :349 */
++#line 9974 "./fweave.web"
+ 
+ 
+ mx_open(w_style.indx.m_out);
+@@ -10344,6 +11957,8 @@ fprintf(mx_file,"%% %s\n\n",wbflnm0);
+ 
+ if(change_exists)
+ {
++/* 327: */
++#line 9463 "./fweave.web"
+ 
+ {
+ 
+@@ -10363,9 +11978,11 @@ while(!chngd_module[++k_module]);
+ OUT_STR(", ");out_mod(k_module,ENCAP);
+ }
+ 
+-out(056);
++out('.');
+ }
+ 
++/* :327 */
++#line 9982 "./fweave.web"
+ ;
+ fin_line();
+ fin_line();
+@@ -10374,6 +11991,8 @@ fin_line();
+ OUT_STR(w_style.indx.preamble);fin_line();
+ 
+ 
++/* 330: */
++#line 9514 "./fweave.web"
+ 
+ {
+ int c;
+@@ -10402,7 +12021,11 @@ bucket[c]= cur_name;
+ }
+ }
+ 
++/* :330 */
++#line 9990 "./fweave.web"
+ ;
++/* 338: */
++#line 9625 "./fweave.web"
+ 
+ 
+ w_style.indx.collate= x__to_ASCII((outer_char*)w_style.indx.collate);
+@@ -10416,10 +12039,14 @@ while(sort_ptr>scrp_info)
+ cur_depth= sort_ptr->depth;
+ 
+ if(blink[sort_ptr->head-name_dir]==0||cur_depth==INFTY)
++/* 340: */
++#line 9671 "./fweave.web"
+ 
+ {
+ cur_name= sort_ptr->head;
+ 
++/* 341: */
++#line 9698 "./fweave.web"
+ 
+ {
+ ASCII letter= *cur_name->byte_start;
+@@ -10427,7 +12054,7 @@ ASCII letter= *cur_name->byte_start;
+ 
+ 
+ 
+-if(letter==0134&&cur_name->ilk==normal&&language!=TEX)
++if(letter=='\\'&&cur_name->ilk==normal&&language!=TEX)
+ letter= NON_TEX_MACRO;
+ else
+ letter= A_TO_LOWER(letter);
+@@ -10445,20 +12072,32 @@ OUT_STR(w_style.indx.lethead_prefix);
+ 
+ switch(letter)
+ {
++/* 223: */
++#line 6548 "./fweave.web"
+ 
+ 
++/* 224: */
++#line 6554 "./fweave.web"
+ 
+ 
+-case 0134:case 0173:case 0175
++case '\\':case '{':case '}'
+ 
++/* :224 */
++#line 6550 "./fweave.web"
+ :
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 6551 "./fweave.web"
+ 
+ 
+-:out(0134);
++/* :223 */
++#line 9723 "./fweave.web"
++:out('\\');
+ }
+ out((w_style.indx.lethead_flag>0?A_TO_UPPER(letter):
+ A_TO_LOWER(letter)));
+@@ -10473,6 +12112,8 @@ OUT_STR(w_style.indx.lethead_suffix);
+ last_letter= letter;
+ }
+ 
++/* :341 */
++#line 9675 "./fweave.web"
+ 
+ 
+ do
+@@ -10481,6 +12122,8 @@ if(cur_name->defined_type(language)<0x80)
+ {
+ OUT_STR(w_style.indx.item_0);
+ 
++/* 342: */
++#line 9739 "./fweave.web"
+ 
+ {
+ boolean all_uc= cur_name->info.upper_case;
+@@ -10507,6 +12150,8 @@ OUT_STR(pfrmt->typewritr);
+ else if(length(cur_name)==1)
+ OUT_STR(pfrmt->short_id);
+ else
++/* 255: */
++#line 7348 "./fweave.web"
+ 
+ switch(DEFINED_TYPE(cur_name))
+ {
+@@ -10526,6 +12171,8 @@ break;
+ 
+ }
+ 
++/* :255 */
++#line 9765 "./fweave.web"
+ 
+ break;
+ 
+@@ -10546,9 +12193,15 @@ output_type= IDENTIFIER;break;
+ out_name(m_temp1,YES,output_type,cur_name);
+ }
+ 
++/* :342 */
++#line 9683 "./fweave.web"
+ ;
++/* 343: */
++#line 9791 "./fweave.web"
+ 
+ {
++/* 345: */
++#line 9901 "./fweave.web"
+ 
+ 
+ this_xref= (xref_pointer)cur_name->xref;cur_xref= xmem;
+@@ -10560,6 +12213,8 @@ cur_xref= this_xref;this_xref= next_xref;
+ }
+ while(this_xref!=xmem);
+ 
++/* :345 */
++#line 9793 "./fweave.web"
+ ;
+ 
+ OUT_STR(w_style.indx.delim_0);
+@@ -10660,9 +12315,11 @@ break;
+ OUT_STR(w_style.indx.delim_n);
+ }
+ 
+-out(056);fin_line();
++out('.');fin_line();
+ }
+ 
++/* :343 */
++#line 9684 "./fweave.web"
+ ;
+ }
+ 
+@@ -10673,8 +12330,12 @@ while(cur_name);
+ --sort_ptr;
+ }
+ 
++/* :340 */
++#line 9638 "./fweave.web"
++
++else/* 339: */
++#line 9643 "./fweave.web"
+ 
+-else
+ {
+ ASCII c;
+ 
+@@ -10701,18 +12362,26 @@ while(next_name);
+ --sort_ptr;unbucket((eight_bits)(cur_depth+(eight_bits)1));
+ }
+ 
++/* :339 */
++#line 9639 "./fweave.web"
+ ;
+ }
+ 
++/* :338 */
++#line 9991 "./fweave.web"
+ ;
+ 
+ OUT_STR(w_style.indx.postamble);fin_line();
+ 
+ }
+ 
++/* :348 */
++#line 9319 "./fweave.web"
+ 
+ 
+ if(prn_modules)
++/* 354: */
++#line 10160 "./fweave.web"
+ 
+ {
+ writing(BOOLEAN(!prn_index),temp_mds);
+@@ -10726,6 +12395,8 @@ mod_print(root);
+ OUT_STR(w_style.modules.postamble);fin_line();
+ }
+ 
++/* :354 */
++#line 9322 "./fweave.web"
+ 
+ }
+ 
+@@ -10736,6 +12407,9 @@ CLR_PRINTF(SHORT_INFO,info,("\nDone."));
+ chk_complete();
+ }
+ 
++/* :320 */
++/* 324: */
++#line 9406 "./fweave.web"
+ 
+ 
+ int
+@@ -10746,6 +12420,9 @@ RCS HUGE**pp1 C1("")
+ return STRCMP((*pp0)->keyword,(*pp1)->keyword);
+ }
+ 
++/* :324 */
++/* 325: */
++#line 9425 "./fweave.web"
+ 
+ 
+ ASCII HUGE*
+@@ -10761,19 +12438,27 @@ while(*buf!='\0')
+ {
+ switch(*buf)
+ {
++/* 224: */
++#line 6554 "./fweave.web"
+ 
+ 
+-case 0134:case 0173:case 0175
++case '\\':case '{':case '}'
+ 
++/* :224 */
++#line 9440 "./fweave.web"
+ :
+ if(!all_cases)break;
+ 
++/* 225: */
++#line 6559 "./fweave.web"
+ 
+-case 040:case 043:case 045:case 044:case 0136:case 0140:
+-case 0176:case 046:case 0137
++case ' ':case '#':case '%':case '$':case '^':case '`':
++case '~':case '&':case '_'
+ 
++/* :225 */
++#line 9443 "./fweave.web"
+ :
+-TO_TEMP(0134);
++TO_TEMP('\\');
+ break;
+ }
+ 
+@@ -10784,6 +12469,9 @@ TO_TEMP('\0');
+ return temp0;
+ }
+ 
++/* :325 */
++/* 337: */
++#line 9603 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -10805,6 +12493,9 @@ bucket[collate[c]]= NULL;
+ }
+ }
+ 
++/* :337 */
++/* 346: */
++#line 9916 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -10825,6 +12516,9 @@ mod_print(p->rlink);
+ }
+ }
+ 
++/* :346 */
++/* 355: */
++#line 10175 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -10862,6 +12556,9 @@ printf(" %lu level(s).\n",SUB_PTRS(mx_sort_ptr,scrp_info));
+ mem_avail(1);
+ }
+ 
++/* :355 */
++/* 356: */
++#line 10214 "./fweave.web"
+ 
+ 
+ SRTN
+@@ -10889,12 +12586,21 @@ SRTN ini_tokens FCN((language0))
+ LANGUAGE language0 C1("")
+ {}
+ 
++/* :356 */
++#line 51 "./fweave.web"
+ 
+ #endif 
+ 
++/* :1 */
++/* 56: */
++#line 123 "./ccodes.hweb"
+ 
+ 
++#line 466 "./fweave.web"
+ 
++/* :56 */
++/* 344: */
++#line 9868 "./fweave.web"
+ 
+ outer_char*
+ mx_quote FCN((m_out,s))
+@@ -10924,6 +12630,9 @@ if(c==q->m_escape
+ return m_out;
+ }
+ 
++/* :344 */
++/* 350: */
++#line 10076 "./fweave.web"
+ 
+ outer_char*
+ dbl_bslash FCN((m_temp,s))
+@@ -10937,6 +12646,8 @@ for(p= m_temp;*s;)
+ c= *s++;
+ 
+ if(iscntrl(c)||c=='\\')
++/* 352: */
++#line 10119 "./fweave.web"
+ 
+ {
+ *p++= '\\';
+@@ -10958,6 +12669,8 @@ break;
+ }
+ 
+ 
++/* :352 */
++#line 10089 "./fweave.web"
+ 
+ 
+ *p++= c;
+@@ -10968,6 +12681,9 @@ break;
+ return m_temp;
+ }
+ 
++/* :350 */
++/* 351: */
++#line 10100 "./fweave.web"
+ 
+ 
+ outer_char*
+@@ -10978,6 +12694,8 @@ outer_char c C1("Char to expand")
+ outer_char*p= m_temp;
+ 
+ if(iscntrl(c)||c=='\\')
++/* 352: */
++#line 10119 "./fweave.web"
+ 
+ {
+ *p++= '\\';
+@@ -10999,6 +12717,8 @@ break;
+ }
+ 
+ 
++/* :352 */
++#line 10110 "./fweave.web"
+ 
+ 
+ *p++= c;
+@@ -11007,6 +12727,9 @@ break;
+ return m_temp;
+ }
+ 
++/* :351 */
++/* 353: */
++#line 10141 "./fweave.web"
+ 
+ SRTN mx_open FCN((ext))
+ outer_char*ext C1("File extension")
+@@ -11025,4 +12748,5 @@ makeindex= NO;
+ }
+ }
+ 
++/* :353 */
+ 
+-- 
+1.7.7.1
+

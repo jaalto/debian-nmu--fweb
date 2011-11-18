@@ -1,0 +1,30 @@
+From 74408549737b694e53f6b9371459e307ba7d75b7 Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:23:14 +0200
+Subject: [PATCH] Web/style.web: Comment our see_all
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Web/style.web |    3 ---
+ 1 files changed, 0 insertions(+), 3 deletions(-)
+
+diff --git a/Web/style.web b/Web/style.web
+index c7ac756..8d1c245 100644
+--- a/Web/style.web
++++ b/Web/style.web
+@@ -1783,9 +1783,6 @@ SET_COLOR(info);
+ printf("%s style-file parameters%s%s%s%s:\n",
+ 	see_all ? "Default" : "Modified",
+ 	*pa ? " beginning with \"" : "", (char *)pa, *pa ? "\"" : "",
+-#if 0
+-	see_all // Got tired of reading this; nobody cares anyway.
+-#endif
+ 	0 ? "\n (null or empty values for \
+ @@ command codes are misleading)" : "");
+ 
+-- 
+1.7.7.1
+

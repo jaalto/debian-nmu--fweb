@@ -1,0 +1,29 @@
+From eb9231d68b7a5f998d25db6d0cd6e42b539da90d Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:17:33 +0200
+Subject: [PATCH] Web/common.web: Update VERSION
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Web/common.web |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/Web/common.web b/Web/common.web
+index 5edbb38..40a23cd 100644
+--- a/Web/common.web
++++ b/Web/common.web
+@@ -38,7 +38,7 @@ two component programs, if no confusion can arise.
+ 
+ @ Here is the overall appearance of this file:
+ 
+-@d VERSION "1.61" // For development, use |$REVISION| here.
++@d VERSION "1.62" // For development, use |$REVISION| here.
+ @d RELEASE_DATE "September 23, 1998"
+ 
+ @A
+-- 
+1.7.7.1
+

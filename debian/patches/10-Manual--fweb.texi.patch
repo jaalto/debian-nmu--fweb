@@ -1,0 +1,54 @@
+From 4782f564253f2d5e96bfb356529394c7ca4cf0e5 Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:15:12 +0200
+Subject: [PATCH] Manual/fweb.texi: add enry section
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Manual/fweb.texi |   13 +++++++++++--
+ 1 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/Manual/fweb.texi b/Manual/fweb.texi
+index b00bad3..4662c8c 100644
+--- a/Manual/fweb.texi
++++ b/Manual/fweb.texi
+@@ -3,6 +3,15 @@
+ @setfilename fweb.info
+ @settitle FWEB
+ 
++@ifinfo
++@dircategory Development
++@format
++START-INFO-DIR-ENTRY
++* Fweb: (fweb).            The Fweb literate programming tool.
++END-INFO-DIR-ENTRY
++@end format
++@end ifinfo
++
+ @macro Fprog{name}
+ @sc{\name\}
+ @end macro
+@@ -115,7 +124,7 @@ Copyright @copyright{} 1993--1998 John A. Krommes
+ NOTE: Because of last-minute translation problems with texi2html
+ operating on the macro-expanded version of fweb.texi, user-defined macro
+ expansion has temporarily been turned off in this html version.
+-Multitable is also giving trouble, as is @samp in section names.  These
++Multitable is also giving trouble, as is "ATsamp" in section names.  These
+ are probably problems with texi2html; sorry for the inconvenience.
+ @end ifhtml
+ 
+@@ -946,7 +955,7 @@ customized by means of setting parameters in a @code{makeindex}-like
+ 
+ @chapter WEB CONCEPTS
+ 
+-The principle concepts of @sc{WEB} programming are laid out in Knuth's book,
++The principle concepts of @sc{web} programming are laid out in Knuth's book,
+ the reference to which was given in @ref{Intro}.  @FWEB{} follows most
+ conventions introduced by @sc{web} and @sc{Cweb}, except that the names
+ of some commands have been changed for consistency, symmetry, and/or
+-- 
+1.7.7.1
+

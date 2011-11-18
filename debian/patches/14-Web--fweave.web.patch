@@ -1,0 +1,29 @@
+From 46aabc27363348954d7df3079d512f18bbce4954 Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:19:16 +0200
+Subject: [PATCH] Web/fweave.web: Add WHILE default
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Web/fweave.web |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/Web/fweave.web b/Web/fweave.web
+index 7e45ea4..71a5ef3 100644
+--- a/Web/fweave.web
++++ b/Web/fweave.web
+@@ -3250,6 +3250,8 @@ WHILE()
+ 
+ 		   case @'@@':
+ 			loc += 2;
++		   default:
++			loc++;
+ 			}
+ 	else 
+ 		loc++;
+-- 
+1.7.7.1
+

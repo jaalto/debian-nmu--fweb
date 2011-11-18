@@ -1,0 +1,1966 @@
+From c3bd441280e855a84e86e0ec2bc5c1fdaab79821 Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:33:54 +0200
+Subject: [PATCH] Web/ratfor.c: miscellaneous
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Web/ratfor.c |  687 ++++++++++++++++++++++++++++++++++++++++++++--------------
+ 1 files changed, 522 insertions(+), 165 deletions(-)
+
+diff --git a/Web/ratfor.c b/Web/ratfor.c
+index 444a144..f6d7ebb 100644
+--- a/Web/ratfor.c
++++ b/Web/ratfor.c
+@@ -1,23 +1,23 @@
+ #if(0)
+-  FTANGLE v1.60,\
+- created with UNIX on "Thursday, September 24, 1998 at 16:12." \
+-  COMMAND LINE: "Web/ftangle Web/ratfor -A -# --F -= 1.62/Web/ratfor.c"\
+-  RUN TIME:     "Friday, September 25, 1998 at 8:02."\
+-  WEB FILE:     "Web/ratfor.web"\
++  FTANGLE v1.61,\
++ created with UNIX on "Friday, September 25, 1998 at 8:02." \
++  COMMAND LINE: "ftangle ./ratfor -uCONFIG -mCONFIG -mGCC -= ratfor.c"\
++  RUN TIME:     "Tuesday, June 29, 1999 at 21:24."\
++  WEB FILE:     "./ratfor.web"\
+   CHANGE FILE:  (none)
+ #endif
+ #define _RATFOR_h  
+ #define _ratfor_   \
+ 
+-#define stringg  (eight_bits)02 \
++#define stringg  (eight_bits)'\2' \
+ 
+-#define constant  (eight_bits)03
++#define constant  (eight_bits)'\3'
+ #define begin_Xmeta  or_or
+ #define end_Xmeta  star_star
+-#define cdir  (eight_bits)06
+-#define colon_colon  (eight_bits)011 \
++#define cdir  (eight_bits)'\6'
++#define colon_colon  (eight_bits)'\11' \
+ 
+-#define join  (eight_bits)0177 \
++#define join  (eight_bits)'\177' \
+ 
+ #define ID0  0200
+ #define TOKEN1(a)((a)<ID0) \
+@@ -40,84 +40,84 @@
+ 
+ #define ignore  0 \
+ 
+-#define begin_comment0  (eight_bits)0376
+-#define begin_comment1  (eight_bits)0375 \
++#define begin_comment0  (eight_bits)'\xFE'
++#define begin_comment1  (eight_bits)'\xFD' \
+ 
+-#define module_number  (eight_bits)0201
+-#define identifier  (eight_bits)0202
+-#define id_keyword  (eight_bits)0203 \
++#define module_number  (eight_bits)'\201'
++#define identifier  (eight_bits)'\202'
++#define id_keyword  (eight_bits)'\203' \
+ 
+-#define L_switch  (eight_bits)0257
+-#define begin_FORTRAN  (eight_bits)0260
+-#define begin_RATFOR  (eight_bits)0261
+-#define begin_C  (eight_bits)0262
+-#define begin_LITERAL  (eight_bits)0263 \
++#define L_switch  (eight_bits)'\257'
++#define begin_FORTRAN  (eight_bits)'\260'
++#define begin_RATFOR  (eight_bits)'\261'
++#define begin_C  (eight_bits)'\262'
++#define begin_LITERAL  (eight_bits)'\263' \
+ 
+-#define verbatim  (eight_bits)0264 \
++#define verbatim  (eight_bits)'\264' \
+  \
+ 
+-#define invisible_cmnt  (eight_bits)0265
+-#define compiler_directive  (eight_bits)0266
+-#define Compiler_Directive  (eight_bits)0267 \
++#define invisible_cmnt  (eight_bits)'\265'
++#define compiler_directive  (eight_bits)'\266'
++#define Compiler_Directive  (eight_bits)'\267' \
+ 
+-#define keyword_name  (eight_bits)0270 \
++#define keyword_name  (eight_bits)'\270' \
+ 
+-#define no_index  (eight_bits)0300
+-#define yes_index  (eight_bits)0301 \
++#define no_index  (eight_bits)'\300'
++#define yes_index  (eight_bits)'\301' \
+ 
+-#define ascii_constant  (eight_bits)0302
+-#define begin_vcmnt  (eight_bits)0303
+-#define big_line_break  (eight_bits)0304 \
++#define ascii_constant  (eight_bits)'\302'
++#define begin_vcmnt  (eight_bits)'\303'
++#define big_line_break  (eight_bits)'\304' \
+ 
+-#define begin_bp  (eight_bits)0305
+-#define insert_bp  (eight_bits)0306 \
++#define begin_bp  (eight_bits)'\305'
++#define insert_bp  (eight_bits)'\306' \
+ 
+-#define begin_meta  (eight_bits)017
+-#define end_meta  (eight_bits)027 \
++#define begin_meta  (eight_bits)'\17'
++#define end_meta  (eight_bits)'\27' \
+ 
+-#define TeX_string  (eight_bits)0307
+-#define xref_roman  (eight_bits)0310
+-#define xref_typewriter  (eight_bits)0311
+-#define xref_wildcard  (eight_bits)0312 \
++#define TeX_string  (eight_bits)'\307'
++#define xref_roman  (eight_bits)'\310'
++#define xref_typewriter  (eight_bits)'\311'
++#define xref_wildcard  (eight_bits)'\312' \
+ 
+-#define control_text  (eight_bits)0313 \
++#define control_text  (eight_bits)'\313' \
+ 
+-#define begin_nuweb  (eight_bits)0314
+-#define no_mac_expand  (eight_bits)0315
+-#define set_line_info  (eight_bits)0316
+-#define short_fcn  (eight_bits)0317 \
++#define begin_nuweb  (eight_bits)'\314'
++#define no_mac_expand  (eight_bits)'\315'
++#define set_line_info  (eight_bits)'\316'
++#define short_fcn  (eight_bits)'\317' \
+ 
+-#define formatt  (eight_bits)0320 \
++#define formatt  (eight_bits)'\320' \
+ 
+-#define limbo_text  (eight_bits)0323
+-#define op_def  (eight_bits)0324
+-#define macro_def  (eight_bits)0325 \
++#define limbo_text  (eight_bits)'\323'
++#define op_def  (eight_bits)'\324'
++#define macro_def  (eight_bits)'\325' \
+ 
+-#define ignore_defn  (eight_bits)0327 \
++#define ignore_defn  (eight_bits)'\327' \
+ 
+-#define new_output_file  (eight_bits)0331 \
++#define new_output_file  (eight_bits)'\331' \
+ 
+-#define definition  (eight_bits)0332
+-#define undefinition  (eight_bits)0333
+-#define WEB_definition  (eight_bits)0334 \
++#define definition  (eight_bits)'\332'
++#define undefinition  (eight_bits)'\333'
++#define WEB_definition  (eight_bits)'\334' \
+ 
+-#define m_ifdef  (eight_bits)0335
+-#define m_ifndef  (eight_bits)0336
+-#define m_if  (eight_bits)0337
+-#define m_else  (eight_bits)0340
+-#define m_elif  (eight_bits)0341
+-#define m_endif  (eight_bits)0342
+-#define m_for  (eight_bits)0343
+-#define m_endfor  (eight_bits)0344
+-#define m_line  (eight_bits)0345
+-#define m_undef  (eight_bits)0346 \
++#define m_ifdef  (eight_bits)'\335'
++#define m_ifndef  (eight_bits)'\336'
++#define m_if  (eight_bits)'\337'
++#define m_else  (eight_bits)'\340'
++#define m_elif  (eight_bits)'\341'
++#define m_endif  (eight_bits)'\342'
++#define m_for  (eight_bits)'\343'
++#define m_endfor  (eight_bits)'\344'
++#define m_line  (eight_bits)'\345'
++#define m_undef  (eight_bits)'\346' \
+ 
+-#define end_of_buffer  (eight_bits)0347 \
++#define end_of_buffer  (eight_bits)'\347' \
+ 
+-#define begin_code  (eight_bits)0350
+-#define module_name  (eight_bits)0351 \
++#define begin_code  (eight_bits)'\350'
++#define module_name  (eight_bits)'\351' \
+ 
+-#define new_module  (eight_bits)0352 \
++#define new_module  (eight_bits)'\352' \
+ 
+ #define cur_end  cur_state.end_field
+ #define cur_byte  cur_state.byte_field
+@@ -247,20 +247,20 @@ copy_out(save_buffer,psave_buffer,!macro) \
+ #define NUMBER(lbl)out_label(PRINT_IF_0,(STMT_LBL)(lbl)) \
+  \
+ 
+-#define PARENS  copyd(TO_OUTPUT,XPN_CASES,050,051,NO) \
++#define PARENS  copyd(TO_OUTPUT,XPN_CASES,'(',')',NO) \
+  \
+ 
+-#define NL  out_char(012)
+-#define LP  out_char(050)
+-#define RP  out_char(051)
+-#define COMMA  out_char(054)
+-#define NOT  out_char(041)
+-#define EQUALS  out_char(075)
+-#define MINUS  out_char(055)
++#define NL  out_char('\n')
++#define LP  out_char('(')
++#define RP  out_char(')')
++#define COMMA  out_char(',')
++#define NOT  out_char('!')
++#define EQUALS  out_char('=')
++#define MINUS  out_char('-')
+ #define EQ_EQ  out_char(eq_eq)
+ #define OR  out_char(or_or)
+-#define LT  out_char(074)
+-#define GT  out_char(076) \
++#define LT  out_char('<')
++#define GT  out_char('>') \
+ 
+ #define IF(stmt_num)LABEL(stmt_num);id0(id__IF)
+ #define THEN  id0(id__THEN);NL
+@@ -289,7 +289,11 @@ copy_out(save_buffer,psave_buffer,!macro) \
+ #define NCASES  257
+ #define cur_switch  switches[switch_level] \
+ 
++/* 1: */
++#line 27 "./ratfor.web"
+ 
++/* 4: */
++#line 16 "./typedefs.hweb"
+ 
+ 
+ #ifndef part
+@@ -301,6 +305,9 @@ copy_out(save_buffer,psave_buffer,!macro) \
+ #endif 
+ 
+ 
++/* :4 */
++/* 5: */
++#line 42 "./typedefs.hweb"
+ 
+ 
+ #if(part == 0 || part == 1)
+@@ -314,19 +321,32 @@ copy_out(save_buffer,psave_buffer,!macro) \
+ #endif
+ 
+ 
++/* :5 */
++#line 28 "./ratfor.web"
+ 
+ 
++/* 33: */
++#line 440 "./typedefs.hweb"
+ 
+ #include "typedefs.h"
+ 
+ 
+ 
++#line 46 "./ratfor.web"
+ 
++#line 8 "./t_codes.hweb"
+ 
++/* :33 */
++/* 45: */
++#line 55 "./ratfor.web"
+ 
+ #include "map.h"
+ 
++/* :45 */
++#line 30 "./ratfor.web"
+ 
++/* 37: */
++#line 47 "./texts.hweb"
+ 
+ 
+ typedef struct
+@@ -348,6 +368,9 @@ nbytes:19;
+ 
+ typedef text HUGE*text_pointer;
+ 
++/* :37 */
++/* 39: */
++#line 46 "./stacks.hweb"
+ 
+ 
+ typedef struct{
+@@ -363,6 +386,9 @@ eight_bits HUGE*macro_buf,HUGE*mp,HUGE*macro_buf_end;
+ 
+ typedef output_state HUGE*stack_pointer;
+ 
++/* :39 */
++/* 41: */
++#line 11 "./val.hweb"
+ 
+ 
+ 
+@@ -397,7 +423,11 @@ VALUE value;
+ TYPE type;
+ struct val HUGE*last,HUGE*next;
+ }VAL;
++#line 8 "./macs.hweb"
+ 
++/* :41 */
++/* 42: */
++#line 49 "./macs.hweb"
+ 
+ 
+ typedef struct
+@@ -406,6 +436,9 @@ sixteen_bits token[MAX_XLEVELS];
+ int level;
+ }XIDS;
+ 
++/* :42 */
++/* 44: */
++#line 19 "./trunc.hweb"
+ 
+ 
+ #if(0)
+@@ -436,7 +469,11 @@ ASCII HUGE*id,HUGE*id_end;
+ BP HUGE*first,HUGE*last;
+ struct Trunc HUGE*next;
+ }TRUNC;
++#line 53 "./ratfor.web"
+ 
++/* :44 */
++/* 123: */
++#line 2413 "./ratfor.web"
+ 
+ 
+ IN_RATFOR int switch_level RSET(0);
+@@ -469,12 +506,20 @@ boolean has_default;
+ 
+ IN_RATFOR SWITCH HUGE*switches;
+ 
++/* :123 */
++#line 31 "./ratfor.web"
+ 
++/* 46: */
++#line 59 "./ratfor.web"
+ 
+ 
+ #include "t_type.h" 
+ 
++/* :46 */
++#line 32 "./ratfor.web"
+ 
++/* 32: */
++#line 426 "./typedefs.hweb"
+ 
+ 
+ 
+@@ -488,6 +533,9 @@ IN_RATFOR SWITCH HUGE*switches;
+ 
+ 
+ 
++/* :32 */
++/* 38: */
++#line 69 "./texts.hweb"
+ 
+ 
+ EXTERN long max_texts;
+@@ -515,7 +563,11 @@ EXTERN eight_bits HUGE*mx_tok_ptr,HUGE*mx_dtok_ptr;
+ 
+ 
+ EXTERN text_pointer macro_text;
++#line 8 "./stacks.hweb"
+ 
++/* :38 */
++/* 40: */
++#line 82 "./stacks.hweb"
+ 
+ 
+ EXTERN output_state cur_state;
+@@ -525,7 +577,11 @@ EXTERN long stck_size;
+ EXTERN output_state HUGE*stack;
+ EXTERN stack_pointer stck_end;
+ EXTERN stack_pointer stck_ptr;
++#line 8 "./val.hweb"
+ 
++/* :40 */
++/* 43: */
++#line 58 "./macs.hweb"
+ 
+ 
+ IN_COMMON STMT_LBL max_stmt;
+@@ -537,7 +593,11 @@ EXTERN sixteen_bits outp_line[NUM_LANGUAGES]
+ #endif 
+ #endif 
+ ;
++#line 8 "./trunc.hweb"
+ 
++/* :43 */
++/* 47: */
++#line 68 "./ratfor.web"
+ 
+ 
+ EXTERN boolean mac_protected,in_string;
+@@ -550,6 +610,9 @@ EXTERN eight_bits sent;
+ IN_COMMON STMT_LBL max_stmt;
+ IN_COMMON sixteen_bits outp_line[];
+ 
++/* :47 */
++/* 50: */
++#line 102 "./ratfor.web"
+ 
+ 
+ 
+@@ -593,6 +656,7 @@ IN_RATFOR sixteen_bits
+ id__CONTAINS,id__CYCLE,id__ENDWHERE,id__INTERFACE,id__MODULE,
+ id__SELECT,id__TYPE,id__WHERE;
+ 
++#line 146 "./ratfor.web"
+ 
+ 
+ 
+@@ -689,10 +753,16 @@ IN_RATFOR SPEC spec90_tokens[]
+ #endif
+ ;
+ 
++/* :50 */
++/* 53: */
++#line 287 "./ratfor.web"
+ 
+ 
+ IN_RATFOR sixteen_bits sym_label RSET(0);
+ 
++/* :53 */
++/* 61: */
++#line 525 "./ratfor.web"
+ 
+ 
+ IN_RATFOR boolean saved_token RSET(NO);
+@@ -701,12 +771,18 @@ IN_RATFOR int last_bytes;
+ 
+ 
+ 
++/* :61 */
++/* 64: */
++#line 659 "./ratfor.web"
+ 
+ 
+ IN_RATFOR eight_bits HUGE*cmnt_buf RSET(NULL),
+ HUGE*cmnt_buf_end RSET(NULL),
+ HUGE*cmnt_pos RSET(NULL);
+ 
++/* :64 */
++/* 69: */
++#line 781 "./ratfor.web"
+ 
+ typedef struct
+ {
+@@ -727,21 +803,33 @@ IN_RATFOR int wlevel RSET(0);
+ 
+ 
+ 
++/* :69 */
++/* 73: */
++#line 884 "./ratfor.web"
+ 
+ 
+ IN_RATFOR boolean balanced RSET(YES);
+ IN_RATFOR ASCII cur_delim RSET('\0');
+ 
++/* :73 */
++/* 85: */
++#line 1316 "./ratfor.web"
+ 
+ 
+ IN_RATFOR eight_bits HUGE*save_buffer RSET(NULL),HUGE*psave_buffer;
+ 
++/* :85 */
++/* 94: */
++#line 1576 "./ratfor.web"
+ 
+ 
+ IN_RATFOR outer_char HUGE*cmd_fmt;
+ IN_RATFOR ASCII HUGE*cmd_msg,HUGE*cmd_end;
+ IN_RATFOR BUF_SIZE cmd_fsize,cmd_size;
+ 
++/* :94 */
++/* 125: */
++#line 2532 "./ratfor.web"
+ 
+ 
+ IN_COMMON double g_ratio;
+@@ -750,11 +838,15 @@ IN_COMMON unsigned short marginal_cases;
+ 
+ IN_EVAL VAL HUGE*val_ptr,HUGE*val_heap;
+ 
++/* :125 */
++#line 33 "./ratfor.web"
+ 
+ 
+ 
+ 
+ #if(part != 2)
++/* 48: */
++#line 82 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -763,6 +855,9 @@ is_Rat_present(VOID)
+ Rat_is_loaded= YES;
+ }
+ 
++/* :48 */
++/* 49: */
++#line 91 "./ratfor.web"
+ 
+ 
+ boolean
+@@ -772,6 +867,9 @@ outer_char*msg C1("")
+ return YES;
+ }
+ 
++/* :49 */
++/* 51: */
++#line 244 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -796,6 +894,8 @@ confusion(OC("ini_RAT_tokens"),OC("Language should be RATFOR-like here"));
+ }
+ 
+ ini_univ_tokens(language0);
++/* 52: */
++#line 271 "./ratfor.web"
+ 
+ {
+ ASCII HUGE*pd;
+@@ -803,15 +903,20 @@ ASCII HUGE*pd;
+ 
+ break_tokens[0]= LEFT(id_break,ID0);
+ break_tokens[1]= RIGHT(id_break);
+-break_tokens[2]= 073;
++break_tokens[2]= ';';
+ 
+ pd= x_to_ASCII(OC("data"));
+ id_data= ID_NUM(pd,pd+4);
+ }
+ 
++/* :52 */
++#line 267 "./ratfor.web"
+ 
+ }
+ 
++/* :51 */
++/* 54: */
++#line 300 "./ratfor.web"
+ 
+ 
+ int
+@@ -819,7 +924,7 @@ chk_lbl(VOID)
+ {
+ sixteen_bits a;
+ 
+-if(next_byte()==072)
++if(next_byte()==':')
+ {
+ sym_label= (sixteen_bits)cur_val;
+ 
+@@ -854,6 +959,9 @@ BACK_UP
+ return NO;
+ }
+ 
++/* :54 */
++/* 55: */
++#line 349 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -906,6 +1014,9 @@ FREE_MEM(temp,"RAT_error:temp",N_MSGBUF,char);
+ FREE_MEM(temp1,"RAT_error:temp1",N_MSGBUF,char);
+ }
+ 
++/* :55 */
++/* 56: */
++#line 412 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -939,6 +1050,9 @@ RAT_error(ERROR,OC("Output ended %s"),1,temp);
+ fatal(ERR_R,OC("ABORTING!"),OC(""));
+ }
+ 
++/* :56 */
++/* 57: */
++#line 438 "./ratfor.web"
+ 
+ 
+ outer_char HUGE*
+@@ -975,6 +1089,9 @@ default:return OC("UNKNOWN CMD");
+ }
+ }
+ 
++/* :57 */
++/* 58: */
++#line 476 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -986,6 +1103,9 @@ RAT_error(ERROR,OC("Misplaced keyword: \
+ \"%s\" must be used only inside \"switch\""),1,s);
+ }
+ 
++/* :58 */
++/* 59: */
++#line 487 "./ratfor.web"
+ 
+ SRTN didnt_expand FCN((c0,c,op))
+ eight_bits c0 C0("")
+@@ -997,6 +1117,9 @@ RAT_error(ERROR,OC("Was expecting '%c', not '%c', after \"%s\"; \
+ expansion aborted"),3,XCHR(c0),XCHR(c),op);
+ }
+ 
++/* :59 */
++/* 60: */
++#line 500 "./ratfor.web"
+ 
+ boolean
+ char_after FCN((c))
+@@ -1013,6 +1136,9 @@ return NO;
+ return YES;
+ }
+ 
++/* :60 */
++/* 62: */
++#line 536 "./ratfor.web"
+ 
+ 
+ eight_bits
+@@ -1067,6 +1193,8 @@ last_bytes= 1;
+ break;
+ }
+ 
++/* 63: */
++#line 599 "./ratfor.web"
+ 
+ {
+ a= IDENTIFIER(a0,last_a= *cur_byte++);
+@@ -1120,6 +1248,8 @@ OUT_CHAR(module_number);
+ }
+ }
+ 
++/* :63 */
++#line 590 "./ratfor.web"
+ 
+ }
+ 
+@@ -1128,6 +1258,9 @@ cur_val= cur_val0;
+ return a0;
+ }
+ 
++/* :62 */
++/* 65: */
++#line 666 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1142,7 +1275,7 @@ cmnt_pos= cmnt_buf= GET_MEM("cmnt_buf",SAVE8,eight_bits);
+ cmnt_buf_end= cmnt_buf+SAVE8;
+ }
+ 
+-while((a= copy_comment(save_comments))==012);
++while((a= copy_comment(save_comments))=='\n');
+ 
+ if(a==ignore)
+ output_ended(OC("while skipping newlines"),0);
+@@ -1150,6 +1283,9 @@ output_ended(OC("while skipping newlines"),0);
+ BACK_UP
+ }
+ 
++/* :65 */
++/* 66: */
++#line 691 "./ratfor.web"
+ 
+ eight_bits
+ copy_comment FCN((save_comments))
+@@ -1184,6 +1320,9 @@ while((a= get_output())!=stringg);
+ DUMMY_RETURN(ignore);
+ }
+ 
++/* :66 */
++/* 67: */
++#line 728 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1200,6 +1339,9 @@ FREE_MEM(cmnt_buf,"cmnt_buf",SAVE8,eight_bits);
+ cmnt_buf= cmnt_buf_end= cmnt_pos= NULL;
+ }
+ 
++/* :67 */
++/* 68: */
++#line 747 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1215,6 +1357,9 @@ out_ptrunc(cur_val);
+ out_state= NUM_OR_ID;
+ }
+ 
++/* :68 */
++/* 71: */
++#line 810 "./ratfor.web"
+ 
+ 
+ int
+@@ -1243,6 +1388,9 @@ icase= ignore;
+ return wlevel;
+ }
+ 
++/* :71 */
++/* 72: */
++#line 845 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1273,6 +1421,9 @@ OUT_CHAR(XORD(*p));
+ OUT_CHAR(constant);
+ }
+ 
++/* :72 */
++/* 74: */
++#line 918 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1293,16 +1444,18 @@ boolean found_semi;
+ boolean balanced0= balanced;
+ ASCII cur_delim0= cur_delim;
+ 
++/* 75: */
++#line 997 "./ratfor.web"
+ 
+ 
+ switch(l)
+ {
+-case 0173:
+-l0= 050;r0= 051;
++case '{':
++l0= '(';r0= ')';
+ break;
+ 
+-case 050:
+-l0= 0173;r0= 0175;
++case '(':
++l0= '{';r0= '}';
+ break;
+ 
+ default:
+@@ -1310,9 +1463,11 @@ default:
+ confusion(OC("copyd"),OC("Invalid left delimiter 0x%x"),l);
+ }
+ 
++/* :75 */
++#line 938 "./ratfor.web"
+ 
+ 
+-if(l==0173&&xpn_cases)
++if(l=='{'&&xpn_cases)
+ {
+ if(DONE_LEVEL&&!pop_level())
+ output_ended(OC("after '{'"),0);
+@@ -1357,14 +1512,18 @@ a= (sixteen_bits)(*output_rtn)();
+ if(to_memory&&a==(sixteen_bits)stringg)
+ in_string= BOOLEAN(!in_string);
+ 
+-if(!in_string)
++if(!in_string)/* 76: */
++#line 1016 "./ratfor.web"
++
+ {
+ if(a==ignore)
+ output_ended(OC("while scanning for '%c'.  Scan began \
+ with delimiter '%c' at line %u"),3,XCHR(r),XCHR(l),starting_line);
+ 
+ if(a==(sixteen_bits)l)bal0[++bal]= 0;
+-else if(a==(sixteen_bits)r)
++else if(a==(sixteen_bits)r)/* 77: */
++#line 1039 "./ratfor.web"
++
+ {
+ if(bal<=0)
+ {
+@@ -1385,14 +1544,14 @@ else OUT_CHAR(r0);
+ 
+ if(--bal==0)
+ {
+-if(semi_allowed&&last_token&&last_token!=073)
++if(semi_allowed&&last_token&&last_token!=';')
+ {
+ 
+ RAT_error(WARNING,OC("Supplied missing ';' before \
+ delimiter '%c'"),1,r);
+ 
+-if(to_memory)SAVE_IN_MEM(073)
+-else OUT_CHAR(073);
++if(to_memory)SAVE_IN_MEM(';')
++else OUT_CHAR(';');
+ }
+ 
+ if(to_memory)SAVE_IN_MEM(r)
+@@ -1405,9 +1564,13 @@ break;
+ }
+ }
+ 
++/* :77 */
++#line 1022 "./ratfor.web"
+ 
+ else if(a==l0)bal0[bal]++;
+-else if(a==r0)
++else if(a==r0)/* 78: */
++#line 1080 "./ratfor.web"
++
+ {
+ if(bal0[bal]<=0)
+ {
+@@ -1418,10 +1581,12 @@ continue;
+ else bal0[bal]--;
+ }
+ 
++/* :78 */
++#line 1024 "./ratfor.web"
+ 
+ else if(a!=stringg)
+ {
+-if(a==073)
++if(a==';')
+ if(semi_allowed)found_semi= YES;
+ else
+ RAT_error(ERROR,OC("Spurious semicolon"),0);
+@@ -1433,9 +1598,13 @@ else last_token= a;
+ }
+ }
+ 
++/* :76 */
++#line 984 "./ratfor.web"
+ 
+ 
+-if(to_memory)
++if(to_memory)/* 79: */
++#line 1095 "./ratfor.web"
++
+ {
+ if(TOKEN1(a))
+ {
+@@ -1456,6 +1625,8 @@ RAT_error(ERROR,OC("@o command not allowed inside switch"),0);
+ else
+ {
+ if(xpn_cases)
++/* 80: */
++#line 1128 "./ratfor.web"
+ 
+ {
+ eight_bits a0,a1;
+@@ -1466,15 +1637,17 @@ a= IDENTIFIER(a0= (eight_bits)a,a1= next_byte());
+ if(a==id_switch)
+ {
+ SAVE_16;
+-copyd(TO_MEMORY,DONT_XPN_CASES,050,051,NO);
++copyd(TO_MEMORY,DONT_XPN_CASES,'(',')',NO);
+ skip_newlines(COPY_COMMENTS);
+-copyd(TO_MEMORY,DONT_XPN_CASES,0173,0175,YES);
++copyd(TO_MEMORY,DONT_XPN_CASES,'{','}',YES);
+ }
+ else if(a==id_case)x_case();
+ else if(a==id_default)x_default();
+ else SAVE_16;
+ }
+ 
++/* :80 */
++#line 1115 "./ratfor.web"
+ 
+ else
+ {
+@@ -1484,6 +1657,8 @@ SAVE_IN_MEM(next_byte())
+ }
+ }
+ 
++/* :79 */
++#line 986 "./ratfor.web"
+ 
+ }
+ 
+@@ -1491,13 +1666,16 @@ balanced= balanced0;
+ cur_delim= cur_delim0;
+ }
+ 
++/* :74 */
++/* 81: */
++#line 1149 "./ratfor.web"
+ 
+ 
+ SRTN
+ cp_fcn_body(VOID)
+ {
+ brace_level++;
+-copyd(TO_OUTPUT,XPN_CASES,0173,0175,YES);
++copyd(TO_OUTPUT,XPN_CASES,'{','}',YES);
+ 
+ if(--brace_level==0)
+ {
+@@ -1507,6 +1685,9 @@ rlevel--;
+ }
+ }
+ 
++/* :81 */
++/* 83: */
++#line 1222 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1519,7 +1700,7 @@ sixteen_bits a;
+ EAT_AUTO_SEMI;
+ skip_newlines(COPY_COMMENTS);
+ 
+-if((a= next_byte())!=0173)
++if((a= next_byte())!='{')
+ {
+ if(a==ignore)
+ output_ended(OC("at beginning of statement"),0);
+@@ -1530,7 +1711,7 @@ if(brace_only)
+ 
+ RAT_error(WARNING,OC("Inserted '{'"),0);
+ BACK_UP
+-copyd(to_memory,XPN_CASES,0173,0175,YES);
++copyd(to_memory,XPN_CASES,'{','}',YES);
+ return;
+ }
+ 
+@@ -1556,11 +1737,14 @@ BACK_UP
+ x_stmt();
+ }
+ }
+-else copyd(to_memory,XPN_CASES,0173,0175,YES);
++else copyd(to_memory,XPN_CASES,'{','}',YES);
+ 
+ }
+ 
+ 
++/* :83 */
++/* 84: */
++#line 1277 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1574,13 +1758,13 @@ if((a= get_output())==ignore)
+ output_ended(OC("during scan of simple \
+ statement "),0);
+ 
+-if(a==073&&!in_string)break;
++if(a==';'&&!in_string)break;
+ }
+ 
+ 
+ if((a= next_byte())!=stringg){BACK_UP return;}
+ 
+-if(*cur_byte!=012){BACK_UP return;}
++if(*cur_byte!='\n'){BACK_UP return;}
+ 
+ 
+ OUT_CHAR(a);
+@@ -1588,6 +1772,9 @@ while((a= get_output())!=stringg);
+ }
+ 
+ 
++/* :84 */
++/* 86: */
++#line 1337 "./ratfor.web"
+ 
+ 
+ eight_bits HUGE*
+@@ -1614,13 +1801,13 @@ p_end= p+nmax-1;
+ 
+ switch(r_after)
+ {
+-case 051:
+-l= (eight_bits)050;
++case ')':
++l= (eight_bits)'(';
+ bal= 1;
+ break;
+ 
+-case 0175:
+-l= (eight_bits)0173;
++case '}':
++l= (eight_bits)'{';
+ bal= 1;
+ break;
+ 
+@@ -1647,6 +1834,8 @@ if(p>=p_end)resize(pp,nmax,&p,&p_end);
+ if(TOKEN1(a= next_byte()))
+ {
+ if(!in_string)
++/* 87: */
++#line 1411 "./ratfor.web"
+ 
+ {
+ if(a==ignore)
+@@ -1654,7 +1843,9 @@ output_ended(OC("while scanning from line %u \
+ for delimiter (r_before = '%c', r_after = '%c')"),3,starting_line,XCHR(r_before),XCHR(r_after));
+ 
+ if(a==l)bal0[++bal]= 0;
+-else if(a==r_after&&r_after!=NOT_AFTER)
++else if(a==r_after&&r_after!=NOT_AFTER)/* 88: */
++#line 1430 "./ratfor.web"
++
+ {
+ if(l&&bal<=0)
+ {
+@@ -1666,11 +1857,11 @@ else
+ {
+ if(bal0[bal]!=0)
+ {
+-inserted(bal0[bal],0173,0175,l,bal);
++inserted(bal0[bal],'{','}',l,bal);
+ 
+ while(bal0[bal]--)
+ {
+-*p++= 0175;
++*p++= '}';
+ if(p>=p_end)resize(pp,nmax,&p,&p_end);
+ }
+ }
+@@ -1684,6 +1875,8 @@ return p;
+ }
+ }
+ 
++/* :88 */
++#line 1418 "./ratfor.web"
+ 
+ else if(a==r_before&&r_before!=NOT_BEFORE)
+ {
+@@ -1691,23 +1884,31 @@ BACK_UP;
+ *p= '\0';
+ return p;
+ }
+-else if(a==0173)bal0[bal]++;
+-else if(a==0175)
++else if(a=='{')bal0[bal]++;
++else if(a=='}')/* 89: */
++#line 1461 "./ratfor.web"
++
+ {
+ if(bal0[bal]<=0)
+ {
+ p--;
+-unmatched(0173,0175);
++unmatched('{','}');
+ continue;
+ }
+ else bal0[bal]--;
+ }
+ 
++/* :89 */
++#line 1426 "./ratfor.web"
+ 
+ }
+ 
++/* :87 */
++#line 1395 "./ratfor.web"
+ 
+ 
++/* 90: */
++#line 1473 "./ratfor.web"
+ 
+ {
+ *p++= a;
+@@ -1725,6 +1926,8 @@ break;
+ }
+ }
+ 
++/* :90 */
++#line 1397 "./ratfor.web"
+ 
+ }
+ else
+@@ -1738,6 +1941,9 @@ DUMMY_RETURN(NULL);
+ }
+ 
+ 
++/* :86 */
++/* 91: */
++#line 1491 "./ratfor.web"
+ 
+ 
+ outer_char*
+@@ -1750,6 +1956,9 @@ sprintf((char*)q0,delim?"'%c'":"?",XCHR(delim));
+ return q0;
+ }
+ 
++/* :91 */
++/* 92: */
++#line 1505 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1769,33 +1978,50 @@ old_len*sizeof(eight_bits));
+ *pp_end= *pp+new_len-1;
+ }
+ 
++/* :92 */
++#line 38 "./ratfor.web"
+ 
+ #endif 
+ 
+ #if(part != 1)
++/* 95: */
++#line 1584 "./ratfor.web"
+ 
+ 
+ SRTN
+ alloc_Rat(VOID)
+ {
++/* 70: */
++#line 802 "./ratfor.web"
+ 
+ 
+ ALLOC(LBL,lbl,"lb",max_lbls,0);
+ lbl_end= lbl+max_lbls;
+ 
++/* :70 */
++/* 96: */
++#line 1593 "./ratfor.web"
+ 
+ 
+ ALLOC(outer_char,cmd_fmt,"cf",cmd_fsize,0);
+ ALLOC(ASCII,cmd_msg,"cg",cmd_size,0);
+ cmd_end= cmd_msg+cmd_size;
+ 
++/* :96 */
++/* 100: */
++#line 1720 "./ratfor.web"
+ 
+ 
+ begun= GET_MEM("begun",max_lbls,BEGUN);
+ 
++/* :100 */
++#line 1589 "./ratfor.web"
+ 
+ }
+ 
++/* :95 */
++/* 97: */
++#line 1603 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1826,11 +2052,15 @@ fmt0= va_arg(arg_ptr,char*);
+ va_arg(arg_ptr,int);
+ #endif
+ 
++/* 99: */
++#line 1702 "./ratfor.web"
+ 
+ {
+ static outer_char brkset[3]= "*?";
+ 
++#ifndef strpbrk
+ char*strpbrk();
++#endif
+ boolean found_abbrev;
+ 
+ 
+@@ -1841,6 +2071,8 @@ if(suppress_cmds){if(found_abbrev)return;}
+ else{if(!found_abbrev)return;}
+ }
+ 
++/* :99 */
++#line 1633 "./ratfor.web"
+ 
+ 
+ if(emit_continue)
+@@ -1853,6 +2085,8 @@ CONTINUE(ignore);
+ if(
+ nsprintf(cmd_fmt,OC("--- %s \"%s%s\" ---"),3,beginning,cmd_name(begun[rlevel-1].cmd),fmt0)>=(int)(cmd_fsize))OVERFLW("cmd_fmt","");
+ 
++/* 98: */
++#line 1657 "./ratfor.web"
+ 
+ {
+ outer_char HUGE*p;
+@@ -1894,14 +2128,19 @@ va_end(arg_ptr);
+ OUT_MSG(cmd_msg,q);
+ }
+ 
++/* :98 */
++#line 1644 "./ratfor.web"
+ ;
+ 
+ if(Fortran88&&symbolic_label)
+ {
+-id0(symbolic_label);OUT_CHAR(072);
++id0(symbolic_label);OUT_CHAR(':');
+ }
+ }
+ 
++/* :97 */
++/* 101: */
++#line 1725 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -1919,6 +2158,9 @@ begun[rlevel].level= wlevel;
+ rlevel++;
+ }
+ 
++/* :101 */
++/* 103: */
++#line 1758 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -1940,7 +2182,7 @@ didnt_expand('(',c,"while");
+ return;
+ }
+ };
+-pa= SAVE_AFTER(&a,SAVE8,051);
++pa= SAVE_AFTER(&a,SAVE8,')');
+ 
+ 
+ out_cmd(YES,'w',OC(""),OC("(%s)"),2,a,pa);
+@@ -1971,6 +2213,9 @@ rlevel--;
+ FREE_MEM(a,"while:a",SAVE8,eight_bits);
+ }
+ 
++/* :103 */
++/* 104: */
++#line 1803 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -1982,7 +2227,7 @@ sixteen_bits a;
+ if(wlevel==0&&switch_level==0)
+ {
+ NOT_LOOP("break"," or \"switch\"");
+-COPY_TO(073);
++COPY_TO(';');
+ return;
+ }
+ 
+@@ -2010,6 +2255,9 @@ char_after(';');
+ rlevel--;
+ }
+ 
++/* :104 */
++/* 105: */
++#line 1845 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -2022,6 +2270,9 @@ RAT_error(WARNING,OC("Misplaced keyword: \
+ \"%s\" must appear inside loop%s; command ignored"),2,id,msg);
+ }
+ 
++/* :105 */
++/* 106: */
++#line 1860 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2033,7 +2284,7 @@ sixteen_bits a;
+ if(wlevel==0)
+ {
+ NOT_LOOP("next","");
+-COPY_TO(073);
++COPY_TO(';');
+ return;
+ }
+ 
+@@ -2058,6 +2309,9 @@ char_after(';');
+ rlevel--;
+ }
+ 
++/* :106 */
++/* 108: */
++#line 1910 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2102,7 +2356,7 @@ didnt_expand('(',c,"until");
+ return;
+ }
+ };
+-pu= SAVE_AFTER(&u,SAVE8,051);
++pu= SAVE_AFTER(&u,SAVE8,')');
+ 
+ out_cmd(NO,'p',OC(""),OC("(%s)"),2,u,pu);
+ 
+@@ -2123,6 +2377,9 @@ wlevel--;
+ rlevel--;
+ }
+ 
++/* :108 */
++/* 110: */
++#line 1981 "./ratfor.web"
+ 
+ X_FCN
+ x_do(VOID)
+@@ -2156,7 +2413,7 @@ BACK_UP
+ 
+ if(!(a==id_while))
+ {
+-id0(id__DO);if(!Fortran88)LABEL(s_next);COPY_2TO(0173,073);NL;
++id0(id__DO);if(!Fortran88)LABEL(s_next);COPY_2TO('{',';');NL;
+ INDENT;
+ stmt(TO_OUTPUT,0);
+ OUTDENT;
+@@ -2177,6 +2434,9 @@ wlevel--;
+ rlevel--;
+ }
+ 
++/* :110 */
++/* 112: */
++#line 2059 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2199,9 +2459,9 @@ didnt_expand('(',c,"for");
+ return;
+ }
+ };
+-pa= SAVE_AFTER(&a,SAVE8,073);
+-pb= SAVE_AFTER(&b,SAVE8,073);
+-pc= SAVE_AFTER(&c,SAVE8,051);
++pa= SAVE_AFTER(&a,SAVE8,';');
++pb= SAVE_AFTER(&b,SAVE8,';');
++pc= SAVE_AFTER(&c,SAVE8,')');
+ 
+ 
+ out_cmd(YES,'f',OC(""),OC("(%s;%s;%s)"),6,a,pa,b,pb,c,pc);
+@@ -2237,6 +2497,9 @@ FREE_MEM(b,"for:b",SAVE8,eight_bits);
+ FREE_MEM(c,"for:c",SAVE8,eight_bits);
+ }
+ 
++/* :112 */
++/* 114: */
++#line 2131 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2259,6 +2522,9 @@ rlevel--;
+ }
+ 
+ 
++/* :114 */
++/* 115: */
++#line 2152 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -2278,6 +2544,9 @@ stmt(TO_OUTPUT,0);
+ OUTDENT;
+ }
+ 
++/* :115 */
++/* 116: */
++#line 2172 "./ratfor.web"
+ 
+ 
+ boolean
+@@ -2342,6 +2611,9 @@ return NO;
+ }
+ }
+ 
++/* :116 */
++/* 117: */
++#line 2238 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2356,6 +2628,9 @@ x_els_if(VOID)
+ UNEXPECTED("elseif");
+ }
+ 
++/* :117 */
++/* 118: */
++#line 2256 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2418,6 +2693,9 @@ x_until(VOID)
+ UNEXPECTED("until");
+ }
+ 
++/* :118 */
++/* 120: */
++#line 2338 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2435,6 +2713,9 @@ ENDWHERE;
+ rlevel--;
+ }
+ 
++/* :120 */
++/* 121: */
++#line 2357 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -2445,6 +2726,9 @@ CONST outer_char id[]C1("Error message.")
+ RAT_error(WARNING,OC("Unexpected keyword \"%s\" ignored"),1,id);
+ }
+ 
++/* :121 */
++/* 124: */
++#line 2454 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2488,7 +2772,7 @@ didnt_expand('(',c,"switch");
+ return;
+ }
+ };
+-pa= SAVE_AFTER(&a,SAVE8,051);
++pa= SAVE_AFTER(&a,SAVE8,')');
+ 
+ 
+ out_cmd(YES,'s',OC(""),OC("(%s)"),2,a,pa);
+@@ -2504,7 +2788,9 @@ if(Fortran88)
+ {
+ computed_goto= NO;
+ }
+-else
++else/* 126: */
++#line 2541 "./ratfor.web"
++
+ {
+ unsigned short k;
+ VAL val;
+@@ -2573,9 +2859,13 @@ mcases<max_spread)?YES:
+ not_integer:;
+ }
+ 
++/* :126 */
++#line 2503 "./ratfor.web"
+ ;
+ 
+-if(computed_goto)
++if(computed_goto)/* 127: */
++#line 2614 "./ratfor.web"
++
+ {
+ CASE_TYPE m;
+ unsigned short k;
+@@ -2613,8 +2903,12 @@ rlevel--;
+ }
+ }
+ 
++/* :127 */
++#line 2505 "./ratfor.web"
++
++else/* 128: */
++#line 2655 "./ratfor.web"
+ 
+-else
+ {
+ boolean case_ended_with_break= NO;
+ boolean made_temp= YES;
+@@ -2634,6 +2928,8 @@ id0(icase);EQUALS;copy_out(a,pa,!macro);NL;
+ }
+ 
+ for(k= 1;k<=cur_switch.ncases;k++)
++/* 131: */
++#line 2737 "./ratfor.web"
+ 
+ {
+ cur_case= &cur_switch.cases[k];
+@@ -2642,6 +2938,8 @@ if(Fortran88)
+ if(k==1)s_case= max_stmt++;
+ else
+ {
++/* 132: */
++#line 2798 "./ratfor.web"
+ 
+ {
+ CASE HUGE*last_case= &cur_switch.cases[k-1];
+@@ -2653,6 +2951,8 @@ BOOLEAN(MEMCMP(last_case->txt.next-3,break_tokens,3)==0);
+ else case_ended_with_break= NO;
+ }
+ 
++/* :132 */
++#line 2745 "./ratfor.web"
+ 
+ if(!case_ended_with_break){GOTO(s_case);}
+ }
+@@ -2666,10 +2966,10 @@ id0(id__CASE);
+ if(cur_case->is_default)id0(id__DEFAULT);
+ else
+ {
+-if(*cur_case->case_txt.start!=050)LP;
++if(*cur_case->case_txt.start!='(')LP;
+ copy_out(cur_case->case_txt.start,cur_case->case_txt.next,
+ !macro);
+-if(*(cur_case->case_txt.next-1)!=051)RP;
++if(*(cur_case->case_txt.next-1)!=')')RP;
+ }
+ NL;
+ INDENT;
+@@ -2703,6 +3003,8 @@ copy_out(cur_case->txt.start,cur_case->txt.next,!macro);
+ rlevel--;
+ }
+ 
++/* :131 */
++#line 2673 "./ratfor.web"
+ 
+ 
+ if(!Fortran88)
+@@ -2715,6 +3017,8 @@ GOTO(s_default);
+ }
+ }
+ 
++/* :128 */
++#line 2506 "./ratfor.web"
+ 
+ OUTDENT;
+ 
+@@ -2734,6 +3038,9 @@ switch_level--;
+ FREE_MEM(a,"switch:a",SAVE8,eight_bits);
+ }
+ 
++/* :124 */
++/* 129: */
++#line 2687 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -2754,6 +3061,9 @@ out_cmd(NO,'c',OC(""),OC(" %s:"),2,cur_case->case_txt.start,cur_case->case_txt.n
+ }
+ }
+ 
++/* :129 */
++/* 130: */
++#line 2710 "./ratfor.web"
+ 
+ 
+ STMT_LBL
+@@ -2780,6 +3090,9 @@ if(cur_case->is_default)return s_default;
+ return s_break;
+ }
+ 
++/* :130 */
++/* 133: */
++#line 2810 "./ratfor.web"
+ 
+ X_FCN x_case(VOID)
+ {
+@@ -2791,6 +3104,8 @@ return;
+ 
+ expanding(case_CMD);
+ 
++/* 134: */
++#line 2832 "./ratfor.web"
+ 
+ 
+ *cur_case->txt.next= '\0';
+@@ -2813,10 +3128,14 @@ cur_case->txt.end= cur_case->txt.start+BIG_SAVE8;
+ 
+ cur_case->txt.next= cur_case->txt.start;
+ 
++/* :134 */
++#line 2821 "./ratfor.web"
+ ;
+-cur_case->case_txt.next= SAVE_AFTER(&cur_case->case_txt.start,SAVE8,072);
++cur_case->case_txt.next= SAVE_AFTER(&cur_case->case_txt.start,SAVE8,':');
+ cur_case->is_default= NO;
+ 
++/* 135: */
++#line 2855 "./ratfor.web"
+ 
+ {
+ unsigned short k;
+@@ -2838,11 +3157,16 @@ break;
+ }
+ }
+ 
++/* :135 */
++#line 2825 "./ratfor.web"
+ 
+ 
+ rlevel--;
+ }
+ 
++/* :133 */
++/* 136: */
++#line 2878 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -2861,6 +3185,8 @@ if(cur_switch.has_default)
+ RAT_error(ERROR,OC("Only one default allowed per switch"),0);
+ else cur_switch.has_default= YES;
+ 
++/* 134: */
++#line 2832 "./ratfor.web"
+ 
+ 
+ *cur_case->txt.next= '\0';
+@@ -2883,6 +3209,8 @@ cur_case->txt.end= cur_case->txt.start+BIG_SAVE8;
+ 
+ cur_case->txt.next= cur_case->txt.start;
+ 
++/* :134 */
++#line 2895 "./ratfor.web"
+ ;
+ cur_case->case_txt.next= cur_case->case_txt.start;
+ cur_case->is_default= YES;
+@@ -2893,6 +3221,9 @@ char_after(':');
+ rlevel--;
+ }
+ 
++/* :136 */
++/* 138: */
++#line 3083 "./ratfor.web"
+ 
+ 
+ 
+@@ -2909,7 +3240,7 @@ WHILE()
+ {
+ a= next_byte();
+ 
+-if(!(a==040||a==tab_mark))
++if(!(a==' '||a==tab_mark))
+ break;
+ }
+ 
+@@ -2933,19 +3264,19 @@ id0(id_program);id0(cur_fcn);
+ 
+ if(cur_fcn==id_procedure)
+ {
+-COPY_TO(073);NL;
++COPY_TO(';');NL;
+ }
+ else
+ {
+ b= next_byte();BACK_UP
+-if(b==050)PARENS;
++if(b=='(')PARENS;
+ NL;
+ EAT_AUTO_SEMI;
+ skip_newlines(COPY_COMMENTS);
+ INDENT;
+ copy_out(insert.program.start,insert.program.end,!macro);
+-out_char(073);
+-COPY_2TO(0173,NOT_AFTER);
++out_char(';');
++COPY_2TO('{',NOT_AFTER);
+ if(psave_buffer>save_buffer)NL;
+ brace_level++;
+ stmt(TO_OUTPUT,BRACE_ONLY);
+@@ -2975,7 +3306,7 @@ WHILE()
+ {
+ a= next_byte();
+ 
+-if(!(a==040||a==tab_mark))
++if(!(a==' '||a==tab_mark))
+ break;
+ }
+ 
+@@ -2999,19 +3330,19 @@ id0(id_module);id0(cur_fcn);
+ 
+ if(cur_fcn==id_procedure)
+ {
+-COPY_TO(073);NL;
++COPY_TO(';');NL;
+ }
+ else
+ {
+ b= next_byte();BACK_UP
+-if(b==050)PARENS;
++if(b=='(')PARENS;
+ NL;
+ EAT_AUTO_SEMI;
+ skip_newlines(COPY_COMMENTS);
+ INDENT;
+ copy_out(insert.module.start,insert.module.end,!macro);
+-out_char(073);
+-COPY_2TO(0173,NOT_AFTER);
++out_char(';');
++COPY_2TO('{',NOT_AFTER);
+ if(psave_buffer>save_buffer)NL;
+ brace_level++;
+ stmt(TO_OUTPUT,BRACE_ONLY);
+@@ -3041,7 +3372,7 @@ WHILE()
+ {
+ a= next_byte();
+ 
+-if(!(a==040||a==tab_mark))
++if(!(a==' '||a==tab_mark))
+ break;
+ }
+ 
+@@ -3065,19 +3396,19 @@ id0(id_subroutine);id0(cur_fcn);
+ 
+ if(cur_fcn==id_procedure)
+ {
+-COPY_TO(073);NL;
++COPY_TO(';');NL;
+ }
+ else
+ {
+ b= next_byte();BACK_UP
+-if(b==050)PARENS;
++if(b=='(')PARENS;
+ NL;
+ EAT_AUTO_SEMI;
+ skip_newlines(COPY_COMMENTS);
+ INDENT;
+ copy_out(insert.subroutine.start,insert.subroutine.end,!macro);
+-out_char(073);
+-COPY_2TO(0173,NOT_AFTER);
++out_char(';');
++COPY_2TO('{',NOT_AFTER);
+ if(psave_buffer>save_buffer)NL;
+ brace_level++;
+ stmt(TO_OUTPUT,BRACE_ONLY);
+@@ -3107,7 +3438,7 @@ WHILE()
+ {
+ a= next_byte();
+ 
+-if(!(a==040||a==tab_mark))
++if(!(a==' '||a==tab_mark))
+ break;
+ }
+ 
+@@ -3131,19 +3462,19 @@ id0(id_function);id0(cur_fcn);
+ 
+ if(cur_fcn==id_procedure)
+ {
+-COPY_TO(073);NL;
++COPY_TO(';');NL;
+ }
+ else
+ {
+ b= next_byte();BACK_UP
+-if(b==050)PARENS;
++if(b=='(')PARENS;
+ NL;
+ EAT_AUTO_SEMI;
+ skip_newlines(COPY_COMMENTS);
+ INDENT;
+ copy_out(insert.function.start,insert.function.end,!macro);
+-out_char(073);
+-COPY_2TO(0173,NOT_AFTER);
++out_char(';');
++COPY_2TO('{',NOT_AFTER);
+ if(psave_buffer>save_buffer)NL;
+ brace_level++;
+ stmt(TO_OUTPUT,BRACE_ONLY);
+@@ -3173,7 +3504,7 @@ WHILE()
+ {
+ a= next_byte();
+ 
+-if(!(a==040||a==tab_mark))
++if(!(a==' '||a==tab_mark))
+ break;
+ }
+ 
+@@ -3197,19 +3528,19 @@ id0(id_blockdata);id0(cur_fcn);
+ 
+ if(cur_fcn==id_procedure)
+ {
+-COPY_TO(073);NL;
++COPY_TO(';');NL;
+ }
+ else
+ {
+ b= next_byte();BACK_UP
+-if(b==050)PARENS;
++if(b=='(')PARENS;
+ NL;
+ EAT_AUTO_SEMI;
+ skip_newlines(COPY_COMMENTS);
+ INDENT;
+ copy_out(insert.blockdata.start,insert.blockdata.end,!macro);
+-out_char(073);
+-COPY_2TO(0173,NOT_AFTER);
++out_char(';');
++COPY_2TO('{',NOT_AFTER);
+ if(psave_buffer>save_buffer)NL;
+ brace_level++;
+ stmt(TO_OUTPUT,BRACE_ONLY);
+@@ -3239,7 +3570,7 @@ WHILE()
+ {
+ a= next_byte();
+ 
+-if(!(a==040||a==tab_mark))
++if(!(a==' '||a==tab_mark))
+ break;
+ }
+ 
+@@ -3263,19 +3594,19 @@ id0(id_interface);id0(cur_fcn);
+ 
+ if(cur_fcn==id_procedure)
+ {
+-COPY_TO(073);NL;
++COPY_TO(';');NL;
+ }
+ else
+ {
+ b= next_byte();BACK_UP
+-if(b==050)PARENS;
++if(b=='(')PARENS;
+ NL;
+ EAT_AUTO_SEMI;
+ skip_newlines(COPY_COMMENTS);
+ INDENT;
+ copy_out(insert.interface.start,insert.interface.end,!macro);
+-out_char(073);
+-COPY_2TO(0173,NOT_AFTER);
++out_char(';');
++COPY_2TO('{',NOT_AFTER);
+ if(psave_buffer>save_buffer)NL;
+ brace_level++;
+ stmt(TO_OUTPUT,BRACE_ONLY);
+@@ -3292,6 +3623,9 @@ cur_fcn= NO_FCN;
+ rlevel--;
+ }
+ 
++/* :138 */
++/* 139: */
++#line 3093 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -3317,6 +3651,9 @@ id0(a);
+ }
+ }
+ 
++/* :139 */
++/* 141: */
++#line 3135 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -3329,6 +3666,9 @@ NL;
+ INDENT;
+ }
+ 
++/* :141 */
++/* 143: */
++#line 3210 "./ratfor.web"
+ 
+ 
+ 
+@@ -3338,8 +3678,8 @@ sixteen_bits a;
+ eight_bits b;
+ 
+ b= next_byte();BACK_UP
+-if(b==054){}
+-else if(b==050)
++if(b==','){}
++else if(b=='(')
+ {
+ id0(id_type);
+ return;
+@@ -3373,7 +3713,13 @@ char_after(';');OUT_CHAR(';');
+ wlevel--;
+ rlevel--;
+ }
++/* :143 */
++/* 143: */
++#line 3215 "./ratfor.web"
+ 
++/* :143 */
++/* 144: */
++#line 3219 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -3384,7 +3730,7 @@ eight_bits HUGE*return_expr= NULL,HUGE*pr;
+ expanding(return_CMD);
+ 
+ 
+-if((pr= SAVE_AFTER(&return_expr,SAVE8,073))>return_expr)
++if((pr= SAVE_AFTER(&return_expr,SAVE8,';'))>return_expr)
+ {
+ if(!is_function)
+ 
+@@ -3403,6 +3749,9 @@ rlevel--;
+ FREE_MEM(return_expr,"return_expr",SAVE8,eight_bits);
+ }
+ 
++/* :144 */
++/* 145: */
++#line 3250 "./ratfor.web"
+ 
+ 
+ X_FCN
+@@ -3434,7 +3783,7 @@ return;
+ }
+ };
+ 
+-pI= SAVE_AFTER(&I,SAVE8,054);
++pI= SAVE_AFTER(&I,SAVE8,',');
+ 
+ if(TOKEN1(*I))
+ {
+@@ -3444,13 +3793,13 @@ expansion aborted"),0);
+ return;
+ }
+ 
+-pImin= SAVE_AFTER(&Imin,SAVE8,054);
++pImin= SAVE_AFTER(&Imin,SAVE8,',');
+ imin= neval(Imin,pImin);
+ 
+-pImax= SAVE_AFTER(&Imax,SAVE8,054);
++pImax= SAVE_AFTER(&Imax,SAVE8,',');
+ imax= neval(Imax,pImax);
+ 
+-pDi= SAVE_AFTER(&Di,SAVE8,051);
++pDi= SAVE_AFTER(&Di,SAVE8,')');
+ di= neval(Di,pDi);
+ 
+ EAT_AUTO_SEMI;
+@@ -3458,7 +3807,7 @@ skip_newlines(NO);
+ 
+ c= next_byte();
+ 
+-if(!(c==0173||c==050))
++if(!(c=='{'||c=='('))
+ {
+ 
+ RAT_error(ERROR,OC("Was expecting '{' or '(', not '%c', after $DO(); \
+@@ -3469,7 +3818,7 @@ return;
+ 
+ 
+ mac_protected= YES;
+-ptxt= SAVE_AFTER(&txt,BIG_SAVE8,c==0173?0175:051);
++ptxt= SAVE_AFTER(&txt,BIG_SAVE8,c=='{'?'}':')');
+ mac_protected= NO;
+ 
+ n= name_dir+IDENTIFIER(*I,*(I+1));
+@@ -3507,6 +3856,9 @@ FREE_MEM(Imax,"unroll:Imax",SAVE8,eight_bits);
+ FREE_MEM(txt,"unroll:txt",SAVE8,eight_bits);
+ }
+ 
++/* :145 */
++/* 146: */
++#line 3347 "./ratfor.web"
+ 
+ 
+ SRTN
+@@ -3526,10 +3878,15 @@ insert.interface.start= insert.interface.end=
+ GET_MEM("interface",2,eight_bits);
+ }
+ 
++/* :146 */
++#line 42 "./ratfor.web"
+ 
+ #endif 
+ 
++#line 1 "./typedefs.hweb"
+ 
+ 
++#line 8 "./formats.hweb"
+ 
++/* :1 */
+ 
+-- 
+1.7.7.1
+

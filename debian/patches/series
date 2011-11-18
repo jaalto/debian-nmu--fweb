@@ -1,0 +1,11 @@
+01-Web--Makefile.patch
+02-Web--configure.patch
+10-Manual--fweb.texi.patch
+12-Web--common.web.patch
+14-Web--fweave.web.patch
+16-Web--ratfor.web.patch
+18-Web--style.web.patch
+20-Web--common.c.patch
+22-Web--fweave.c.patch
+24-Web--ratfor.c.patch
+26-Web--style.c.patch

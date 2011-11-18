@@ -1,0 +1,30 @@
+From 8ae39031239c32e59bab9aabce7e5633e4ef3948 Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:21:11 +0200
+Subject: [PATCH] Web/ratfor.web: Define strpbrk()
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Web/ratfor.web |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/Web/ratfor.web b/Web/ratfor.web
+index e87d5fc..f0affc4 100644
+--- a/Web/ratfor.web
++++ b/Web/ratfor.web
+@@ -1703,7 +1703,9 @@ means output all comments.
+ @B
+ static outer_char brkset[3] = "*?"; /* Prototype list of possible characters to
+ 			be searched for in the command-line list. */
++#ifndef strpbrk
+ char *strpbrk();
++#endif
+ boolean found_abbrev;
+ 
+ @b
+-- 
+1.7.7.1
+

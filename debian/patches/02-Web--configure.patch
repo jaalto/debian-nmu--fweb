@@ -1,0 +1,47 @@
+From 202d6b44a9c648d68fd8a99155ff8babbe679ed3 Mon Sep 17 00:00:00 2001
+From: Jari Aalto <jari.aalto@cante.net>
+Date: Fri, 18 Nov 2011 15:29:34 +0200
+Subject: [PATCH] Web/configure: use -lncurses
+Organization: Private
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Jari Aalto <jari.aalto@cante.net>
+---
+ Web/configure |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Web/configure b/Web/configure
+index a0105ca..f7ad0cd 100755
+--- a/Web/configure
++++ b/Web/configure
+@@ -1589,14 +1589,14 @@ cat >> confdefs.h <<\EOF
+ EOF
+ 
+ fi
+-echo $ac_n "checking for tputs in -ltermcap""... $ac_c" 1>&6
+-echo "configure:1594: checking for tputs in -ltermcap" >&5
++echo $ac_n "checking for tputs in -lncurses""... $ac_c" 1>&6
++echo "configure:1594: checking for tputs in -lncurses" >&5
+ ac_lib_var=`echo termcap'_'tputs | sed 'y%./+-%__p_%'`
+ if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
+   echo $ac_n "(cached) $ac_c" 1>&6
+ else
+   ac_save_LIBS="$LIBS"
+-LIBS="-ltermcap  $LIBS"
++LIBS="-lncurses  $LIBS"
+ cat > conftest.$ac_ext <<EOF
+ #line 1602 "configure"
+ #include "confdefs.h"
+@@ -1625,7 +1625,7 @@ fi
+ if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
+   echo "$ac_t""yes" 1>&6
+   TERMCAP0=
+-LIBS="$LIBS -ltermcap"
++LIBS="$LIBS -lncurses"
+ else
+   echo "$ac_t""no" 1>&6
+ TERMCAP0=termcap0."$(O)"
+-- 
+1.7.7.1
+
