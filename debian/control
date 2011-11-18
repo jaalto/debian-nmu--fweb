@@ -32,6 +32,6 @@ Architecture: all
 Depends: ${misc:Depends}
 Suggests: doc-base, fweb
 Replaces: fweb (<= 1.62-8)
-Description: Documentation for Fweb
+Description: Documentation for literate-programming tool Fweb
  This is the documentation for the fweb litterate-programming tool, in
  HTML, info, and texinfo formats.
