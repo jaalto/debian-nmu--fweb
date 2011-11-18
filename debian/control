@@ -33,5 +33,9 @@ Depends: ${misc:Depends}
 Suggests: doc-base, fweb
 Replaces: fweb (<= 1.62-8)
 Description: Documentation for literate-programming tool Fweb
- This is the documentation for the fweb litterate-programming tool, in
- HTML, info, and texinfo formats.
+ Literate-programming allows the programmer to write a program's
+ code and its code's documentation, with equal importance accorded
+ to both. This helps producing a well-documented code.
+ .
+ This is the documentation for the F in HTML, info, and texinfo
+ formats.
