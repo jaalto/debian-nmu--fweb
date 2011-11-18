@@ -55,7 +55,11 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	-${MAKE} -C Web -i distclean || ${MAKE} -C Web -f Makefile.in distclean
+	if [ -f Web/Makefile ]; then \
+	    ${MAKE} -C Web -i distclean ; \
+	else \
+	    ${MAKE} -C Web -f Makefile.in distclean ; \
+	fi
 	-rm -f Web/idxmerge Web/idxmerge.c Web/custom.h Web/config.h \
 		Manual/fweb.info* Manual/fweb*.html
 	rm -rf Manual/fweb/
