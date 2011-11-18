@@ -1589,14 +1589,14 @@ cat >> confdefs.h <<\EOF
 EOF
 
 fi
-echo $ac_n "checking for tputs in -lncurses""... $ac_c" 1>&6
-echo "configure:1594: checking for tputs in -lncurses" >&5
+echo $ac_n "checking for tputs in -ltermcap""... $ac_c" 1>&6
+echo "configure:1594: checking for tputs in -ltermcap" >&5
 ac_lib_var=`echo termcap'_'tputs | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
-LIBS="-lncurses  $LIBS"
+LIBS="-ltermcap  $LIBS"
 cat > conftest.$ac_ext <<EOF
 #line 1602 "configure"
 #include "confdefs.h"
@@ -1625,7 +1625,7 @@ fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
   TERMCAP0=
-LIBS="$LIBS -lncurses"
+LIBS="$LIBS -ltermcap"
 else
   echo "$ac_t""no" 1>&6
 TERMCAP0=termcap0."$(O)"

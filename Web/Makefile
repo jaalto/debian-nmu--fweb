@@ -591,10 +591,19 @@ install: both idxmerge $(MANUAL)/fweb.info
 	$(INSTALL_DATA) $(MANUAL)/fwebmac.sty $(texdir)/fwebmac.sty
 	$(INSTALL_DATA) $(MANUAL)/fweb.tex $(texdir)/fweb.tex
 	$(INSTALL_DATA) $(MANUAL)/fweb.1 $(mandir)/fweb.$(manext)
-	$(INSTALL_DATA) $(MANUAL)/fweb.info* $(infodir)/
-#	$(INSTALL_DATA) $(MANUAL)/fweb.texi $(texinfodir)/fweb.texi
-#	@echo ""
-#	@echo "DON'T FORGET TO RECORD THE PRESENCE OF fweb.info BY EDITING $(infodir)/dir."
+	$(INSTALL_DATA) $(MANUAL)/fweb.info $(infodir)/fweb.info
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-1 $(infodir)/fweb.info-1
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-2 $(infodir)/fweb.info-2
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-3 $(infodir)/fweb.info-3
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-4 $(infodir)/fweb.info-4
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-5 $(infodir)/fweb.info-5
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-6 $(infodir)/fweb.info-6
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-7 $(infodir)/fweb.info-7
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-8 $(infodir)/fweb.info-8
+	$(INSTALL_DATA) $(MANUAL)/fweb.info-9 $(infodir)/fweb.info-9
+	$(INSTALL_DATA) $(MANUAL)/fweb.texi $(texinfodir)/fweb.texi
+	@echo ""
+	@echo "DON'T FORGET TO RECORD THE PRESENCE OF fweb.info BY EDITING $(infodir)/dir."
 
 uninstall:
 	@echo "Sorry, uninstall is not implemented yet!"

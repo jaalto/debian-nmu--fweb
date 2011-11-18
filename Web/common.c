@@ -1,15 +1,15 @@
 #if(0)
-  FTANGLE v1.61,\
- created with UNIX on "Friday, September 25, 1998 at 8:02." \
-  COMMAND LINE: "./ftangle ./common -uCONFIG -mCONFIG -mGCC -= common.c"\
-  RUN TIME:     "Tuesday, December 14, 1999 at 0:39."\
-  WEB FILE:     "./common.web"\
+  FTANGLE v1.60,\
+ created with UNIX on "Thursday, September 24, 1998 at 16:12." \
+  COMMAND LINE: "Web/ftangle Web/common -A -# --F -= 1.62/Web/common.c"\
+  RUN TIME:     "Friday, September 25, 1998 at 8:02."\
+  WEB FILE:     "Web/common.web"\
   CHANGE FILE:  (none)
 #endif
 #define _COMMON_h  
 #define COMMON_FCNS_   \
 
-#define VERSION  "1.62"
+#define VERSION  "1.61"
 #define RELEASE_DATE  "September 23, 1998" \
 
 #define normal  0
@@ -94,17 +94,17 @@ its present value of %lu characters."),buf_size); \
 
 #define MARK(type,delim,len)mark_cmnt(type,delim,len,p) \
 
-#define BLANK_OUT(d)MEMSET((d)->pos,' ',(d)->len) \
+#define BLANK_OUT(d)MEMSET((d)->pos,040,(d)->len) \
 
 #define is_C_style_cmnt  (C_style_cmnt= ((short_cmnt= Cpp_comments&&*lp== \
-'/'&&*(lp+1)=='/'))||(*lp=='/'&&*(lp+1)=='*')) \
+057&&*(lp+1)==057))||(*lp==057&&*(lp+1)==052)) \
 
 #define start_comment  (is_C_style_cmnt||(*lp==(char)begin_comment0) \
 ||(*lp==(char)begin_comment1)) \
 
 #define start_Rcomment  ((R_style_cmnt= BOOLEAN(*lp==cmnt_char&& \
 *(lp+1)!=cmnt_char&&*(lp-1)!=cmnt_char&& \
-!(*(lp-1)=='@')))||is_C_style_cmnt) \
+!(*(lp-1)==0100)))||is_C_style_cmnt) \
 
 #define k0  cur0_prms->K0
 #define found_at  cur0_prms->Found_at
@@ -136,15 +136,15 @@ if(*end==BP_MARKER&&np!=npmax)end= ((BP*)end)->byte_start \
 
 #define hash_size  353 \
 
-#define stringg  (eight_bits)'\2' \
+#define stringg  (eight_bits)02 \
 
-#define constant  (eight_bits)'\3'
+#define constant  (eight_bits)03
 #define begin_Xmeta  or_or
 #define end_Xmeta  star_star
-#define cdir  (eight_bits)'\6'
-#define colon_colon  (eight_bits)'\11' \
+#define cdir  (eight_bits)06
+#define colon_colon  (eight_bits)011 \
 
-#define join  (eight_bits)'\177' \
+#define join  (eight_bits)0177 \
 
 #define ID0  0200
 #define TOKEN1(a)((a)<ID0) \
@@ -167,84 +167,84 @@ if(*end==BP_MARKER&&np!=npmax)end= ((BP*)end)->byte_start \
 
 #define ignore  0 \
 
-#define begin_comment0  (eight_bits)'\xFE'
-#define begin_comment1  (eight_bits)'\xFD' \
+#define begin_comment0  (eight_bits)0376
+#define begin_comment1  (eight_bits)0375 \
 
-#define module_number  (eight_bits)'\201'
-#define identifier  (eight_bits)'\202'
-#define id_keyword  (eight_bits)'\203' \
+#define module_number  (eight_bits)0201
+#define identifier  (eight_bits)0202
+#define id_keyword  (eight_bits)0203 \
 
-#define L_switch  (eight_bits)'\257'
-#define begin_FORTRAN  (eight_bits)'\260'
-#define begin_RATFOR  (eight_bits)'\261'
-#define begin_C  (eight_bits)'\262'
-#define begin_LITERAL  (eight_bits)'\263' \
+#define L_switch  (eight_bits)0257
+#define begin_FORTRAN  (eight_bits)0260
+#define begin_RATFOR  (eight_bits)0261
+#define begin_C  (eight_bits)0262
+#define begin_LITERAL  (eight_bits)0263 \
 
-#define verbatim  (eight_bits)'\264' \
+#define verbatim  (eight_bits)0264 \
  \
 
-#define invisible_cmnt  (eight_bits)'\265'
-#define compiler_directive  (eight_bits)'\266'
-#define Compiler_Directive  (eight_bits)'\267' \
+#define invisible_cmnt  (eight_bits)0265
+#define compiler_directive  (eight_bits)0266
+#define Compiler_Directive  (eight_bits)0267 \
 
-#define keyword_name  (eight_bits)'\270' \
+#define keyword_name  (eight_bits)0270 \
 
-#define no_index  (eight_bits)'\300'
-#define yes_index  (eight_bits)'\301' \
+#define no_index  (eight_bits)0300
+#define yes_index  (eight_bits)0301 \
 
-#define ascii_constant  (eight_bits)'\302'
-#define begin_vcmnt  (eight_bits)'\303'
-#define big_line_break  (eight_bits)'\304' \
+#define ascii_constant  (eight_bits)0302
+#define begin_vcmnt  (eight_bits)0303
+#define big_line_break  (eight_bits)0304 \
 
-#define begin_bp  (eight_bits)'\305'
-#define insert_bp  (eight_bits)'\306' \
+#define begin_bp  (eight_bits)0305
+#define insert_bp  (eight_bits)0306 \
 
-#define begin_meta  (eight_bits)'\17'
-#define end_meta  (eight_bits)'\27' \
+#define begin_meta  (eight_bits)017
+#define end_meta  (eight_bits)027 \
 
-#define TeX_string  (eight_bits)'\307'
-#define xref_roman  (eight_bits)'\310'
-#define xref_typewriter  (eight_bits)'\311'
-#define xref_wildcard  (eight_bits)'\312' \
+#define TeX_string  (eight_bits)0307
+#define xref_roman  (eight_bits)0310
+#define xref_typewriter  (eight_bits)0311
+#define xref_wildcard  (eight_bits)0312 \
 
-#define control_text  (eight_bits)'\313' \
+#define control_text  (eight_bits)0313 \
 
-#define begin_nuweb  (eight_bits)'\314'
-#define no_mac_expand  (eight_bits)'\315'
-#define set_line_info  (eight_bits)'\316'
-#define short_fcn  (eight_bits)'\317' \
+#define begin_nuweb  (eight_bits)0314
+#define no_mac_expand  (eight_bits)0315
+#define set_line_info  (eight_bits)0316
+#define short_fcn  (eight_bits)0317 \
 
-#define formatt  (eight_bits)'\320' \
+#define formatt  (eight_bits)0320 \
 
-#define limbo_text  (eight_bits)'\323'
-#define op_def  (eight_bits)'\324'
-#define macro_def  (eight_bits)'\325' \
+#define limbo_text  (eight_bits)0323
+#define op_def  (eight_bits)0324
+#define macro_def  (eight_bits)0325 \
 
-#define ignore_defn  (eight_bits)'\327' \
+#define ignore_defn  (eight_bits)0327 \
 
-#define new_output_file  (eight_bits)'\331' \
+#define new_output_file  (eight_bits)0331 \
 
-#define definition  (eight_bits)'\332'
-#define undefinition  (eight_bits)'\333'
-#define WEB_definition  (eight_bits)'\334' \
+#define definition  (eight_bits)0332
+#define undefinition  (eight_bits)0333
+#define WEB_definition  (eight_bits)0334 \
 
-#define m_ifdef  (eight_bits)'\335'
-#define m_ifndef  (eight_bits)'\336'
-#define m_if  (eight_bits)'\337'
-#define m_else  (eight_bits)'\340'
-#define m_elif  (eight_bits)'\341'
-#define m_endif  (eight_bits)'\342'
-#define m_for  (eight_bits)'\343'
-#define m_endfor  (eight_bits)'\344'
-#define m_line  (eight_bits)'\345'
-#define m_undef  (eight_bits)'\346' \
+#define m_ifdef  (eight_bits)0335
+#define m_ifndef  (eight_bits)0336
+#define m_if  (eight_bits)0337
+#define m_else  (eight_bits)0340
+#define m_elif  (eight_bits)0341
+#define m_endif  (eight_bits)0342
+#define m_for  (eight_bits)0343
+#define m_endfor  (eight_bits)0344
+#define m_line  (eight_bits)0345
+#define m_undef  (eight_bits)0346 \
 
-#define end_of_buffer  (eight_bits)'\347' \
+#define end_of_buffer  (eight_bits)0347 \
 
-#define begin_code  (eight_bits)'\350'
-#define module_name  (eight_bits)'\351' \
+#define begin_code  (eight_bits)0350
+#define module_name  (eight_bits)0351 \
 
-#define new_module  (eight_bits)'\352' \
+#define new_module  (eight_bits)0352 \
 
 #define MAX_ERR_BUF  160 \
 
@@ -317,13 +317,9 @@ if(mp+(n)>buf_end) \
 OVERFLW("Keyword buffer","") \
 
 #define CUR_QUOTE  ((eight_bits)(single_quote||(!double_quote&&R77_or_F)? \
-'\'':'"')) \
+047:042)) \
 
-/* 2: */
-#line 44 "./common.web"
 
-/* 5: */
-#line 16 "./typedefs.hweb"
 
 
 #ifndef part
@@ -335,9 +331,6 @@ OVERFLW("Keyword buffer","") \
 #endif 
 
 
-/* :5 */
-/* 6: */
-#line 42 "./typedefs.hweb"
 
 
 #if(part == 0 || part == 1)
@@ -351,32 +344,19 @@ OVERFLW("Keyword buffer","") \
 #endif
 
 
-/* :6 */
-#line 45 "./common.web"
 
 
-/* 34: */
-#line 440 "./typedefs.hweb"
 
 #include "typedefs.h"
 
 
 
-#line 65 "./common.web"
 
-#line 8 "./xrefs.hweb"
 
-/* :34 */
-/* 48: */
-#line 72 "./common.web"
 
 #include "map.h"
 
-/* :48 */
-#line 47 "./common.web"
 
-/* 50: */
-#line 84 "./common.web"
 
 
 #ifdef ibmpc 
@@ -386,9 +366,6 @@ extern unsigned _stklen= STKLEN;
 #endif
 
 
-/* :50 */
-/* 52: */
-#line 184 "./common.web"
 
 
 IN_COMMON ASCII xord[last_text_char+1];
@@ -397,26 +374,17 @@ ASCII xxord[last_text_char+1];
 #endif
 IN_COMMON outer_char xchr[0200];
 
-/* :52 */
-/* 65: */
-#line 475 "./common.web"
 
 
 extern DOTS dots0[],mcmds[];
 
 
-/* :65 */
-/* 66: */
-#line 483 "./common.web"
 
 
 IN_COMMON BUF_SIZE delta_dots;
 IN_COMMON BUF_SIZE ndots;
 IN_COMMON DOTS HUGE*dots,HUGE*dots_end,HUGE*next_dot;
 
-/* :66 */
-/* 72: */
-#line 661 "./common.web"
 
 
 IN_COMMON BUF_SIZE buf_size;
@@ -440,32 +408,20 @@ ASCII HUGE*pos;
 IN_COMMON CMNT_DATA posns[CMNT_MARKS],HUGE*pcmnt CSET(posns),
 HUGE*pcmnt_end CSET(posns+CMNT_MARKS);
 
-/* :72 */
-/* 96: */
-#line 1504 "./common.web"
 
 
 IN_COMMON ASCII HUGE*pk;
 
-/* :96 */
-/* 98: */
-#line 1549 "./common.web"
 
 
 IN_COMMON ASCII HUGE*lp,HUGE*semi_pos;
 IN_COMMON boolean found_text,text,C_style_cmnt,short_cmnt,R_style_cmnt;
 
-/* :98 */
-/* 103: */
-#line 1693 "./common.web"
 
 
 IN_COMMON ASCII HUGE*last_pos;
 IN_COMMON ASCII cmnt_char;
 
-/* :103 */
-/* 130: */
-#line 2443 "./common.web"
 
 
 IN_COMMON sixteen_bits module_count;
@@ -484,9 +440,6 @@ IN_COMMON boolean no_more_input CSET(NO);
 
 
 
-/* :130 */
-/* 162: */
-#line 3325 "./common.web"
 
 
 
@@ -559,25 +512,16 @@ IN_COMMON boolean no_more_input CSET(NO);
 #endif 
 
 
-/* :162 */
-/* 171: */
-#line 3678 "./common.web"
 
 
 IN_COMMON name_pointer name_ptr;
 IN_COMMON ASCII HUGE*byte_ptr;
 
-/* :171 */
-/* 214: */
-#line 4962 "./common.web"
 
 
 IN_COMMON ASCII HUGE*pformat,HUGE*pdefault,HUGE*pdata,
 HUGE*pbp,HUGE*pinclude,HUGE*ppragma,HUGE*pcontains;
 
-/* :214 */
-/* 216: */
-#line 4996 "./common.web"
 
 
 IN_COMMON outer_char outp_buf[MAX_OUTPUT_LINE_LENGTH];
@@ -592,26 +536,17 @@ IN_COMMON outer_char prefix_end_char CSET(PREFIX_END_CHAR);
 
 IN_COMMON boolean all_std CSET(NO);
 
-/* :216 */
-/* 263: */
-#line 6559 "./common.web"
 
 
 IN_COMMON STMT_LBL max_stmt CSET(STARTING_DO_NUM);
 IN_COMMON int not;
 
-/* :263 */
-/* 283: */
-#line 7419 "./common.web"
 
 
 IN_COMMON double g_ratio CSET(G_RATIO);
 IN_COMMON unsigned short marginal_cases CSET(MARGINAL_CASES);
 IN_COMMON CASE_TYPE max_spread CSET(MAX_SPREAD);
 
-/* :283 */
-/* 335: */
-#line 8869 "./common.web"
 
 
 IN_COMMON CONST char*day[]
@@ -627,9 +562,6 @@ IN_COMMON CONST char*month[]
 #endif 
 ;
 
-/* :335 */
-/* 338: */
-#line 8943 "./common.web"
 
 
 #if TIMING
@@ -661,11 +593,7 @@ return t1-t0;
 
 #endif 
 
-/* :338 */
-#line 48 "./common.web"
 
-/* 37: */
-#line 79 "./xrefs.hweb"
 
 
 typedef struct xref_info0
@@ -681,18 +609,12 @@ typedef ASCII HUGE*XREF_POINTER;
 
 
 
-/* :37 */
-/* 39: */
-#line 27 "./tokens.hweb"
 
 
 typedef sixteen_bits Token;
 typedef Token HUGE*token_pointer;
 typedef token_pointer HUGE*text_pointer;
 
-/* :39 */
-/* 41: */
-#line 44 "./scraps.hweb"
 
 
 typedef struct
@@ -704,23 +626,15 @@ eight_bits mathness;
 union
 {
 text_pointer Trans;
-/* 49: */
-#line 77 "./common.web"
 
 
-/* :49 */
-#line 55 "./scraps.hweb"
 
 }trans_plus;
 }scrap;
 
 typedef scrap HUGE*scrap_pointer;
 
-/* :41 */
-/* 46: */
-#line 46 "./stacks.hweb"
 
-#line 47 "./stacks.hweb"
 
 typedef struct{
 eight_bits HUGE*end_field;
@@ -735,9 +649,6 @@ eight_bits HUGE*macro_buf,HUGE*mp,HUGE*macro_buf_end;
 
 typedef output_state HUGE*stack_pointer;
 
-/* :46 */
-/* 169: */
-#line 19 "./trunc.hweb"
 
 
 #if(0)
@@ -768,11 +679,7 @@ ASCII HUGE*id,HUGE*id_end;
 BP HUGE*first,HUGE*last;
 struct Trunc HUGE*next;
 }TRUNC;
-#line 3628 "./common.web"
 
-/* :169 */
-/* 237: */
-#line 5713 "./common.web"
 
 
 typedef struct
@@ -787,38 +694,24 @@ IN_COMMON SECT_INFO HUGE*sect_info;
 IN_COMMON outer_char HUGE*HUGE*mod_names;
 IN_COMMON outer_char HUGE*HUGE*next_mod_name,HUGE*HUGE*last_mod_name;
 
-/* :237 */
-#line 49 "./common.web"
 
-/* 74: */
-#line 761 "./common.web"
 
 
 IN_COMMON long start_line CSET(1);
 
 IN_COMMON long end_line CSET(LONG_MAX);
 
-/* :74 */
-/* 136: */
-#line 2576 "./common.web"
 
 
 IN_COMMON int stored_line_length;
 IN_COMMON ASCII HUGE*stored_line;
 
-/* :136 */
-/* 138: */
-#line 2624 "./common.web"
 
 
 IN_COMMON outer_char last_include_file[MAX_FILE_NAME_LENGTH]CSET(""),
 this_include_file[MAX_FILE_NAME_LENGTH]CSET("");
 
-/* :138 */
-#line 50 "./common.web"
 
-/* 33: */
-#line 426 "./typedefs.hweb"
 
 
 
@@ -832,16 +725,10 @@ this_include_file[MAX_FILE_NAME_LENGTH]CSET("");
 
 
 
-/* :33 */
-/* 36: */
-#line 47 "./xrefs.hweb"
 
 
 EXTERN boolean change_exists;
 
-/* :36 */
-/* 38: */
-#line 111 "./xrefs.hweb"
 
 
 #ifndef COMMON_FCNS_
@@ -859,11 +746,7 @@ EXTERN boolean defd_switch;
 EXTERN NAME_TYPE defd_type SET(NEVER_DEFINED);
 EXTERN boolean typd_switch;
 EXTERN boolean index_short;
-#line 8 "./tokens.hweb"
 
-/* :38 */
-/* 40: */
-#line 37 "./tokens.hweb"
 
 
 EXTERN long max_toks;
@@ -881,11 +764,7 @@ EXTERN text_pointer text_ptr;
 
 EXTERN token_pointer mx_tok_ptr;
 EXTERN text_pointer mx_text_ptr;
-#line 8 "./scraps.hweb"
 
-/* :40 */
-/* 42: */
-#line 67 "./scraps.hweb"
 
 
 EXTERN long max_scraps;
@@ -900,9 +779,6 @@ EXTERN scrap_pointer hi_ptr;
 
 EXTERN scrap_pointer mx_scr_ptr;
 
-/* :42 */
-/* 47: */
-#line 82 "./stacks.hweb"
 
 
 EXTERN output_state cur_state;
@@ -912,19 +788,12 @@ EXTERN long stck_size;
 EXTERN output_state HUGE*stack;
 EXTERN stack_pointer stck_end;
 EXTERN stack_pointer stck_ptr;
-#line 70 "./common.web"
 
-/* :47 */
-/* 91: */
-#line 1356 "./common.web"
 
 
 IN_COMMON ASCII string_char;
 IN_COMMON boolean in_char_string;
 
-/* :91 */
-/* 121: */
-#line 2196 "./common.web"
 
 
 IN_COMMON INPUT_PARAMS change_params0
@@ -933,55 +802,35 @@ IN_COMMON INPUT_PARAMS change_params0
 #endif
 ;
 
-/* :121 */
-/* 140: */
-#line 2695 "./common.web"
 
 
 IN_COMMON BUF_SIZE max_ifiles;
 IN_COMMON outer_char**ifiles;
 IN_COMMON int num_ifiles;
 
-/* :140 */
-/* 150: */
-#line 3051 "./common.web"
 
 
 IN_COMMON BUF_SIZE max_keywords;
 IN_COMMON RCS HUGE*rcs;
 IN_COMMON unsigned num_keywords;
 
-/* :150 */
-/* 155: */
-#line 10 "./mem.hweb"
 
-#line 11 "./mem.hweb"
 
 #ifndef C_TYPES
 #include SFILE(y_type.h)
 #endif 
-#line 3163 "./common.web"
 
-/* :155 */
-/* 156: */
-#line 3168 "./common.web"
 
 
 IN_COMMON BUF_SIZE total_mem CSET(0);
 
 IN_COMMON BUF_SIZE max_mem CSET(0);
 
-/* :156 */
-/* 161: */
-#line 3312 "./common.web"
 
 
 IN_COMMON boolean show_mem CSET(SHOW_MEM);
 IN_COMMON BUF_SIZE show_size CSET(10000);
 
-/* :161 */
-/* 163: */
-#line 3398 "./common.web"
 
 
 IN_COMMON MEM mem[]
@@ -1065,9 +914,6 @@ DFLT_MAX_TOKS_W,UL(65536L)},
 
 IN_COMMON size_t sizeof_mem CSET(sizeof(mem));
 
-/* :163 */
-/* 182: */
-#line 3895 "./common.web"
 
 
 IN_COMMON boolean info_option CSET(NO);
@@ -1080,9 +926,6 @@ IN_COMMON RSRVD rsrvd
 IN_COMMON outer_char HUGE*style_args CSET(NULL);
 IN_STYLE ASCII HUGE*at_codes;
 
-/* :182 */
-/* 197: */
-#line 4204 "./common.web"
 
 
 IN_COMMON CONST char*origin_name[]
@@ -1091,18 +934,12 @@ IN_COMMON CONST char*origin_name[]
 #endif 
 ;
 
-/* :197 */
-/* 218: */
-#line 5044 "./common.web"
 
 
 IN_COMMON boolean found_web,found_change;
 IN_COMMON outer_char wbflnm0[MAX_FILE_NAME_LENGTH];
 
 
-/* :218 */
-/* 221: */
-#line 5147 "./common.web"
 
 
 IN_COMMON outer_char
@@ -1115,79 +952,51 @@ IN_COMMON outer_char HUGE*HUGE*pn0;
 IN_COMMON outer_char HUGE*HUGE*pn1;
 IN_COMMON FILE*ini_file CSET(NULL);
 
-/* :221 */
-/* 226: */
-#line 5366 "./common.web"
 
 
 IN_COMMON INCL_PATHS incl;
 IN_COMMON INCL_PATHS hdr_incl;
 
-/* :226 */
-/* 243: */
-#line 5912 "./common.web"
 
 
 jmp_buf top_of_get_arg;
 
-/* :243 */
-/* 249: */
-#line 6138 "./common.web"
 
 
 IN_COMMON outer_char style_file_name[MAX_FILE_NAME_LENGTH]
 CSET(STYLE_FILE_NAME);
 IN_COMMON boolean renamed_style CSET(NO);
 
-/* :249 */
-/* 252: */
-#line 6175 "./common.web"
 
 
 IN_COMMON boolean doing_cmd_line;
 IN_COMMON boolean cmd_prms;
 
-/* :252 */
-/* 291: */
-#line 7691 "./common.web"
 
 
 IN_COMMON ASCII HUGE*fbuffer,HUGE*flimit,HUGE*floc;
 
 
-/* :291 */
-/* 295: */
-#line 7760 "./common.web"
 
 
 IN_COMMON BUF_SIZE starting_memory CSET(ULONG_MAX);
 
 
-/* :295 */
-/* 308: */
-#line 8096 "./common.web"
 
 
 IN_COMMON outer_char*extra_args;
 
 IN_COMMON boolean mod_warning_flag CSET(NEVER_USED);
 
-/* :308 */
-/* 348: */
-#line 9221 "./common.web"
 
 
 IN_COMMON boolean single_quote CSET(NO),double_quote CSET(NO);
 
-/* :348 */
-#line 51 "./common.web"
 
 
 
 
 #if(part != 2)
-/* 53: */
-#line 204 "./common.web"
 
 
 SRTN
@@ -1202,8 +1011,6 @@ translate_ASCII= YES;
 
 is_Rat_present();
 
-/* 54: */
-#line 243 "./common.web"
 
 {
 STRNCPY(xchr,"                                 !\"#$%&'()*+,-./0123456789\
@@ -1212,17 +1019,11 @@ sizeof(xchr));
 
 
 xchr[tab_mark]= '\t';
-xchr['\n']= '\n';
-
-/* 60: */
-#line 411 "./common.web"
+xchr[012]= '\n';
 
 
-/* :60 */
-#line 253 "./common.web"
+
 ;
-/* 55: */
-#line 260 "./common.web"
 
 {
 int i;
@@ -1231,9 +1032,9 @@ int i;
 
 for(i= first_text_char;i<=last_text_char;i++)
 {
-xord[i]= ' ';
+xord[i]= 040;
 #ifdef scramble_ASCII
-xxord[i]= ' ';
+xxord[i]= 040;
 #endif
 }
 
@@ -1257,16 +1058,10 @@ xord[(eight_bits)XCHR_[i]]= (ASCII)i;
 #endif
 }
 
-/* :55 */
-#line 254 "./common.web"
 ;
 }
 
-/* :54 */
-#line 218 "./common.web"
 
-/* 212: */
-#line 4729 "./common.web"
 
 {
 int k;
@@ -1274,41 +1069,34 @@ int k;
 for(k= 0;k<128;k++)
 TeX[k]= TeX_other;
 
-for(k= 'A';k<='Z';k++)
+for(k= 0101;k<=0132;k++)
 TeX[k]= TeX_letter;
 
-for(k= 'a';k<='z';k++)
+for(k= 0141;k<=0172;k++)
 TeX[k]= TeX_letter;
 
-TeX['\\']= TeX_escape;
-TeX['{']= TeX_bgroup;
-TeX['}']= TeX_egroup;
-TeX['$']= TeX_math_shift;
-TeX['&']= TeX_alignment_tab;
-TeX['\n']= TeX_eol;
-TeX['#']= TeX_parameter;
-TeX['^']= TeX_superscript;
-TeX['_']= TeX_subscript;
+TeX[0134]= TeX_escape;
+TeX[0173]= TeX_bgroup;
+TeX[0175]= TeX_egroup;
+TeX[044]= TeX_math_shift;
+TeX[046]= TeX_alignment_tab;
+TeX[012]= TeX_eol;
+TeX[043]= TeX_parameter;
+TeX[0136]= TeX_superscript;
+TeX[0137]= TeX_subscript;
 TeX[0]= TeX_ignored;
-TeX[' ']= TeX[tab_mark]= TeX_space;
-TeX['~']= TeX_active;
-TeX['%']= TeX_comment;
+TeX[040]= TeX[tab_mark]= TeX_space;
+TeX[0176]= TeX_active;
+TeX[045]= TeX_comment;
 TeX[0177]= TeX_invalid;
 }
 
-/* :212 */
-#line 219 "./common.web"
 ;
-/* 124: */
-#line 2221 "./common.web"
 
 {
 ALLOC(INPUT_PRMS,prms,"id",max_include_depth,1);
 }
 
-/* :124 */
-/* 174: */
-#line 3708 "./common.web"
 
 
 hash= GET_MEM("hash",hash_size,name_pointer);
@@ -1316,9 +1104,6 @@ hash_end= hash+hash_size-1;
 
 for(h= hash;h<=hash_end;*h++= NULL);
 
-/* :174 */
-/* 215: */
-#line 4969 "./common.web"
 
 {
 pformat= x__to_ASCII(OC("format"));
@@ -1336,29 +1121,19 @@ conv_dot(dots0);
 conv_dot(mcmds);
 }
 
-/* :215 */
-/* 262: */
-#line 6551 "./common.web"
 
 
 SET_VAL(mbuf_size,"mb");
 
-/* :262 */
-/* 300: */
-#line 7865 "./common.web"
 
 {
 init_buf(&sput_buf,10);
 init_buf(&c_buf,10);
 }
 
-/* :300 */
-#line 220 "./common.web"
 ;
 predefine_macros();
 
-/* 213: */
-#line 4761 "./common.web"
 
 {
 params.uses= 0;
@@ -1556,16 +1331,10 @@ translate_ASCII= YES;
 global_params= params;
 }
 
-/* :213 */
-#line 223 "./common.web"
 
 
-/* 325: */
-#line 8594 "./common.web"
 
 {
-/* 326: */
-#line 8619 "./common.web"
 
 {
 int k;
@@ -1579,8 +1348,6 @@ for(k= 0;k<NUM_LANGUAGES;k++)
 new_fname(params.outp_nm+k,NULL,NULL);
 }
 
-/* :326 */
-#line 8596 "./common.web"
 
 scan_args();
 
@@ -1589,8 +1356,6 @@ if(found_web)
 {
 ini_input_prms(WEB_FILE,(outer_char HUGE*)"",ABORT_ON_ERROR);
 
-/* 328: */
-#line 8671 "./common.web"
 
 {
 outer_char temp1[100],temp2[1000],
@@ -1628,8 +1393,6 @@ STRCAT(cmd_ln_buf,temp1);
 STRCAT(cmd_ln_buf,temp2);
 }
 
-/* :328 */
-#line 8604 "./common.web"
 ;
 
 if(program==weave)
@@ -1644,8 +1407,6 @@ ini_language(XORD(*LANGUAGE_CODE(GLOBAL_LANGUAGE)));
 global_params= params;
 }
 
-/* :325 */
-#line 225 "./common.web"
 ;
 
 #if 0
@@ -1653,8 +1414,6 @@ banner();
 #endif
 
 
-/* 67: */
-#line 490 "./common.web"
 
 {
 DOTS HUGE*d;
@@ -1673,9 +1432,6 @@ confusion(OC("dots allocation"),OC("Invalid dot code"));
 }
 }
 
-/* :67 */
-/* 125: */
-#line 2230 "./common.web"
 
 {
 BUF_SIZE cur_prms_units;
@@ -1688,32 +1444,20 @@ prms= (INPUT_PRMS*)REALLOC(prms,
 (DFLT_MAX_INCLUDE_DEPTH+1)*sizeof(INPUT_PRMS));
 }
 
-/* :125 */
-/* 131: */
-#line 2462 "./common.web"
 
 
 ALLOC(boolean,chngd_module,"m",max_modules,0);
 
-/* :131 */
-/* 141: */
-#line 2702 "./common.web"
 
 {
 ALLOC(outer_char*,ifiles,"if",max_ifiles,0);
 }
 
-/* :141 */
-/* 151: */
-#line 3058 "./common.web"
 
 {
 ALLOC(RCS,rcs,"rk",max_keywords,0);
 }
 
-/* :151 */
-/* 168: */
-#line 3615 "./common.web"
 
 
 ALLOC(ASCII,byte_mem,"b",max_bytes,0);
@@ -1726,18 +1470,11 @@ name_end= name_dir+max_names-1;
 ALLOC(ASCII,mod_text,"ln",longest_name,1);
 mod_end= mod_text+longest_name;
 
-#line 8 "./trunc.hweb"
 
-/* :168 */
-/* 238: */
-#line 5728 "./common.web"
 
 
 ALLOC(SECT_INFO,sect_info,"m",max_modules,0);
 
-/* :238 */
-/* 334: */
-#line 8854 "./common.web"
 
 {
 if(program==tangle)
@@ -1747,11 +1484,7 @@ max_margs++;
 }
 }
 
-/* :334 */
-#line 232 "./common.web"
 
-/* 172: */
-#line 3684 "./common.web"
 
 
 CAST(name_pointer,name_dir)->byte_start= byte_ptr= byte_mem;
@@ -1760,18 +1493,11 @@ name_ptr= name_dir+1;
 CAST(name_pointer,name_ptr)->byte_start= byte_mem;
 
 
-/* :172 */
-/* 190: */
-#line 4027 "./common.web"
 
 
 root= NULL;
 
-/* :190 */
-#line 233 "./common.web"
 ;
-/* 183: */
-#line 3910 "./common.web"
 
 {
 if(rsrvd.args)see_reserved(&rsrvd);
@@ -1781,8 +1507,6 @@ if(!found_web&&info_option&&!at_codes)
 wrap_up();
 }
 
-/* :183 */
-#line 234 "./common.web"
 
 
 more_includes(&incl,wt_style.Idir);
@@ -1791,9 +1515,6 @@ if(found_web)
 read_aux();
 }
 
-/* :53 */
-/* 56: */
-#line 299 "./common.web"
 
 
 ASCII HUGE*
@@ -1817,9 +1538,6 @@ else
 return(ASCII HUGE*)p0;
 }
 
-/* :56 */
-/* 57: */
-#line 325 "./common.web"
 
 
 ASCII HUGE*
@@ -1860,9 +1578,6 @@ else
 return(ASCII HUGE*)p0;
 }
 
-/* :57 */
-/* 58: */
-#line 366 "./common.web"
 
 
 ASCII HUGE*
@@ -1878,9 +1593,6 @@ for(p= (ASCII HUGE*)p0;*p;p++)
 return(ASCII HUGE*)p0;
 }
 
-/* :58 */
-/* 59: */
-#line 383 "./common.web"
 
 
 outer_char HUGE*
@@ -1895,9 +1607,6 @@ for(p= (outer_char HUGE*)p0;*p;p++)*p= XCHR(*(ASCII HUGE*)p);
 return(outer_char HUGE*)p0;
 }
 
-/* :59 */
-/* 62: */
-#line 422 "./common.web"
 
 
 boolean
@@ -1910,13 +1619,10 @@ if(m4&&is_in(incl_likes,id_first,id_loc))return YES;
 
 if(program==tangle)return NO;
 
-if(!(*id_first=='$'||*id_first=='_'))return NO;
+if(!(*id_first==044||*id_first==0137))return NO;
 return is_in(WEB_incl_likes,id_first,id_loc);
 }
 
-/* :62 */
-/* 63: */
-#line 439 "./common.web"
 
 SRTN conv_bi FCN((b))
 BUILT_IN HUGE*b C1("")
@@ -1933,9 +1639,6 @@ for(;d->code!=0;d++)
 d->symbol= x__to_ASCII((outer_char*)d->symbol);
 }
 
-/* :63 */
-/* 64: */
-#line 457 "./common.web"
 
 
 boolean
@@ -1953,9 +1656,6 @@ return YES;
 return NO;
 }
 
-/* :64 */
-/* 68: */
-#line 510 "./common.web"
 
 
 ASCII HUGE*
@@ -1971,9 +1671,6 @@ p[k]= A_TO_UPPER(p[k]);
 return p;
 }
 
-/* :68 */
-/* 69: */
-#line 528 "./common.web"
 
 
 boolean
@@ -1986,10 +1683,10 @@ ASCII temp[MAX_DOT_LENGTH];
 
 
 for(p= loc,n= 0;n<MAX_DOT_LENGTH;n++,p++)
-if(*p=='.'||!isAlpha(*p))
+if(*p==056||!isAlpha(*p))
 break;
 
-if(*p!='.'||p==loc)
+if(*p!=056||p==loc)
 return NO;
 
 
@@ -1999,9 +1696,6 @@ return BOOLEAN(CHOICE(dot_code(dots,uppercase(temp,n),temp+n,dot_const),
 YES,NO));
 }
 
-/* :69 */
-/* 70: */
-#line 557 "./common.web"
 
 
 eight_bits
@@ -2054,9 +1748,6 @@ next_dot->len= 0;
 goto re_dot;
 }
 
-/* :70 */
-/* 71: */
-#line 611 "./common.web"
 
 
 eight_bits
@@ -2075,9 +1766,6 @@ return 0;
 }
 
 
-/* :71 */
-/* 73: */
-#line 692 "./common.web"
 
 
 boolean
@@ -2122,19 +1810,14 @@ return NO;
 
 if(column_mode&&FORTRAN_LIKE(language)&&
 PTR_DIFF(size_t,limit,cur_buffer)==2&&
-((!auto_semi&&(cur_buffer[1]==';'||cur_buffer[1]==' '))||
-(auto_semi&&cur_buffer[1]==';'&&(cur_buffer[0]=='C'||
-cur_buffer[0]=='c'||cur_buffer[0]=='*'))))
+((!auto_semi&&(cur_buffer[1]==073||cur_buffer[1]==040))||
+(auto_semi&&cur_buffer[1]==073&&(cur_buffer[0]=='C'||
+cur_buffer[0]==0143||cur_buffer[0]==052))))
 empty_line:
 limit= cur_buffer;
 
-/* :73 */
-/* 73: */
-#line 746 "./common.web"
 
 #if(DEBUG)
-/* 75: */
-#line 768 "./common.web"
 
 {
 register ASCII HUGE*k;
@@ -2177,17 +1860,12 @@ puts("\"");
 }
 }
 
-/* :75 */
-#line 748 "./common.web"
 ;
 #endif
 
 return YES;
 }
 
-/* :73 */
-/* 76: */
-#line 816 "./common.web"
 
 
 boolean
@@ -2196,13 +1874,9 @@ rd_free_form(VOID)
 register int c= '\0';
 register ASCII HUGE*k;
 
-/* 77: */
-#line 830 "./common.web"
 
 {
 if(num_in_buffer!=0)
-/* 82: */
-#line 1011 "./common.web"
 
 {
 STRNCPY(cur_buffer,k0,num_in_buffer);
@@ -2211,26 +1885,19 @@ limit= cur_buffer+num_in_buffer-N_END;
 num_in_buffer= 0;
 }
 
-/* :82 */
-#line 833 "./common.web"
 
 else
 {
 if(feof(cur0_prms->File))
 return NO;
 
-/* 78: */
-#line 857 "./common.web"
 
 {
 k= cur_buffer;
 
-/* :78 */
-/* 78: */
-#line 867 "./common.web"
 
 while(k<=buffer_end&&(c= getc(cur0_prms->File))!=EOF&&c!='\n')
-if((*(k++)= XORD(c))!=' ')limit= k;
+if((*(k++)= XORD(c))!=040)limit= k;
 
 
 
@@ -2245,25 +1912,15 @@ if(c==EOF&&limit==cur_buffer)
 return NO;
 }
 
-/* :78 */
-#line 839 "./common.web"
 ;
-/* :77 */
-/* 77: */
-#line 843 "./common.web"
 }
 }
 
-/* :77 */
-#line 824 "./common.web"
 
 
 return YES;
 }
 
-/* :76 */
-/* 80: */
-#line 940 "./common.web"
 
 
 boolean
@@ -2283,8 +1940,6 @@ in_char_string= NO;
 
 for(k= limit;;k= k0= (limit+= N_END),first_line= NO,cur_line++)
 if(num_in_buffer==0)
-/* 83: */
-#line 1020 "./common.web"
 
 {
 int i;
@@ -2300,13 +1955,9 @@ goto concatenate_cmnts;
 
 k0= limit;
 
-/* 85: */
-#line 1121 "./common.web"
 
 {
 if(ignore_C)
-/* 87: */
-#line 1218 "./common.web"
 
 {
 first_char:
@@ -2335,14 +1986,12 @@ break;
 }
 }
 
-/* :87 */
-#line 1124 "./common.web"
 
 
 while(k<=buffer_end&&(c= getc(cur0_prms->File))!=EOF&&c!='\n')
 if(c=='\t'&&k<=buffer_end-6)
 for(i= 0;i<6;++i)
-*(k++)= ' ';
+*(k++)= 040;
 
 else
 {
@@ -2351,7 +2000,7 @@ outer_char c1;
 
 if(c==';')
 c= XCHR(interior_semi);
-else if(point_comments&&(*k0!='@')&&
+else if(point_comments&&(*k0!=0100)&&
 (escaped_char= BOOLEAN(c=='\\')))
 {
 c= getc(cur0_prms->File);
@@ -2366,7 +2015,7 @@ c= '\\';
 
 
 if((*(k++)= CHOICE(IS_POINT(c)&&!escaped_char,
-(ASCII)begin_comment1,XORD(c)))!=' ')
+(ASCII)begin_comment1,XORD(c)))!=040)
 limit= k;
 }
 
@@ -2381,20 +2030,18 @@ if(c==EOF&&limit==cur_buffer)return NO;
 
 }
 
-/* :85 */
-#line 1035 "./common.web"
 ;
 
 
 
-MEMSET(limit,' ',N_END);
+MEMSET(limit,040,N_END);
 num_in_buffer= 0;
 
 
 
-at_line= BOOLEAN(*k0=='@'&&*(k0+1)!='/');
+at_line= BOOLEAN(*k0==0100&&*(k0+1)!=057);
 
-if(at_line&&(*(k0+1)=='*'||*(k0+1)==' '))
+if(at_line&&(*(k0+1)==052||*(k0+1)==040))
 found_at= YES;
 
 
@@ -2418,8 +2065,6 @@ continue;
 }
 
 if(!(at_line||scanning_C_cmnt))
-/* 86: */
-#line 1172 "./common.web"
 
 {
 boolean is_cmnt= NO,Fortran_cmnt= NO,C_cmnt= NO;
@@ -2430,9 +2075,9 @@ ASCII HUGE*p= k0;
 
 switch(*k0)
 {
-case 'C':
-case 'c':
-case '*':
+case 0103:
+case 0143:
+case 052:
 case(ASCII)begin_comment0:
 case(ASCII)begin_comment1:
 is_cmnt= Fortran_cmnt= YES;
@@ -2441,11 +2086,11 @@ break;
 default:
 
 for(;p<limit;p++)
-if(*p!=' ')
+if(*p!=040)
 break;
 
-if((*p=='/'&&(*(p+1)=='*'
-||(*(p+1)=='/'&&Cpp_comments&&!ignore_C)))
+if((*p==057&&(*(p+1)==052
+||(*(p+1)==057&&Cpp_comments&&!ignore_C)))
 ||*p==(ASCII)begin_comment0
 ||*p==(ASCII)begin_comment1)
 is_cmnt= C_cmnt= YES;
@@ -2453,8 +2098,6 @@ break;
 }
 
 if(is_cmnt)
-/* 88: */
-#line 1250 "./common.web"
 
 {
 if(limit==k0+1)
@@ -2468,7 +2111,7 @@ goto concatenate_cmnts;
 }
 
 if(k0>cur_buffer)
-MEMSET(k0-N_END,' ',N_END);
+MEMSET(k0-N_END,040,N_END);
 
 if(Fortran_cmnt)
 *p= begin_comment1;
@@ -2488,16 +2131,12 @@ continue;
 }
 
 
-/* :88 */
-#line 1205 "./common.web"
 
 
 
 
 
-if(limit-k0>=5&&!(k0[5]==' '||k0[5]=='0'))
-/* 89: */
-#line 1289 "./common.web"
+if(limit-k0>=5&&!(k0[5]==040||k0[5]==060))
 
 {
 register ASCII HUGE*l;
@@ -2516,7 +2155,7 @@ continue;
 stuff_in_1_5= NO;
 
 for(l= k0;l<k0+5;++l)
-if(*l!=' ')
+if(*l!=040)
 {
 stuff_in_1_5= YES;
 break;
@@ -2527,19 +2166,15 @@ break;
 
 if(stuff_in_1_5)goto neither_cmnt_nor_continuation;
 
-*l= ' ';
+*l= 040;
 scan_for_cmnts();
 continue;
 }
 
-/* :89 */
-#line 1211 "./common.web"
 
 }
 
 
-/* :86 */
-#line 1070 "./common.web"
 
 
 
@@ -2562,8 +2197,6 @@ continue;
 
 }
 
-/* 84: */
-#line 1098 "./common.web"
 
 {
 last_of_read:
@@ -2581,21 +2214,13 @@ cur_line--;
 break;
 }
 
-/* :84 */
-#line 1092 "./common.web"
 ;
 }
 
-/* :83 */
-#line 959 "./common.web"
 
 else
-/* 81: */
-#line 984 "./common.web"
 
 {
-/* 82: */
-#line 1011 "./common.web"
 
 {
 STRNCPY(cur_buffer,k0,num_in_buffer);
@@ -2604,8 +2229,6 @@ limit= cur_buffer+num_in_buffer-N_END;
 num_in_buffer= 0;
 }
 
-/* :82 */
-#line 986 "./common.web"
 ;
 
 
@@ -2628,30 +2251,22 @@ last_was_empty= BOOLEAN(limit==cur_buffer);
 scan_for_cmnts();
 }
 
-/* :81 */
-#line 961 "./common.web"
 
 
 
 
-if(*cur_buffer=='@'&&!(limit==cur_buffer+1||*(cur_buffer+1)=='*'||
-*(cur_buffer+1)==' '))
+if(*cur_buffer==0100&&!(limit==cur_buffer+1||*(cur_buffer+1)==052||
+*(cur_buffer+1)==040))
 for(k= cur_buffer+2;k<limit;++k)
-if(*k==';')
+if(*k==073)
 {
-/* :80 */
-/* 80: */
-#line 973 "./common.web"
-*k= ' ';
+*k= 040;
 break;
 }
 
 return YES;
 }
 
-/* :80 */
-/* 90: */
-#line 1326 "./common.web"
 
 
 SRTN
@@ -2681,9 +2296,6 @@ pcmnt->len= 0;
 pcmnt->pos= limit;
 }
 
-/* :90 */
-/* 92: */
-#line 1365 "./common.web"
 
 
 SRTN
@@ -2710,11 +2322,9 @@ p= limit;
 MARK(SHORT_CMNT,END,0);
 break;
 
-case '\'':
-case '"':
+case 047:
+case 042:
 if(!scanning_C_cmnt)
-/* 93: */
-#line 1430 "./common.web"
 
 {
 if(!in_char_string)
@@ -2733,22 +2343,20 @@ break;
 in_char_string= NO;
 }
 
-/* :93 */
-#line 1394 "./common.web"
 
 break;
 
-case '/':
+case 057:
 if(in_char_string||scanning_C_cmnt)
 break;
 
-if(*(p+1)=='/'&&Cpp_comments&&!ignore_C)
+if(*(p+1)==057&&Cpp_comments&&!ignore_C)
 {
 MARK(SHORT_CMNT,START,2);
 p= limit;
 MARK(SHORT_CMNT,END,0);
 }
-else if(*(p+1)=='*')
+else if(*(p+1)==052)
 {
 MARK(LONG_CMNT,START,2);
 p++;
@@ -2756,11 +2364,11 @@ p++;
 
 break;
 
-case '*':
+case 052:
 if(in_char_string)
 break;
 
-if(scanning_C_cmnt&&*(p+1)=='/')
+if(scanning_C_cmnt&&*(p+1)==057)
 {
 MARK(LONG_CMNT,END,2);
 p++;
@@ -2770,9 +2378,6 @@ break;
 }
 }
 
-/* :92 */
-/* 94: */
-#line 1452 "./common.web"
 
 
 SRTN
@@ -2789,7 +2394,7 @@ for(d= posns+1;d<pcmnt;d+= 2)
 found_text= NO;
 
 for(l= d->pos+d->len;l<(d+1)->pos;l++)
-if(*l!=' ')
+if(*l!=040)
 {
 found_text= YES;
 break;
@@ -2801,8 +2406,8 @@ if(d->type==SHORT_CMNT)
 {
 BLANK_OUT(d-1);
 *((d-1)->pos)= begin_comment0;
-*(d->pos)= '*';
-*(d->pos+1)= '/';
+*(d->pos)= 052;
+*(d->pos+1)= 057;
 }
 }
 else if(d->type==(d+1)->type)
@@ -2813,8 +2418,6 @@ d->type= (d+1)->type= NO_CMNT;
 }
 }
 
-/* 99: */
-#line 1555 "./common.web"
 
 {
 boolean text_after= NO;
@@ -2823,10 +2426,10 @@ if(pcmnt>posns)
 {
 if(!scanning_C_cmnt)
 for(l= limit-1;l>(pcmnt-1)->pos+(pcmnt-1)->len;l--)
-if(*l!=' ')
+if(*l!=040)
 {
 text_after= YES;
-*(l+1)= ';';
+*(l+1)= 073;
 break;
 }
 
@@ -2861,11 +2464,9 @@ lmin= (pcmnt-1)->pos+(pcmnt-1)->len;
 
 for(l= pcmnt->pos-1;l>=lmin;l--)
 {
-if(*l!=' ')
+if(*l!=040)
 {
 semi_pos= pcmnt->pos;
-/* 100: */
-#line 1628 "./common.web"
 
 {
 *(semi_pos+1)= (ASCII)(((pcmnt+1)->type==LONG_CMNT?begin_comment0:
@@ -2875,38 +2476,32 @@ begin_comment1));
 
 
 
-if(semi_pos>cur_buffer&&*(semi_pos-1)=='@')
+if(semi_pos>cur_buffer&&*(semi_pos-1)==0100)
 {
-*(semi_pos--)= '@';
+*(semi_pos--)= 0100;
 }
 
-*semi_pos= ';';
+*semi_pos= 073;
 
 
-/* 101: */
-#line 1650 "./common.web"
 
 
 for(lp= semi_pos-1;lp>cur_buffer;lp--)
 {
-if(*lp==' ')continue;
+if(*lp==040)continue;
 
-if(*lp=='/'&&*(--lp)=='@')
+if(*lp==057&&*(--lp)==0100)
 {
-*semi_pos= ' ';
-*lp= ';';*(lp+1)= '@';*(lp+2)= '/';
+*semi_pos= 040;
+*lp= 073;*(lp+1)= 0100;*(lp+2)= 057;
 }
 break;
 }
 
 
-/* :101 */
-#line 1645 "./common.web"
 ;
 }
 
-/* :100 */
-#line 1603 "./common.web"
 
 goto done_auto_insert;
 }
@@ -2919,9 +2514,9 @@ pcmnt-= 2;
 else
 {
 for(l= limit-1;l>=cur_buffer;l--)
-if(*l!=' ')
+if(*l!=040)
 {
-*(l+1)= ';';
+*(l+1)= 073;
 break;
 }
 }
@@ -2930,16 +2525,11 @@ done_auto_insert:
 ;
 }
 
-/* :99 */
-#line 1492 "./common.web"
 
 
 pcmnt= posns;
 }
 
-/* :94 */
-/* 102: */
-#line 1667 "./common.web"
 
 
 boolean
@@ -2952,13 +2542,9 @@ boolean found_semi;
 string_char= '\0';
 in_char_string= NO;
 
-/* 77: */
-#line 830 "./common.web"
 
 {
 if(num_in_buffer!=0)
-/* 82: */
-#line 1011 "./common.web"
 
 {
 STRNCPY(cur_buffer,k0,num_in_buffer);
@@ -2967,26 +2553,19 @@ limit= cur_buffer+num_in_buffer-N_END;
 num_in_buffer= 0;
 }
 
-/* :82 */
-#line 833 "./common.web"
 
 else
 {
 if(feof(cur0_prms->File))
 return NO;
 
-/* 78: */
-#line 857 "./common.web"
 
 {
 k= cur_buffer;
 
-/* :78 */
-/* 78: */
-#line 867 "./common.web"
 
 while(k<=buffer_end&&(c= getc(cur0_prms->File))!=EOF&&c!='\n')
-if((*(k++)= XORD(c))!=' ')limit= k;
+if((*(k++)= XORD(c))!=040)limit= k;
 
 
 
@@ -3001,27 +2580,18 @@ if(c==EOF&&limit==cur_buffer)
 return NO;
 }
 
-/* :78 */
-#line 839 "./common.web"
 ;
-/* :77 */
-/* 77: */
-#line 843 "./common.web"
 }
 }
 
-/* :77 */
-#line 1679 "./common.web"
 
 
 
 
-if(*cur_buffer=='@'&&(limit==cur_buffer+1
-||*(cur_buffer+1)=='*'||*(cur_buffer+1)==' '))
+if(*cur_buffer==0100&&(limit==cur_buffer+1
+||*(cur_buffer+1)==052||*(cur_buffer+1)==040))
 column_mode= NO;
 else
-/* 104: */
-#line 1702 "./common.web"
 
 {
 last_was_continued= continuing_line;
@@ -3030,9 +2600,9 @@ continuing_line= NO;
 if(limit==cur_buffer)
 return YES;
 
-limit[0]= limit[1]= limit[2]= limit[3]= ' ';
+limit[0]= limit[1]= limit[2]= limit[3]= 040;
 
-cmnt_char= '#';
+cmnt_char= 043;
 
 found_semi= found_text= text= NO;
 
@@ -3040,31 +2610,31 @@ semi_pos= NULL;
 
 
 
-if(!free_form_input&&!(*cur_buffer=='@'&&*(cur_buffer+1)=='#'))
+if(!free_form_input&&!(*cur_buffer==0100&&*(cur_buffer+1)==043))
 {
 for(lp= cur_buffer;;)
 if(!skip_Rtext()||!skp_cmnt())break;
 
 switch(*last_pos)
 {
-case '+':case '-':case '*':case '=':case '{':case '}':
-case '^':case '&':case '|':case '(':case ':':
-case '>':case '<':case '[':case ',':case '\\':
+case 053:case 055:case 052:case 075:case 0173:case 0175:
+case 0136:case 046:case 0174:case 050:case 072:
+case 076:case 074:case 0133:case 054:case 0134:
 continuing_line= YES;
 break;
 
 
-case '_':
+case 0137:
 if(last_pos>cur_buffer)
 {
 ASCII c;
 
 c= *(last_pos-1);
 if(isAlpha(c)||isDigit(c)||
-c=='_'||c=='$')
+c==0137||c==044)
 goto not_continuation;
 }
-*last_pos= ' ';
+*last_pos= 040;
 continuing_line= YES;
 break;
 
@@ -3077,9 +2647,7 @@ break;
 
 
 
-if(!text&&semi_pos!=NULL)/* 100: */
-#line 1628 "./common.web"
-
+if(!text&&semi_pos!=NULL)
 {
 *(semi_pos+1)= (ASCII)(((pcmnt+1)->type==LONG_CMNT?begin_comment0:
 begin_comment1));
@@ -3088,63 +2656,50 @@ begin_comment1));
 
 
 
-if(semi_pos>cur_buffer&&*(semi_pos-1)=='@')
+if(semi_pos>cur_buffer&&*(semi_pos-1)==0100)
 {
-*(semi_pos--)= '@';
+*(semi_pos--)= 0100;
 }
 
-*semi_pos= ';';
+*semi_pos= 073;
 
 
-/* 101: */
-#line 1650 "./common.web"
 
 
 for(lp= semi_pos-1;lp>cur_buffer;lp--)
 {
-if(*lp==' ')continue;
+if(*lp==040)continue;
 
-if(*lp=='/'&&*(--lp)=='@')
+if(*lp==057&&*(--lp)==0100)
 {
-*semi_pos= ' ';
-*lp= ';';*(lp+1)= '@';*(lp+2)= '/';
+*semi_pos= 040;
+*lp= 073;*(lp+1)= 0100;*(lp+2)= 057;
 }
 break;
 }
 
 
-/* :101 */
-#line 1645 "./common.web"
 ;
 }
 
-/* :100 */
-#line 1757 "./common.web"
 
-else if(found_text&&limit>cur_buffer)*limit++= ';';
+else if(found_text&&limit>cur_buffer)*limit++= 073;
 
 break;
 }
 }
 }
 
-/* :104 */
-#line 1687 "./common.web"
 ;
 
 return YES;
 }
 
-/* :102 */
-/* 106: */
-#line 1800 "./common.web"
 
 boolean skip_Rtext(VOID)
 {
-static ASCII blank= ' ';
+static ASCII blank= 040;
 
-/* 107: */
-#line 1836 "./common.web"
 
 
 if(scanning_C_cmnt)return YES;
@@ -3152,12 +2707,10 @@ if(scanning_C_cmnt)return YES;
 
 
 for(;lp<limit;++lp)
-if(!(*lp==' '||*lp==tab_mark))break;
+if(!(*lp==040||*lp==tab_mark))break;
 
 if(lp>=limit)return NO;
 
-/* :107 */
-#line 1805 "./common.web"
 ;
 
 last_pos= &blank;
@@ -3176,21 +2729,18 @@ if(start_Rcomment)
 if(R_style_cmnt)
 {
 *lp= cmnt_char= begin_comment0;
-*limit++= '*';*limit++= '/';
+*limit++= 052;*limit++= 057;
 }
 if(++lp<limit)return YES;
 }
 
-if(*lp!=' '&&*lp!=tab_mark)
+if(*lp!=040&&*lp!=tab_mark)
 last_pos= lp;
 }
 
 return NO;
 }
 
-/* :106 */
-/* 108: */
-#line 1848 "./common.web"
 
 boolean skp_cmnt(VOID)
 {
@@ -3214,11 +2764,11 @@ for(++lp;lp<limit;lp++)
 {
 if(*lp==(ASCII)begin_comment0||*lp==(ASCII)begin_comment1)
 {
-*lp= 'c';
+*lp= 0143;
 continue;
 }
 
-if(*lp=='*'&&*(lp+1)=='/')
+if(*lp==052&&*(lp+1)==057)
 {
 lp+= 2;
 if(lp<=limit)return YES;
@@ -3231,17 +2781,14 @@ else
 {
 for(++lp;lp<limit;lp++)
 if(*lp==(ASCII)begin_comment1)
-*lp= '!';
+*lp= 041;
 
-*(limit-2)= '*';*(limit-1)= '/';
+*(limit-2)= 052;*(limit-1)= 057;
 }
 
 return NO;
 }
 
-/* :108 */
-/* 111: */
-#line 1941 "./common.web"
 
 
 SRTN
@@ -3259,8 +2806,6 @@ column_mode= change_params.Column_mode;
 
 change_limit= NULL;
 
-/* 112: */
-#line 1978 "./common.web"
 
 
 WHILE()
@@ -3275,23 +2820,17 @@ goto done_priming;
 
 if(limit<cur_buffer+2)continue;
 
-if(cur_buffer[0]!='@')continue;
-
-/* 114: */
-#line 2056 "./common.web"
+if(cur_buffer[0]!=0100)continue;
 
 
-if((cur_buffer[1]>='X'&&cur_buffer[1]<='Z')||cur_buffer[1]=='I')
-cur_buffer[1]+= 'z'-'Z';
 
-/* :114 */
-#line 1994 "./common.web"
+if((cur_buffer[1]>=0130&&cur_buffer[1]<=0132)||cur_buffer[1]==0111)
+cur_buffer[1]+= 0172-0132;
+
 ;
-/* 115: */
-#line 2063 "./common.web"
 
 
-if(cur_buffer[1]=='i')
+if(cur_buffer[1]==0151)
 {
 loc= cur_buffer+2;
 
@@ -3299,23 +2838,19 @@ err0_print(ERR_C,OC("Sorry, no includes allowed in change file"),0);
 
 }
 
-/* :115 */
-#line 1995 "./common.web"
 ;
-if((c= cur_buffer[1])=='x')break;
+if((c= cur_buffer[1])==0170)break;
 
-if(c=='y'||c=='z')
+if(c==0171||c==0172)
 {
 loc= cur_buffer+2;
 
 err0_print(ERR_C,OC("Where is the matching @x?"),0);
 
 }
-else/* 113: */
-#line 2008 "./common.web"
-
+else
 {
-if(c=='l')
+if(c==0154)
 if(limit==cur_buffer+2)
 
 err0_print(ERR_C,OC("Missing language character after @L"),0);
@@ -3323,71 +2858,51 @@ else c= cur_buffer[2];
 
 switch(c)
 {
-/* 10: */
-#line 95 "./typedefs.hweb"
 
-case 'c'
+case 0143
 
-/* :10 */
-#line 2017 "./common.web"
 :
 language= change_params.Language= 
-(cur_buffer[2]=='+')?C_PLUS_PLUS:C;
+(cur_buffer[2]==053)?C_PLUS_PLUS:C;
 column_mode= change_params.Column_mode= NO;
 continue;
 
-/* 11: */
-#line 98 "./typedefs.hweb"
 
-case 'r'
+case 0162
 
-/* :11 */
-#line 2023 "./common.web"
 :
 if(!RAT_OK("Language change ignored"))continue;
 
 language= change_params.Language= 
-(cur_buffer[2]=='9')?RATFOR_90:RATFOR;
+(cur_buffer[2]==071)?RATFOR_90:RATFOR;
 continue;
 
-/* 12: */
-#line 101 "./typedefs.hweb"
 
-case 'n'
+case 0156
 
-/* :12 */
-#line 2030 "./common.web"
 :
 language= change_params.Language= 
-(cur_buffer[2]=='9')?FORTRAN_90:FORTRAN;
+(cur_buffer[2]==071)?FORTRAN_90:FORTRAN;
 continue;
 
-/* 14: */
-#line 107 "./typedefs.hweb"
 
-case 'v'
+case 0166
 
 
 
-/* :14 */
-#line 2035 "./common.web"
 :
 language= change_params.Language= LITERAL;continue;
 
-/* 13: */
-#line 104 "./typedefs.hweb"
 
-case 'x'
+case 0170
 
-/* :13 */
-#line 2038 "./common.web"
 :
 language= change_params.Language= TEX;continue;
 
-case '[':
+case 0133:
 column_mode= change_params.Column_mode= YES;continue;
 
-case ']':
+case 0135:
 column_mode= change_params.Column_mode= NO;continue;
 
 default:
@@ -3398,16 +2913,10 @@ continue;
 }
 }
 
-/* :113 */
-#line 2004 "./common.web"
 
 }
 
-/* :112 */
-#line 1959 "./common.web"
 ;
-/* 116: */
-#line 2074 "./common.web"
 
 
 do
@@ -3423,8 +2932,6 @@ goto done_priming;
 }
 while(limit==cur_buffer);
 
-/* :116 */
-#line 1960 "./common.web"
 ;
 
 done_priming:
@@ -3438,9 +2945,6 @@ changing= NO;
 cur0_prms= cur_prms.web;
 }
 
-/* :111 */
-/* 117: */
-#line 2096 "./common.web"
 
 
 SRTN
@@ -3463,27 +2967,19 @@ change_limit= NULL;changing= NO;prn_where= YES;
 return;
 }
 
-/* 118: */
-#line 2138 "./common.web"
 
 
-if(limit>cur_buffer+1&&cur_buffer[0]=='@')
+if(limit>cur_buffer+1&&cur_buffer[0]==0100)
 {
-/* 114: */
-#line 2056 "./common.web"
 
 
-if((cur_buffer[1]>='X'&&cur_buffer[1]<='Z')||cur_buffer[1]=='I')
-cur_buffer[1]+= 'z'-'Z';
+if((cur_buffer[1]>=0130&&cur_buffer[1]<=0132)||cur_buffer[1]==0111)
+cur_buffer[1]+= 0172-0132;
 
-/* :114 */
-#line 2142 "./common.web"
 ;
-/* 115: */
-#line 2063 "./common.web"
 
 
-if(cur_buffer[1]=='i')
+if(cur_buffer[1]==0151)
 {
 loc= cur_buffer+2;
 
@@ -3491,18 +2987,16 @@ err0_print(ERR_C,OC("Sorry, no includes allowed in change file"),0);
 
 }
 
-/* :115 */
-#line 2143 "./common.web"
 ;
 
-if(cur_buffer[1]=='x'||cur_buffer[1]=='z')
+if(cur_buffer[1]==0170||cur_buffer[1]==0172)
 {
 loc= cur_buffer+2;
 
 err0_print(ERR_C,OC("Where is the matching @y?"),0);
 
 }
-else if(cur_buffer[1]=='y')
+else if(cur_buffer[1]==0171)
 {
 if(n>0)
 {
@@ -3515,8 +3009,6 @@ return;
 }
 }
 
-/* :118 */
-#line 2118 "./common.web"
 ;
 changing= NO;prn_where= YES;
 
@@ -3537,14 +3029,10 @@ if(LINES_DONT_MATCH)n++;
 }
 }
 
-/* :117 */
-#line 56 "./common.web"
 
 #endif 
 
 #if(part != 1)
-/* 119: */
-#line 2171 "./common.web"
 
 
 SRTN
@@ -3554,46 +3042,31 @@ FCLOSE(prms[WEB_FILE].web.File);
 FCLOSE(prms[WEB_FILE].change.File);
 
 ini_input_prms(WEB_FILE,(outer_char HUGE*)"",ABORT_ON_ERROR);
-/* 120: */
-#line 2191 "./common.web"
 
 
-limit= cur_buffer;loc= cur_buffer+1;cur_buffer[0]= ' '
+limit= cur_buffer;loc= cur_buffer+1;cur_buffer[0]= 040
 
-/* :120 */
-#line 2180 "./common.web"
 ;
 
-/* 122: */
-#line 2205 "./common.web"
 
 {
 cur0_prms= cur_prms.change;
 changing= YES;
 change_params= change_params0;
 prime_the_change_buffer();
-/* 120: */
-#line 2191 "./common.web"
 
 
-limit= cur_buffer;loc= cur_buffer+1;cur_buffer[0]= ' '
+limit= cur_buffer;loc= cur_buffer+1;cur_buffer[0]= 040
 
-/* :120 */
-#line 2211 "./common.web"
 ;
 }
 
-/* :122 */
-#line 2182 "./common.web"
 
 
 incl_depth= WEB_FILE;
 input_has_ended= NO;
 }
 
-/* :119 */
-/* 126: */
-#line 2243 "./common.web"
 
 
 boolean
@@ -3635,9 +3108,6 @@ STRCPY(this_include_file,web_level?
 return YES;
 }
 
-/* :126 */
-/* 127: */
-#line 2285 "./common.web"
 
 
 boolean
@@ -3688,9 +3158,6 @@ return NO;
 return YES;
 }
 
-/* :127 */
-/* 128: */
-#line 2339 "./common.web"
 
 
 FILE*
@@ -3739,9 +3206,6 @@ path= p1+1;
 return NULL;
 }
 
-/* :128 */
-/* 129: */
-#line 2391 "./common.web"
 
 
 FILE*
@@ -3784,17 +3248,12 @@ return file_ptr;
 return NULL;
 }
 
-/* :129 */
-/* 132: */
-#line 2469 "./common.web"
 
 
 boolean
 get_line(VOID)
 {
 if(return_toggle)
-/* 137: */
-#line 2584 "./common.web"
 
 {
 return_toggle= NO;
@@ -3808,7 +3267,7 @@ return NO;
 STRNCPY(cur_buffer,stored_line,stored_line_length);
 FREE_MEM(stored_line,"stored_line",stored_line_length,ASCII);
 limit= cur_buffer+stored_line_length;
-*limit= ' ';
+*limit= 040;
 
 if(popped)
 {
@@ -3821,16 +3280,12 @@ else
 goto process_line;
 }
 
-/* :137 */
-#line 2475 "./common.web"
 
 
 restart:
 if(changing)
 chngd_module[module_count]= YES;
 else
-/* 147: */
-#line 2888 "./common.web"
 
 {
 popped= NO;
@@ -3887,8 +3342,6 @@ if(return_toggle)
 no_more_input= input_has_ended;
 input_has_ended= NO;
 popped= YES;
-/* 135: */
-#line 2559 "./common.web"
 
 {
 return_toggle= YES;
@@ -3900,13 +3353,11 @@ STRNCPY(stored_line,cur_buffer,stored_line_length);
 loc= cur_buffer+2;
 get_fname(prms[1].web.File_name);
 loc= limit= cur_buffer;
-*limit++= '@';*limit++= '\001';*limit= ' ';
+*limit++= 0100;*limit++= '\001';*limit= 040;
 
 return YES;
 }
 
-/* :135 */
-#line 2944 "./common.web"
 
 }
 
@@ -3917,14 +3368,10 @@ if(cur_buffer[0]==change_buffer[0])
 if(change_limit>change_buffer)chk_change();
 }
 
-/* :147 */
-#line 2481 "./common.web"
 ;
 
 if(changing)
 {
-/* 153: */
-#line 3109 "./common.web"
 
 {
 if(!input_ln(CHANGE_FILE))
@@ -3932,27 +3379,21 @@ if(!input_ln(CHANGE_FILE))
 
 err0_print(ERR_C,OC("Change file ended without @z"),0);
 
-cur_buffer[0]= '@';cur_buffer[1]= 'z';limit= cur_buffer+2;
+cur_buffer[0]= 0100;cur_buffer[1]= 0172;limit= cur_buffer+2;
 }
 
 if(limit>cur_buffer+1)
-if(cur_buffer[0]=='@')
+if(cur_buffer[0]==0100)
 {
-/* 114: */
-#line 2056 "./common.web"
 
 
-if((cur_buffer[1]>='X'&&cur_buffer[1]<='Z')||cur_buffer[1]=='I')
-cur_buffer[1]+= 'z'-'Z';
+if((cur_buffer[1]>=0130&&cur_buffer[1]<=0132)||cur_buffer[1]==0111)
+cur_buffer[1]+= 0172-0132;
 
-/* :114 */
-#line 3121 "./common.web"
 ;
-/* 115: */
-#line 2063 "./common.web"
 
 
-if(cur_buffer[1]=='i')
+if(cur_buffer[1]==0151)
 {
 loc= cur_buffer+2;
 
@@ -3960,25 +3401,21 @@ err0_print(ERR_C,OC("Sorry, no includes allowed in change file"),0);
 
 }
 
-/* :115 */
-#line 3122 "./common.web"
 ;
 
-if(cur_buffer[1]=='x'||cur_buffer[1]=='y')
+if(cur_buffer[1]==0170||cur_buffer[1]==0171)
 {
 loc= cur_buffer+2;
 err0_print(ERR_C,OC("Where is the matching @z?"),0);
 
 }
-else if(cur_buffer[1]=='z')
+else if(cur_buffer[1]==0172)
 {
 prime_the_change_buffer();prn_where= YES;
 }
 }
 }
 
-/* :153 */
-#line 2485 "./common.web"
 ;
 
 if(!changing)
@@ -3988,11 +3425,9 @@ chngd_module[module_count]= YES;goto restart;
 }
 
 process_line:
-loc= cur_buffer;*limit= ' ';
+loc= cur_buffer;*limit= 040;
 
 if(return_toggle)
-/* 135: */
-#line 2559 "./common.web"
 
 {
 return_toggle= YES;
@@ -4004,25 +3439,21 @@ STRNCPY(stored_line,cur_buffer,stored_line_length);
 loc= cur_buffer+2;
 get_fname(prms[1].web.File_name);
 loc= limit= cur_buffer;
-*limit++= '@';*limit++= '\001';*limit= ' ';
+*limit++= 0100;*limit++= '\001';*limit= 040;
 
 return YES;
 }
 
-/* :135 */
-#line 2497 "./common.web"
 
 
-if(*cur_buffer=='@')
+if(*cur_buffer==0100)
 switch(*(cur_buffer+1))
 {
-case 'i':
-case 'I':
-/* 133: */
-#line 2512 "./common.web"
+case 0151:
+case 0111:
 
 
-if(*(cur_buffer+1)=='I'&&(skip_includes||
+if(*(cur_buffer+1)==0111&&(skip_includes||
 (program==weave&&toggle_includes&&CUR_FILE==WEB_FILE)))
 {
 if(skip_includes)
@@ -4033,8 +3464,6 @@ goto restart;
 else if(toggle_includes&&CUR_FILE==WEB_FILE)
 {
 toggling= YES;
-/* 135: */
-#line 2559 "./common.web"
 
 {
 return_toggle= YES;
@@ -4046,19 +3475,15 @@ STRNCPY(stored_line,cur_buffer,stored_line_length);
 loc= cur_buffer+2;
 get_fname(prms[1].web.File_name);
 loc= limit= cur_buffer;
-*limit++= '@';*limit++= '\001';*limit= ' ';
+*limit++= 0100;*limit++= '\001';*limit= 040;
 
 return YES;
 }
 
-/* :135 */
-#line 2525 "./common.web"
 
 }
 }
 else
-/* 139: */
-#line 2630 "./common.web"
 
 {
 boolean found_include;
@@ -4085,8 +3510,6 @@ err0_print(ERR_C,OC("Include file name not given"),0);
 else
 {
 if(skip_ifiles)
-/* 142: */
-#line 2708 "./common.web"
 
 {
 int j;
@@ -4110,8 +3533,6 @@ STRCPY(ifiles[num_ifiles],cur_file_name);
 num_ifiles++;
 }
 
-/* :142 */
-#line 2654 "./common.web"
 
 
 if(!get_fname(change_file_name))
@@ -4131,27 +3552,19 @@ if(found_include)
 if(ini_input_prms(CUR_FILE,incl.list,DONT_ABORT_ON_ERROR))
 {
 if(cur_prms.change->File!=prms[incl_depth-1].change.File)
-/* 122: */
-#line 2205 "./common.web"
 
 {
 cur0_prms= cur_prms.change;
 changing= YES;
 change_params= change_params0;
 prime_the_change_buffer();
-/* 120: */
-#line 2191 "./common.web"
 
 
-limit= cur_buffer;loc= cur_buffer+1;cur_buffer[0]= ' '
+limit= cur_buffer;loc= cur_buffer+1;cur_buffer[0]= 040
 
-/* :120 */
-#line 2211 "./common.web"
 ;
 }
 
-/* :122 */
-#line 2673 "./common.web"
 
 else*cur_prms.change= prms[incl_depth-1].change;
 
@@ -4171,12 +3584,8 @@ incl_depth--;
 goto restart;
 }
 
-/* :139 */
-#line 2529 "./common.web"
 
 
-/* :133 */
-#line 2504 "./common.web"
 
 break;
 }
@@ -4184,9 +3593,6 @@ break;
 return(boolean)(!input_has_ended);
 }
 
-/* :132 */
-/* 143: */
-#line 2733 "./common.web"
 
 
 boolean
@@ -4199,28 +3605,26 @@ outer_char HUGE*k;
 skip_white:
 
 
-while(loc<=limit&&(*loc==' '||*loc=='\t'||*loc=='"'))loc++;
+while(loc<=limit&&(*loc==040||*loc==011||*loc==042))loc++;
 
 
 
 if(loc>=limit)return NO;
 
-/* 144: */
-#line 2772 "./common.web"
 
 {
-if(*loc=='/')
+if(*loc==057)
 {
-if(*(loc+1)=='/')
+if(*(loc+1)==057)
 {
 loc= limit+1;
 return NO;
 }
 
-if(*(loc+1)=='*')
+if(*(loc+1)==052)
 {
 for(loc+= 2;loc<=limit;loc++)
-if(*loc=='*'&&*(loc+1)=='/')
+if(*loc==052&&*(loc+1)==057)
 {
 loc+= 2;
 goto skip_white;
@@ -4232,29 +3636,21 @@ err0_print(ERR_C,OC("Can't continue comments on @i lines"),0);
 }
 }
 
-/* :144 */
-#line 2751 "./common.web"
 
 
 k= file_name;j= loc;
 
 
-while(*loc!=' '&&*loc!='\t'&&*loc!='"')*k++= XCHR(*loc++);
+while(*loc!=040&&*loc!=011&&*loc!=042)*k++= XCHR(*loc++);
 TERMINATE(k,0);
 
 
-/* :143 */
-/* 143: */
-#line 2765 "./common.web"
 
 add_prefix(file_name);
 
 return YES;
 }
 
-/* :143 */
-/* 145: */
-#line 2799 "./common.web"
 
 
 SRTN
@@ -4275,9 +3671,6 @@ STRCPY(file_name,temp);
 }
 }
 
-/* :145 */
-/* 146: */
-#line 2822 "./common.web"
 
 
 SRTN
@@ -4346,9 +3739,6 @@ STRCPY(name,temp);
 #endif 
 }
 
-/* :146 */
-/* 148: */
-#line 2958 "./common.web"
 
 
 boolean
@@ -4362,7 +3752,7 @@ return NO;
 
 
 
-limbo_material= BOOLEAN(cur_buffer[0]=='@'&&cur_buffer[1]=='z');
+limbo_material= BOOLEAN(cur_buffer[0]==0100&&cur_buffer[1]==0172);
 
 if(limbo_material)
 do
@@ -4380,7 +3770,7 @@ find_keywords(cur_buffer,limit);
 
 
 }
-while(!(cur_buffer[0]=='@'&&cur_buffer[1]=='x'));
+while(!(cur_buffer[0]==0100&&cur_buffer[1]==0170));
 
 
 
@@ -4394,9 +3784,6 @@ return NO;
 return YES;
 }
 
-/* :148 */
-/* 149: */
-#line 3007 "./common.web"
 
 
 SRTN
@@ -4408,41 +3795,38 @@ ASCII HUGE*pk,HUGE*pk_end,HUGE*ptext,HUGE*ptext_end;
 
 *p_end= '\0';
 
-pk= (ASCII HUGE*)STRCHR(p,'$');
+pk= (ASCII HUGE*)STRCHR(p,044);
 
 if(!pk)
 return;
 
-pk_end= (ASCII HUGE*)STRCHR(pk,':');
+pk_end= (ASCII HUGE*)STRCHR(pk,072);
 
 if(!pk_end)
 return;
 
-if(pk_end[1]!=' ')
+if(pk_end[1]!=040)
 return;
 
-ptext_end= (ASCII HUGE*)STRCHR(pk_end+1,'$');
+ptext_end= (ASCII HUGE*)STRCHR(pk_end+1,044);
 
 if(!ptext_end)
 return;
 
-if(ptext_end[-1]!=' ')
+if(ptext_end[-1]!=040)
 return;
 
 
-for(ptext= pk_end+2;*ptext==' ';ptext++)
+for(ptext= pk_end+2;*ptext==040;ptext++)
 ;
 
 
-for(ptext_end--;*ptext_end==' ';ptext_end--)
+for(ptext_end--;*ptext_end==040;ptext_end--)
 ;
 
 add_keyword(pk+1,pk_end,ptext,ptext_end+1);
 }
 
-/* :149 */
-/* 152: */
-#line 3064 "./common.web"
 
 
 SRTN
@@ -4487,9 +3871,6 @@ STRCPY(prcs->txt,pt);
 prcs->next= NULL;
 }
 
-/* :152 */
-/* 154: */
-#line 3139 "./common.web"
 
 
 SRTN
@@ -4507,9 +3888,6 @@ err0_print(ERR_C,OC("Change file entry did not match"),0);
 }
 }
 
-/* :154 */
-/* 157: */
-#line 3175 "./common.web"
 
 
 void HUGE*
@@ -4565,9 +3943,6 @@ show_alloc('+',why,nunits,(BUF_SIZE)nsize,nbytes,p,total_mem);
 return p;
 }
 
-/* :157 */
-/* 158: */
-#line 3231 "./common.web"
 
 
 SRTN
@@ -4587,9 +3962,6 @@ printf("(%s total)\n",commas(total_mem));
 free_buf(&c_buf);
 }
 
-/* :158 */
-/* 159: */
-#line 3259 "./common.web"
 
 
 SRTN
@@ -4608,9 +3980,6 @@ PTR_BASE
 printf(ptr_string,p,(char HUGE*)p+nbytes);
 }
 
-/* :159 */
-/* 160: */
-#line 3279 "./common.web"
 
 
 SRTN
@@ -4638,9 +4007,6 @@ show_alloc('-',why,nunits,(BUF_SIZE)nsize,nbytes,p,total_mem);
 FREE(p);
 }
 
-/* :160 */
-/* 164: */
-#line 3485 "./common.web"
 
 
 MEM HUGE*
@@ -4682,9 +4048,6 @@ mark_harmless;
 return m;
 }
 
-/* :164 */
-/* 165: */
-#line 3530 "./common.web"
 
 
 void HUGE*
@@ -4706,9 +4069,6 @@ else
 return get_mem0(abbrev,(*pnunits)+dn,nsize);
 }
 
-/* :165 */
-/* 166: */
-#line 3552 "./common.web"
 
 MEM HUGE*
 find_abbrev FCN((abbrev))
@@ -4726,9 +4086,6 @@ confusion(OC("find_abbrev"),OC("Bad alloc abbreviation \"%s\""),abbrev);
 return NULL;
 }
 
-/* :166 */
-/* 167: */
-#line 3573 "./common.web"
 
 #ifdef mcc
 
@@ -4763,9 +4120,6 @@ return new_ptr;
 
 #endif 
 
-/* :167 */
-/* 170: */
-#line 3633 "./common.web"
 
 
 unsigned
@@ -4806,9 +4160,6 @@ n= PTR_DIFF(int,p1,p0);
 return n;
 }
 
-/* :170 */
-/* 175: */
-#line 3719 "./common.web"
 
 
 name_pointer
@@ -4832,19 +4183,13 @@ for(last= first;*last!='\0';last++)
 }
 
 l= PTR_DIFF(int,last,first);
-/* 186: */
-#line 3977 "./common.web"
 
 
 h= *i;
 
 while(++i<last)h= (h+h+*i)%hash_size;
 
-/* :186 */
-#line 3742 "./common.web"
 ;
-/* 187: */
-#line 3986 "./common.web"
 
 p= hash[h];
 
@@ -4857,13 +4202,9 @@ p->link= hash[h];hash[h]= p;
 
 }
 
-/* :187 */
-#line 3743 "./common.web"
 ;
 
 if(p==name_ptr)
-/* 188: */
-#line 4002 "./common.web"
 
 {
 if(byte_ptr+l>byte_end)OVERFLW("bytes","b");
@@ -4876,8 +4217,6 @@ if(program==weave)
 ini_p(p,t);
 }
 
-/* :188 */
-#line 3746 "./common.web"
 ;
 
 if(!(p->Language&(boolean)language))
@@ -4907,9 +4246,6 @@ default:;
 return p;
 }
 
-/* :175 */
-/* 176: */
-#line 3780 "./common.web"
 
 
 sixteen_bits
@@ -4963,16 +4299,12 @@ STRCPY(a,s);
 i= first= to_ASCII((outer_char*)a);
 last= first+l;
 
-/* 186: */
-#line 3977 "./common.web"
 
 
 h= *i;
 
 while(++i<last)h= (h+h+*i)%hash_size;
 
-/* :186 */
-#line 3833 "./common.web"
 
 p= hash[h];
 while(p&&!(STRNCMP(first,p->byte_start,l)==0))
@@ -4989,11 +4321,7 @@ FREE_MEM(a,"find_s",l+1,ASCII);
 return n;
 }
 
-#line 8 "./t_codes.hweb"
 
-/* :176 */
-/* 180: */
-#line 3852 "./common.web"
 
 
 sixteen_bits
@@ -5004,9 +4332,6 @@ eight_bits a1 C1("")
 return find_n(IDENTIFIER(a0,a1));
 }
 
-/* :180 */
-/* 181: */
-#line 3863 "./common.web"
 
 
 SRTN
@@ -5038,9 +4363,6 @@ if(!prsrvd||prsrvd->keywords)
 pr_lan("keyword  ",np->keyword);
 }
 
-/* :181 */
-/* 184: */
-#line 3922 "./common.web"
 
 
 SRTN
@@ -5069,14 +4391,10 @@ printf("(none)");
 
 printf(" }");
 
-#line 3951 "./common.web"
 
 puts("");
 }
 
-/* :184 */
-/* 185: */
-#line 3956 "./common.web"
 
 
 BUF_SIZE
@@ -5094,9 +4412,6 @@ putchar('\n');
 return n;
 }
 
-/* :185 */
-/* 191: */
-#line 4042 "./common.web"
 
 
 name_pointer
@@ -5128,9 +4443,6 @@ return NULL;
 return install_node(q,c,k,PTR_DIFF(int,l,k)+1);
 }
 
-/* :191 */
-/* 192: */
-#line 4075 "./common.web"
 
 
 LEXI
@@ -5149,9 +4461,6 @@ else if(*j<*k)return LESS;
 else return GREATER;
 }
 
-/* :192 */
-/* 193: */
-#line 4101 "./common.web"
 
 
 name_pointer
@@ -5174,9 +4483,6 @@ STRNCPY(byte_ptr,j,name_len);
 return node;
 }
 
-/* :193 */
-/* 194: */
-#line 4129 "./common.web"
 
 
 name_pointer
@@ -5213,9 +4519,6 @@ err0_print(ERR_C,OC("Ambiguous prefix"),0);
 return r;
 }
 
-/* :194 */
-/* 195: */
-#line 4165 "./common.web"
 
 
 unsigned
@@ -5230,9 +4533,6 @@ r= prefix_lookup((ASCII HUGE*)s,(ASCII HUGE*)(s+STRLEN(s)));
 return r?prn_id(r):0;
 }
 
-/* :195 */
-/* 198: */
-#line 4213 "./common.web"
 
 
 SRTN
@@ -5299,8 +4599,6 @@ printf(".");
 
 
 if(err_origin==ERR_S)
-/* 201: */
-#line 4384 "./common.web"
 
 {
 CONST outer_char HUGE*k,HUGE*l;
@@ -5326,12 +4624,8 @@ putchar(*k>127?' ':*k);
 putchar('\n');
 }
 
-/* :201 */
-#line 4279 "./common.web"
 
 else
-/* 199: */
-#line 4304 "./common.web"
 
 {
 if(cur0_prms)
@@ -5369,7 +4663,7 @@ l= cur_buffer+MAX_ERR_BUF;
 }
 
 for(k= cur_buffer;k<l;k++)
-if(*k=='\t')
+if(*k==011)
 putchar(' ');
 else
 putchar(*k>127?' ':XCHR(*k));
@@ -5393,15 +4687,13 @@ putchar(*k>127?' ':XCHR(*k));
 
 }
 if(limit!=NULL)
-if(*limit=='|')putchar('|');
+if(*limit==0174)putchar('|');
 
 putchar(' ');
 err_happened= YES;
 }
 }
 
-/* :199 */
-#line 4281 "./common.web"
 
 }
 
@@ -5416,9 +4708,6 @@ free_buf(&sput_buf);
 set_color(NORMAL);
 }
 
-/* :198 */
-/* 202: */
-#line 4413 "./common.web"
 
 
 int
@@ -5464,9 +4753,6 @@ return wrap_up();
 
 }
 
-/* :202 */
-/* 203: */
-#line 4467 "./common.web"
 
 
 int
@@ -5502,9 +4788,6 @@ I'M CONFUSED; this shouldn't happen.  PLEASE REPORT THIS!!!  "),OC(temp));
 }
 
 
-/* :203 */
-/* 204: */
-#line 4500 "./common.web"
 
 
 SRTN
@@ -5528,9 +4811,6 @@ fatal(ERR_NULL,OC("!!! Sorry, CAPACITY EXCEEDED:  "),OC("Too many %s.  Current n
 }
 
 
-/* :204 */
-/* 205: */
-#line 4527 "./common.web"
 
 
 SRTN
@@ -5545,9 +4825,6 @@ of %i;",name,value);
 OVERFLW(temp,"");
 }
 
-/* :205 */
-/* 206: */
-#line 4547 "./common.web"
 
 
 #if(VMS)
@@ -5567,8 +4844,6 @@ see_statistics();
 prn_time();
 #endif 
 
-/* 208: */
-#line 4609 "./common.web"
 
 {
 if(msg_level>=SHORT_INFO
@@ -5612,11 +4887,7 @@ CLR_PRINTF(ALWAYS,program_name,("]\n"));
 set_color(NORMAL);
 }
 
-/* :208 */
-#line 4566 "./common.web"
 
-/* 207: */
-#line 4597 "./common.web"
 
 {
 if(cur_prms.web&&cur_prms.web->File)
@@ -5628,8 +4899,6 @@ fclose(cur_prms.change->File);
 cls_files();
 }
 
-/* :207 */
-#line 4567 "./common.web"
 
 
 SET_COLOR(ordinary);
@@ -5657,9 +4926,6 @@ exit(1);
 return-1;
 }
 
-/* :206 */
-/* 209: */
-#line 4654 "./common.web"
 
 
 char
@@ -5679,9 +4945,6 @@ else
 return '!';
 }
 
-/* :209 */
-/* 210: */
-#line 4675 "./common.web"
 
 
 SRTN
@@ -5693,9 +4956,6 @@ fatal(ERR_C,OC("Output error"),OC("from %s (quota exceeded?)."),fcn);
 }
 
 
-/* :210 */
-/* 211: */
-#line 4691 "./common.web"
 
 
 boolean
@@ -5742,9 +5002,6 @@ fflush(stdout);
 return(STRCMP(buf,"yes")==0);
 }
 
-/* :211 */
-/* 219: */
-#line 5051 "./common.web"
 
 
 SRTN
@@ -5767,8 +5024,6 @@ banner();
 if(statistics)
 mem_avail(0);
 
-/* 233: */
-#line 5593 "./common.web"
 
 {
 outer_char HUGE*dot_pos;
@@ -5801,8 +5056,6 @@ TERMINATE(dot_pos,0);
 }
 }
 
-/* 235: */
-#line 5641 "./common.web"
 
 {
 if(p)
@@ -5818,23 +5071,15 @@ STRCPY(wbflnm0,wbflnm);
 }
 }
 
-/* :235 */
-#line 5622 "./common.web"
 
 }
 
-/* :233 */
-#line 5073 "./common.web"
 
 
-/* 250: */
-#line 6145 "./common.web"
 
 {
 read_sty(style_file_name,renamed_style);
 
-/* 251: */
-#line 6155 "./common.web"
 
 {
 DOT_DELIMITER HUGE*d= &wt_style.dot_delimiter;
@@ -5848,17 +5093,11 @@ t_style.ASCII_fcn= x__to_ASCII((outer_char*)t_style.ASCII_fcn);
 }
 }
 
-/* :251 */
-#line 6149 "./common.web"
 
 }
 
-/* :250 */
-#line 5075 "./common.web"
 
 
-/* 232: */
-#line 5568 "./common.web"
 
 {
 int k;
@@ -5883,8 +5122,6 @@ set_name(RATFOR_90,wt_style.output_ext.R90_);
 set_name(TEX,wt_style.output_ext.X_);
 }
 
-/* :232 */
-#line 5077 "./common.web"
 ;
 
 if(!(found_web||info_option))
@@ -5894,9 +5131,6 @@ if(!found_change)
 *change_file_name= '\0';
 }
 
-/* :219 */
-/* 220: */
-#line 5096 "./common.web"
 
 
 outer_char HUGE*
@@ -5941,9 +5175,6 @@ STRCPY(--b,line1);
 return buf;
 }
 
-/* :220 */
-/* 222: */
-#line 5169 "./common.web"
 
 
 SRTN
@@ -5968,8 +5199,6 @@ k= 0;
 
 ini_args= GET_MEM("ini_args",MAX_INI_ARGS,outer_char HUGE*);
 
-/* 223: */
-#line 5231 "./common.web"
 
 {
 outer_char*p_root,ini_root[MAX_FILE_NAME_LENGTH];
@@ -5993,14 +5222,10 @@ ini_file= FOPEN(mk_fname(ini_file_name,MAX_FILE_NAME_LENGTH,
 HOME,YES,ini_root),"r");
 }
 
-/* :223 */
-#line 5193 "./common.web"
 
 
 
 if(ini_file)
-/* 224: */
-#line 5256 "./common.web"
 
 {
 outer_char CONST HUGE*b,HUGE*blimit;
@@ -6030,8 +5255,6 @@ goto done;
 case '"':
 case '\'':
 blank= NO;
-/* 225: */
-#line 5329 "./common.web"
 
 {
 outer_char delim= *b;
@@ -6069,8 +5292,6 @@ else
 *t++= *b++;
 }
 
-/* :225 */
-#line 5285 "./common.web"
 
 goto done;
 
@@ -6115,8 +5336,6 @@ putchar('\n');
 #endif
 }
 
-/* :224 */
-#line 5197 "./common.web"
 
 
 
@@ -6143,9 +5362,6 @@ FREE_MEM(buffer,"buffer",T_SIZE,char);
 FREE_MEM(temp,"temp",T_SIZE,char);
 }
 
-/* :222 */
-/* 227: */
-#line 5375 "./common.web"
 
 
 SRTN
@@ -6196,9 +5412,6 @@ pincl->num++;
 }
 }
 
-/* :227 */
-/* 228: */
-#line 5427 "./common.web"
 
 
 int
@@ -6216,9 +5429,6 @@ return n;
 }
 
 
-/* :228 */
-/* 229: */
-#line 5445 "./common.web"
 
 
 char*
@@ -6272,9 +5482,6 @@ STRCPY(buffer,file_name);
 return(char*)buffer;
 }
 
-/* :229 */
-/* 230: */
-#line 5495 "./common.web"
 
 
 boolean
@@ -6293,9 +5500,6 @@ return YES;
 return NO;
 }
 
-/* :230 */
-/* 231: */
-#line 5515 "./common.web"
 
 
 SRTN
@@ -6336,9 +5540,6 @@ pn++;
 }
 }
 
-/* :231 */
-/* 234: */
-#line 5626 "./common.web"
 
 
 SRTN
@@ -6352,9 +5553,6 @@ if(*params.outp_nm[k= lan_num(l)]=='\0')
 new_fname(params.outp_nm+k,wbflnm0,output_ext);
 }
 
-/* :234 */
-/* 236: */
-#line 5659 "./common.web"
 
 
 outer_char HUGE*
@@ -6401,9 +5599,6 @@ return*pout_name;
 }
 
 
-/* :236 */
-/* 239: */
-#line 5737 "./common.web"
 
 
 SRTN
@@ -6429,8 +5624,6 @@ last_mod_name= mod_names+MAX_MOD_NAMES;
 if(TeX_processor!=LaTeX_p)
 return;
 
-/* 240: */
-#line 5781 "./common.web"
 
 {
 outer_char*dot_pos;
@@ -6462,8 +5655,6 @@ reading(aux_file_name,YES);
 
 }
 
-/* :240 */
-#line 5762 "./common.web"
 
 
 modno= 0;
@@ -6475,8 +5666,6 @@ aline++;
 if(STRNCMP(buffer,"\\Newlabel",9)!=0)
 continue;
 
-/* 242: */
-#line 5826 "./common.web"
 
 {
 #if(!ANSI_SSCANF)
@@ -6560,8 +5749,6 @@ pmcount= 1;
 }
 }
 
-/* :242 */
-#line 5773 "./common.web"
 
 }
 
@@ -6569,9 +5756,6 @@ sect_info[modno].subpage_flag= BOOLEAN(pmcount!=1);
 fclose(fa);
 }
 
-/* :239 */
-/* 245: */
-#line 5994 "./common.web"
 
 
 outer_char HUGE*
@@ -6589,13 +5773,13 @@ outer_char c,letter[2];
 letter[1]= '\0';
 
 c= (ps->subpage_flag?
-XCHR(modno-ps->modno0+'a'-1):'\0');
+XCHR(modno-ps->modno0+0141-1):'\0');
 
 if(c)
 {
-if(XORD(c)>'z')
+if(XORD(c)>0172)
 c= '?';
-else if(c=='`')
+else if(c==0140)
 c= '\0';
 }
 
@@ -6619,9 +5803,6 @@ confusion(OC("mod_trans"),OC("too many unfreed mod names"));
 return*(next_mod_name++)= mod_temp;
 }
 
-/* :245 */
-/* 246: */
-#line 6038 "./common.web"
 
 
 SRTN
@@ -6640,9 +5821,6 @@ FREE(*next_mod_name);
 }
 }
 
-/* :246 */
-/* 247: */
-#line 6062 "./common.web"
 
 
 int
@@ -6687,9 +5865,6 @@ default:return NO_LANGUAGE;
 }
 }
 
-/* :247 */
-/* 248: */
-#line 6109 "./common.web"
 
 int
 lan_index FCN((Language))
@@ -6716,9 +5891,6 @@ default:Language= global_language;goto proper_language;
 }
 }
 
-/* :248 */
-/* 253: */
-#line 6181 "./common.web"
 
 
 SRTN
@@ -6758,8 +5930,6 @@ pa= pa_begin= *(argv++);
 
 
 if((a_file_name= BOOLEAN(*pa!='-'))||*(pa+1)=='\0')
-/* 254: */
-#line 6227 "./common.web"
 
 {
 if(doing_cmd_line)
@@ -6770,8 +5940,6 @@ STRCPY(wbflnm,THE_FILE_NAME);
 *pfound_web= YES;
 }
 else if(!*pfound_change)
-/* 255: */
-#line 6250 "./common.web"
 
 {
 if(a_file_name&&STRLEN(pa)>MAX_FILE_NAME_LENGTH-5)
@@ -6796,12 +5964,8 @@ nsprintf(change_file_name,OC("%s"),1,THE_FILE_NAME)>=(int)(MAX_FILE_NAME_LENGTH)
 *pfound_change= YES;
 }
 
-/* :255 */
-#line 6237 "./common.web"
 
 else
-/* 321: */
-#line 8545 "./common.web"
 
 {
 printf("! Warning: Ignoring multiple change file \"%s\".\n",
@@ -6810,8 +5974,6 @@ mark_harmless;
 continue;
 }
 
-/* :321 */
-#line 6239 "./common.web"
 ;
 }
 else
@@ -6822,12 +5984,8 @@ mark_harmless;
 }
 }
 
-/* :254 */
-#line 6220 "./common.web"
 
 else
-/* 264: */
-#line 6572 "./common.web"
 
 {
 outer_char mc;
@@ -6857,8 +6015,6 @@ tracing= VERBOSE;
 break;
 
 case '@':
-/* 265: */
-#line 6853 "./common.web"
 
 {
 if(!at_codes)
@@ -6871,15 +6027,11 @@ STRCAT(at_codes,to_ASCII(pa));
 info_option= YES;
 }
 
-/* :265 */
-#line 6601 "./common.web"
 
 continue;
 
 case 'a':
 case 'A':
-/* 266: */
-#line 6870 "./common.web"
 
 {
 #if(TRANSLATE_ASCII || DEBUG_XCHR)
@@ -6890,14 +6042,10 @@ translate_ASCII= NOT(TRANSLATE_ASCII0);
 }
 
 
-/* :266 */
-#line 6606 "./common.web"
 
 break;
 
 case 'b':
-/* 267: */
-#line 6882 "./common.web"
 
 {
 params.Block_nums[LN(FORTRAN)]
@@ -6907,8 +6055,6 @@ params.Block_nums[LN(FORTRAN)]
 = NOT(BLOCK_NUMS);
 }
 
-/* :267 */
-#line 6610 "./common.web"
 
 break;
 
@@ -6916,25 +6062,15 @@ case 'B':
 beeps= NOT(BEEPS);
 break;
 
-/* 15: */
-#line 118 "./typedefs.hweb"
 
 case 'c'
 
-/* :15 */
-#line 6617 "./common.web"
 :
-/* 268: */
-#line 6894 "./common.web"
 
 {
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 6896 "./common.web"
 
 
 Cpp= BOOLEAN(*pa=='+');
@@ -6959,8 +6095,6 @@ break;
 }
 
 
-/* :268 */
-#line 6618 "./common.web"
 
 break;
 
@@ -6970,13 +6104,9 @@ pa++;
 break;
 
 case 'D':
-/* 269: */
-#line 6928 "./common.web"
 
 {
 if(*pa=='[')
-/* 270: */
-#line 6950 "./common.web"
 
 {
 for(++pa;*pa!=']';pa++)
@@ -7013,8 +6143,6 @@ break;
 pa++;
 }
 
-/* :270 */
-#line 6931 "./common.web"
 
 else
 {
@@ -7034,8 +6162,6 @@ rsrvd.args= pa;
 info_option= YES;
 }
 
-/* :269 */
-#line 6627 "./common.web"
 
 continue;
 
@@ -7043,17 +6169,11 @@ case 'd':
 number_dos= NOT(NUMBER_DOS);
 
 case ':':
-/* 271: */
-#line 6987 "./common.web"
 
 {
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 6989 "./common.web"
 
 
 max_stmt= STARTING_DO_NUM;
@@ -7069,8 +6189,6 @@ err0_print(ERR_C,OC("Starting DO number must be < 99999; assuming %lu"),-1-1,max
 }
 
 
-/* :271 */
-#line 6634 "./common.web"
 
 continue;
 
@@ -7078,17 +6196,11 @@ case 'e':
 try_extensions= NOT(TRY_EXTENSIONS);break;
 
 case 'E':
-/* 272: */
-#line 7007 "./common.web"
 
 {
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7009 "./common.web"
 
 
 if(*pa)
@@ -7098,8 +6210,6 @@ else
 err0_print(ERR_C,OC("Missing character after -E option; option ignored"),-1-0);
 }
 
-/* :272 */
-#line 6641 "./common.web"
 
 break;
 
@@ -7113,20 +6223,14 @@ case 'g':
 dbg_output= NOT(DBG_OUTPUT);break;
 
 case 'h':
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 6654 "./common.web"
 
 help();
 continue;
 
 case 'H':
-/* 275: */
-#line 7078 "./common.web"
 
 {
 outer_char HUGE*p= pa;
@@ -7157,14 +6261,10 @@ continue;
 
 }
 
-/* :275 */
-#line 6659 "./common.web"
 
 break;
 
 case 'i':
-/* 276: */
-#line 7114 "./common.web"
 
 {
 switch(*pa++)
@@ -7187,22 +6287,16 @@ continue;
 }
 }
 
-/* :276 */
-#line 6663 "./common.web"
 
 break;
 
 case 'I':
-/* 277: */
-#line 7142 "./common.web"
 
 {
 more_includes(read_iformats?&hdr_incl:&incl,pa);
 
 }
 
-/* :277 */
-#line 6667 "./common.web"
 
 continue;
 
@@ -7213,55 +6307,33 @@ case 'k':
 lc_keywords= NOT(LC_KEYWORDS);break;
 
 case 'L':
-/* 278: */
-#line 7151 "./common.web"
 
 {
 switch(*pa)
 {
-/* 15: */
-#line 118 "./typedefs.hweb"
 
 case 'c'
 
-/* :15 */
-#line 7155 "./common.web"
 :
-/* 17: */
-#line 124 "./typedefs.hweb"
 
 case 'n'
 
-/* :17 */
-#line 7156 "./common.web"
 :
-/* 16: */
-#line 121 "./typedefs.hweb"
 
 case 'r'
 
-/* :16 */
-#line 7157 "./common.web"
 :
 goto reswitch;
 
-/* 19: */
-#line 130 "./typedefs.hweb"
 
 case 'v'
 
 
 
-/* :19 */
-#line 7160 "./common.web"
 :
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7161 "./common.web"
 
 switch(*(pa+1))
 {
@@ -7279,21 +6351,13 @@ break;
 }
 break;
 
-/* 18: */
-#line 127 "./typedefs.hweb"
 
 case 'x'
 
-/* :18 */
-#line 7178 "./common.web"
 :
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7179 "./common.web"
 
 switch(*(pa+1))
 {
@@ -7317,14 +6381,10 @@ break;
 }
 }
 
-/* :278 */
-#line 6677 "./common.web"
 
 continue;
 
 case 'l':
-/* 279: */
-#line 7205 "./common.web"
 
 {
 prn_input_lines= BOOLEAN(YES^not);
@@ -7356,14 +6416,10 @@ prn_input_addresses= YES;
 }
 }
 
-/* :279 */
-#line 6681 "./common.web"
 
 continue;
 
 case 'M':
-/* 288: */
-#line 7576 "./common.web"
 
 {
 if(!*pa)
@@ -7383,31 +6439,20 @@ msg_level= EVERYTHING;
 }
 
 
-/* :288 */
-#line 6685 "./common.web"
 
 continue;
 
 case 'm':
-/* 289: */
-#line 7601 "./common.web"
 
 {
 switch(*pa)
 {
 case '4':
 
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7607 "./common.web"
 
-/* :289 */
-/* 289: */
-#line 7611 "./common.web"
 m4= !M4_;
 pa++;
 break;
@@ -7442,8 +6487,6 @@ continue;
 }
 }
 
-/* :289 */
-#line 6689 "./common.web"
 
 break;
 
@@ -7460,8 +6503,6 @@ overload_ops= NOT(OVERLOAD_OPS);
 break;
 
 case 'p':
-/* 286: */
-#line 7483 "./common.web"
 
 {
 IN_STYLE outer_char HUGE*sprm_buf,HUGE*sprm_ptr,HUGE*sprm_end;
@@ -7498,14 +6539,10 @@ sprm_ptr+= n;
 *sprm_ptr++= '\n';
 }
 
-/* :286 */
-#line 6705 "./common.web"
 
 continue;
 
 case 'P':
-/* 287: */
-#line 7524 "./common.web"
 
 {
 switch(*pa)
@@ -7536,8 +6573,6 @@ pa++;
 }
 
 
-/* :287 */
-#line 6709 "./common.web"
 
 break;
 
@@ -7546,13 +6581,9 @@ free_form_input= NOT(FREE_FORM_INPUT);
 Ratfor77= NOT(RATFOR77);
 break;
 
-/* 16: */
-#line 121 "./typedefs.hweb"
 
 case 'r'
 
-/* :16 */
-#line 6717 "./common.web"
 :
 if(!RAT_OK("Language command ignored"))
 break;
@@ -7560,8 +6591,6 @@ FR_args(RATFOR);
 continue;
 
 case 's':
-/* 294: */
-#line 7733 "./common.web"
 
 {
 statistics= NOT(STATISTICS);
@@ -7582,35 +6611,23 @@ mark_harmless;
 }
 }
 
-/* :294 */
-#line 6724 "./common.web"
 
 continue;
 
 case 't':
-/* 302: */
-#line 7917 "./common.web"
 
 {
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7919 "./common.web"
 
 ntrunc();
 }
 
-/* :302 */
-#line 6728 "./common.web"
 
 continue;
 
 case 'T':
-/* 306: */
-#line 8034 "./common.web"
 
 {
 outer_char HUGE*p= pa;
@@ -7654,14 +6671,10 @@ break;
 }
 }
 
-/* :306 */
-#line 6732 "./common.web"
 
 continue;
 
 case 'u':
-/* 307: */
-#line 8080 "./common.web"
 
 {
 if(not)
@@ -7676,8 +6689,6 @@ save_macro(OC("#undef"),pa);
 }
 
 
-/* :307 */
-#line 6736 "./common.web"
 
 continue;
 
@@ -7702,8 +6713,6 @@ input_macros= NOT(INPUT_MACROS);
 continue;
 
 case 'W':
-/* 309: */
-#line 8108 "./common.web"
 
 {
 outer_char HUGE*p= pa;
@@ -7790,8 +6799,6 @@ break;
 }
 }
 
-/* :309 */
-#line 6760 "./common.web"
 
 continue;
 
@@ -7810,8 +6817,6 @@ flags3(BOOLEAN(!not));
 continue;
 
 case 'y':
-/* 311: */
-#line 8260 "./common.web"
 
 {
 outer_char abbrev[80],HUGE*a;
@@ -7820,13 +6825,9 @@ MEM HUGE*m,HUGE*mmin= NULL,HUGE*mmax= NULL;
 boolean query_mode= NO;
 
 
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 8268 "./common.web"
 
 
 if(!*pa)
@@ -7879,23 +6880,15 @@ msearch(abbrev,nunits);
 info_option= YES;
 }
 
-/* :311 */
-#line 6778 "./common.web"
 
 continue;
 
 case 'z':
-/* 312: */
-#line 8323 "./common.web"
 
 {
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 8325 "./common.web"
 
 
 if(STRLEN(pa)<MAX_FILE_NAME_LENGTH)
@@ -7918,8 +6911,6 @@ than %d characters"),-1-2,pa,MAX_FILE_NAME_LENGTH);
 }
 
 
-/* :312 */
-#line 6782 "./common.web"
 
 continue;
 
@@ -7951,13 +6942,9 @@ chk_ifelse= NOT(CHK_IFELSE);break;
 
 case '>':
 case '=':
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 6813 "./common.web"
 
 if(doing_cmd_line||phase==2)
 redirect_output();
@@ -7996,15 +6983,10 @@ spurious(pa);
 }
 
 
-/* :264 */
-#line 6222 "./common.web"
 ;
 }
 }
 
-/* :253 */
-/* 256: */
-#line 6279 "./common.web"
 
 
 SRTN
@@ -8020,15 +7002,15 @@ ini_language(l);
 
 if(!IS_WHITE(*loc))
 {
-if(*loc!='[')
+if(*loc!=0133)
 {
-*pa++= '-';
+*pa++= 055;
 *pa++= l;
 
 WHILE()
 {
-if(IS_WHITE(*loc)||*loc=='[')break;
-if(*loc=='|'&&parsing_mode==INNER)
+if(IS_WHITE(*loc)||*loc==0133)break;
+if(*loc==0174&&parsing_mode==INNER)
 {
 
 err0_print(ERR_C,OC("WARNING:  Code mode ended during \
@@ -8041,13 +7023,13 @@ COPY_TO_ARG_BUFFER(*loc++);
 }
 
 
-if(*loc=='[')
+if(*loc==0133)
 {
-COPY_TO_ARG_BUFFER(' ');
+COPY_TO_ARG_BUFFER(040);
 
 for(loc++;;)
 {
-if(*loc==']')
+if(*loc==0135)
 {
 loc++;
 break;
@@ -8064,9 +7046,6 @@ do_args(NO,argc,args,&found_web,(outer_char*)NULL,&found_change);
 fin_language();
 }
 
-/* :256 */
-/* 257: */
-#line 6341 "./common.web"
 
 
 SRTN
@@ -8078,60 +7057,40 @@ l= A_TO_LOWER(l);
 
 switch(l)
 {
-/* 10: */
-#line 95 "./typedefs.hweb"
 
-case 'c'
+case 0143
 
-/* :10 */
-#line 6352 "./common.web"
 :
 language= (Cpp?C_PLUS_PLUS:C);
 break;
 
-/* 11: */
-#line 98 "./typedefs.hweb"
 
-case 'r'
+case 0162
 
-/* :11 */
-#line 6356 "./common.web"
 :
 if(!RAT_OK("Invalid @r command; language set to C"))language= C;
 else language= (Fortran88?RATFOR_90:RATFOR);
 break;
 
-/* 12: */
-#line 101 "./typedefs.hweb"
 
-case 'n'
+case 0156
 
-/* :12 */
-#line 6361 "./common.web"
 :
 language= (Fortran88?FORTRAN_90:FORTRAN);
 break;
 
-/* 14: */
-#line 107 "./typedefs.hweb"
 
-case 'v'
+case 0166
 
 
 
-/* :14 */
-#line 6365 "./common.web"
 :
 language= LITERAL;
 break;
 
-/* 13: */
-#line 104 "./typedefs.hweb"
 
-case 'x'
+case 0170
 
-/* :13 */
-#line 6369 "./common.web"
 :
 language= TEX;
 break;
@@ -8145,9 +7104,6 @@ cmd_language= language;
 ini0_language();
 }
 
-/* :257 */
-/* 258: */
-#line 6386 "./common.web"
 
 
 SRTN
@@ -8205,9 +7161,6 @@ break;
 }
 }
 
-/* :258 */
-/* 259: */
-#line 6444 "./common.web"
 
 
 SRTN
@@ -8244,17 +7197,11 @@ if(program==tangle)
 out_file= params.outp_file[lan_num(out_language)];
 }
 
-/* :259 */
-/* 260: */
-#line 6481 "./common.web"
 
 
 SRTN
 frz_params(VOID)
 {
-/* :260 */
-/* 260: */
-#line 6489 "./common.web"
 
 cont_char= XORD(in_escape);
 free_90= BOOLEAN(Fortran88&&free_form_input);
@@ -8263,9 +7210,6 @@ free_Fortran= BOOLEAN((language==FORTRAN_90)&&free_90);
 if(!prn_semis&&free_Fortran&&auto_pseudo_semis)
 prn_semis= YES;
 
-/* :260 */
-/* 260: */
-#line 6502 "./common.web"
 
 if(program==tangle&&free_90)
 switch(language)
@@ -8281,9 +7225,6 @@ default:;
 
 }
 
-/* :260 */
-/* 261: */
-#line 6519 "./common.web"
 
 
 int
@@ -8316,9 +7257,6 @@ TERMINATE(p,0);
 return n;
 }
 
-/* :261 */
-/* 273: */
-#line 7023 "./common.web"
 
 
 SRTN
@@ -8335,8 +7273,6 @@ or see the info(1) man-page entry for FWEB."),fflush(stdout);
 }
 
 #if(HAVE_INFO)
-/* 274: */
-#line 7047 "./common.web"
 
 {
 outer_char temp[500],buf[500],*pmenus;
@@ -8366,8 +7302,6 @@ system((char*)temp);
 }
 }
 
-/* :274 */
-#line 7039 "./common.web"
 
 #endif 
 
@@ -8375,9 +7309,6 @@ usage("",NO);
 }
 
 
-/* :273 */
-/* 280: */
-#line 7239 "./common.web"
 
 
 SRTN
@@ -8388,13 +7319,9 @@ int lnum;
 
 if(isdigit(*pa))
 {
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7249 "./common.web"
 
 
 switch(*pa++)
@@ -8431,13 +7358,9 @@ case '\\':
 case '&':
 
 
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7285 "./common.web"
 
 
 if(FORTRAN90_LIKE(language))
@@ -8489,25 +7412,17 @@ break;
 
 case 'g':
 case 'G':
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7336 "./common.web"
 
 
-/* 282: */
-#line 7395 "./common.web"
 
 {
 if(is_RATFOR_(Language))
 {
 if(!RAT_OK("'g' command ignored"))
 break;
-/* 284: */
-#line 7436 "./common.web"
 
 {
 while(*pa)
@@ -8554,23 +7469,17 @@ break;
 }
 }
 
-/* :284 */
-#line 7401 "./common.web"
 ;
 }
 else
 bad_loption(Language);
 }
 
-/* :282 */
-#line 7338 "./common.web"
 
 return;
 
 case 'k':
 suppress_cmds= BOOLEAN(YES^not);
-/* 285: */
-#line 7469 "./common.web"
 
 {
 if(!*pa)
@@ -8580,15 +7489,11 @@ STRNCPY(abbrev_cmds,pa,NUM_RATFOR_CMDS);
 }
 
 
-/* :285 */
-#line 7343 "./common.web"
 
 return;
 
 case 'K':
 suppress_cmds= BOOLEAN(NO^not);
-/* 285: */
-#line 7469 "./common.web"
 
 {
 if(!*pa)
@@ -8598,8 +7503,6 @@ STRNCPY(abbrev_cmds,pa,NUM_RATFOR_CMDS);
 }
 
 
-/* :285 */
-#line 7348 "./common.web"
 
 return;
 
@@ -8609,13 +7512,9 @@ prn_semis= NOT(PRN_SEMIS);
 break;
 
 case '{':
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7357 "./common.web"
 
 pa--;
 set_filter(language);
@@ -8624,13 +7523,9 @@ return;
 case '\0':
 
 
-/* 315: */
-#line 8468 "./common.web"
 
 cant_negate(pa-2);
 
-/* :315 */
-#line 7365 "./common.web"
 
 ini_language(XORD(*LANGUAGE_CODE(Language)));
 return;
@@ -8645,9 +7540,6 @@ if(*pa)
 spurious(pa);
 }
 
-/* :280 */
-/* 290: */
-#line 7647 "./common.web"
 
 
 SRTN
@@ -8691,9 +7583,6 @@ for(;p<mp+2;p++)
 *p= XORD(*p);
 }
 
-/* :290 */
-/* 292: */
-#line 7697 "./common.web"
 
 
 SRTN
@@ -8714,9 +7603,6 @@ limit= end;
 from_buffer= YES;
 }
 
-/* :292 */
-/* 293: */
-#line 7718 "./common.web"
 
 SRTN
 undivert(VOID)
@@ -8729,9 +7615,6 @@ from_buffer= NO;
 }
 
 
-/* :293 */
-/* 296: */
-#line 7766 "./common.web"
 
 
 SRTN
@@ -8758,9 +7641,6 @@ free_buf(&c_buf);
 SET_COLOR(ordinary);
 }
 
-/* :296 */
-/* 297: */
-#line 7794 "./common.web"
 
 
 SRTN
@@ -8786,9 +7666,6 @@ commas(abs_max_num),(char*)ctrl_chars);
 free_buf(&c_buf);
 }
 
-/* :297 */
-/* 298: */
-#line 7820 "./common.web"
 
 
 BUF_SIZE
@@ -8799,9 +7676,6 @@ return MIN(starting_memory,abs_max_num);
 }
 
 
-/* :298 */
-/* 299: */
-#line 7833 "./common.web"
 
 
 SRTN
@@ -8833,9 +7707,6 @@ while(p->n>0)
 FREE(p->s[--p->n]);
 }
 
-/* :299 */
-/* 301: */
-#line 7872 "./common.web"
 
 
 outer_char*
@@ -8878,9 +7749,6 @@ return push_buf(&c_buf,temp1);
 }
 
 
-/* :301 */
-/* 303: */
-#line 7924 "./common.web"
 
 
 SRTN
@@ -8899,54 +7767,34 @@ if(isdigit(*pa))
 l= (language==NO_LANGUAGE)?GLOBAL_LANGUAGE:language;
 else switch(*pa++)
 {
-/* 15: */
-#line 118 "./typedefs.hweb"
 
 case 'c'
 
-/* :15 */
-#line 7942 "./common.web"
 :
 l= lcase(C,'\0',C_PLUS_PLUS,'+',&pa);
 break;
-/* 16: */
-#line 121 "./typedefs.hweb"
 
 case 'r'
 
-/* :16 */
-#line 7945 "./common.web"
 :
 l= lcase(RATFOR,'7',RATFOR_90,'9',&pa);
 break;
-/* 17: */
-#line 124 "./typedefs.hweb"
 
 case 'n'
 
-/* :17 */
-#line 7948 "./common.web"
 :
 l= lcase(FORTRAN,'7',FORTRAN_90,'9',&pa);
 break;
-/* 19: */
-#line 130 "./typedefs.hweb"
 
 case 'v'
 
 
 
-/* :19 */
-#line 7951 "./common.web"
 :
 l= LITERAL;break;
-/* 18: */
-#line 127 "./typedefs.hweb"
 
 case 'x'
 
-/* :18 */
-#line 7953 "./common.web"
 :
 l= TEX;break;
 default:
@@ -8972,9 +7820,6 @@ set_filter(l);
 }
 }
 
-/* :303 */
-/* 304: */
-#line 7978 "./common.web"
 
 
 LANGUAGE
@@ -9000,9 +7845,6 @@ return l1;
 return l0;
 }
 
-/* :304 */
-/* 305: */
-#line 8006 "./common.web"
 
 
 SRTN
@@ -9028,9 +7870,6 @@ return;
 }
 
 
-/* :305 */
-/* 310: */
-#line 8203 "./common.web"
 
 
 SRTN
@@ -9084,9 +7923,6 @@ break;
 no_xref= BOOLEAN(!(prn_index||prn_modules));
 }
 
-/* :310 */
-/* 313: */
-#line 8356 "./common.web"
 
 
 SRTN
@@ -9127,61 +7963,41 @@ pname= pa;
 
 switch(c)
 {
-/* 15: */
-#line 118 "./typedefs.hweb"
 
 case 'c'
 
-/* :15 */
-#line 8396 "./common.web"
 :
 set_fname(lcase(C,'\0',C_PLUS_PLUS,'+',&pa),pname,YES);
 break;
 
-/* 16: */
-#line 121 "./typedefs.hweb"
 
 case 'r'
 
-/* :16 */
-#line 8400 "./common.web"
 :
 if(!RAT_OK("Redirection ignored"))break;
 
 set_fname(lcase(RATFOR,'7',RATFOR_90,'9',&pa),pname,YES);
 break;
 
-/* 17: */
-#line 124 "./typedefs.hweb"
 
 case 'n'
 
-/* :17 */
-#line 8406 "./common.web"
 :
 set_fname(lcase(FORTRAN,'7',FORTRAN_90,'9',&pa),pname,YES);
 break;
 
-/* 19: */
-#line 130 "./typedefs.hweb"
 
 case 'v'
 
 
 
-/* :19 */
-#line 8410 "./common.web"
 :
 set_fname(LITERAL,pname,YES);
 break;
 
-/* 18: */
-#line 127 "./typedefs.hweb"
 
 case 'x'
 
-/* :18 */
-#line 8414 "./common.web"
 :
 set_fname(TEX,pname,YES);
 break;
@@ -9205,9 +8021,6 @@ break;
 }
 }
 
-/* :313 */
-/* 314: */
-#line 8440 "./common.web"
 
 
 SRTN
@@ -9235,9 +8048,6 @@ new_fname(params.outp_nm+lan_num(l),*s?s:(outer_char HUGE*)"stdout",NULL);
 }
 
 
-/* :314 */
-/* 316: */
-#line 8472 "./common.web"
 
 
 SRTN
@@ -9252,9 +8062,6 @@ mark_harmless;
 }
 }
 
-/* :316 */
-/* 317: */
-#line 8487 "./common.web"
 
 
 SRTN
@@ -9266,9 +8073,6 @@ CONST outer_char HUGE*pa0 C1("")
 err0_print(ERR_C,OC("Invalid language %s \"%s\""),-1-2,type,pa0);
 }
 
-/* :317 */
-/* 318: */
-#line 8498 "./common.web"
 
 
 SRTN
@@ -9280,9 +8084,6 @@ printf("! Invalid language option \"%s\" for %s.\n",
 mark_harmless;
 }
 
-/* :318 */
-/* 319: */
-#line 8510 "./common.web"
 
 
 SRTN
@@ -9295,9 +8096,6 @@ err0_print(ERR_C,OC("Missing argument for `-%c' option; \
 should be one or more letters in set {%s}"),-1-2,option,letters);
 }
 
-/* :319 */
-/* 320: */
-#line 8522 "./common.web"
 
 
 SRTN
@@ -9317,9 +8115,6 @@ else
 wrap_up();
 }
 
-/* :320 */
-/* 322: */
-#line 8554 "./common.web"
 
 
 SRTN
@@ -9329,9 +8124,6 @@ too_long(VOID)
 fatal(ERR_NULL,OC("!! Filename too long:  "),OC("%s."),(CONST outer_char*)pa);
 }
 
-/* :322 */
-/* 323: */
-#line 8566 "./common.web"
 
 
 SRTN
@@ -9342,9 +8134,6 @@ cmd_prms?"Command line":".fweb",(char*)pa_begin);
 mark_harmless;
 }
 
-/* :323 */
-/* 324: */
-#line 8578 "./common.web"
 
 
 SRTN
@@ -9357,9 +8146,6 @@ language)
 err0_print(ERR_C,OC("WARNING:  Command-line language %s overridden in limbo by %s"),2,languages[lan_num(cmd_language)],languages[lan_num(language)]);
 }
 
-/* :324 */
-/* 327: */
-#line 8636 "./common.web"
 
 
 SRTN
@@ -9395,9 +8181,6 @@ was_opened(temp,0,pname,&temp_file_ptr);
 }
 }
 
-/* :327 */
-/* 329: */
-#line 8714 "./common.web"
 
 
 unsigned
@@ -9436,9 +8219,6 @@ TERMINATE(pt,0);
 return n;
 }
 
-/* :329 */
-/* 331: */
-#line 8768 "./common.web"
 
 
 SRTN
@@ -9459,15 +8239,15 @@ for(p= p0,a1= atemp;p<p1;a1++,p++)
 switch(*p)
 {
 case interior_semi:
-*a1= ';';
+*a1= 073;
 break;
 
 case MACRO_ARGUMENT:
-*a1++= '[';
-*a1++= '[';
-*a1++= (ASCII)('0'+*(++p));
-*a1++= ']';
-*a1= ']';
+*a1++= 0133;
+*a1++= 0133;
+*a1++= (ASCII)(060+*(++p));
+*a1++= 0135;
+*a1= 0135;
 break;
 
 default:
@@ -9492,22 +8272,15 @@ else
 n_out= FWRITE(atemp,n,file_ptr);
 
 if(n_out!=1)
-/* 332: */
-#line 8825 "./common.web"
 
 {
 
 fatal(ERR_NULL,OC("! WRITE ERROR:  "),OC("nbytes = %u, %u items written\n%s"),(unsigned)n,(unsigned)n_out,strerror(errno));
 }
 
-/* :332 */
-#line 8821 "./common.web"
 
 }
 
-/* :331 */
-/* 333: */
-#line 8834 "./common.web"
 
 
 #if !HAVE_STRERROR
@@ -9524,9 +8297,6 @@ return temp;
 
 #endif 
 
-/* :333 */
-/* 336: */
-#line 8885 "./common.web"
 
 
 struct tm*
@@ -9539,9 +8309,6 @@ time(&the_tm);
 return localtime(&the_tm);
 }
 
-/* :336 */
-/* 337: */
-#line 8898 "./common.web"
 
 
 CONST outer_char*
@@ -9582,9 +8349,6 @@ return(CONST outer_char*)time_buf;
 }
 #undef NTIME
 
-/* :337 */
-/* 339: */
-#line 8975 "./common.web"
 
 
 #if TIMING
@@ -9598,9 +8362,6 @@ clock0= clock();
 
 #endif 
 
-/* :339 */
-/* 340: */
-#line 8993 "./common.web"
 
 
 #if TIMING
@@ -9642,18 +8403,12 @@ printf("  CPU/REAL = %.1f%%.",100.0*(cpu/wall));
 
 
 
-/* :340 */
-/* 340: */
-#line 9040 "./common.web"
 
 SET_COLOR(ordinary);
 }
 
 #endif 
 
-/* :340 */
-/* 342: */
-#line 9051 "./common.web"
 
 
 SRTN
@@ -9668,9 +8423,6 @@ local_banner= OC(LOCAL_BANNER);
 ini_style();
 }
 
-/* :342 */
-/* 343: */
-#line 9067 "./common.web"
 
 
 SRTN
@@ -9701,9 +8453,6 @@ color_mode?(char*)termcap:"",
 SET_COLOR(ordinary);
 }
 
-/* :343 */
-/* 344: */
-#line 9098 "./common.web"
 
 
 SRTN
@@ -9722,9 +8471,6 @@ if(emit_newline)
 putchar('\n');
 }
 
-/* :344 */
-/* 345: */
-#line 9117 "./common.web"
 
 
 SRTN
@@ -9746,9 +8492,6 @@ CLR_PRINTF(SHORT_INFO,info,("..."));
 fflush(stdout);
 }
 
-/* :345 */
-/* 346: */
-#line 9139 "./common.web"
 
 
 SRTN
@@ -9757,7 +8500,7 @@ progress(VOID)
 if(msg_level<EVERYTHING)
 return;
 
-if(loc[-1]=='*')
+if(loc[-1]==052)
 {
 if(err_happened)
 {
@@ -9773,9 +8516,6 @@ CLR_PRINTF(EVERYTHING,module_num,("*%d",module_count));
 UPDATE_TERMINAL;
 }
 
-/* :346 */
-/* 347: */
-#line 9168 "./common.web"
 
 
 int
@@ -9816,20 +8556,13 @@ va_end(arg_ptr);
 return num_char;
 }
 
-/* :347 */
-#line 60 "./common.web"
 
 #endif 
 
 
-#line 1 "./typedefs.hweb"
 
 
-#line 8 "./formats.hweb"
 
-/* :2 */
-/* 200: */
-#line 4373 "./common.web"
 
 SRTN
 multi_chars FCN((c,n))
@@ -9840,9 +8573,6 @@ while(--n>=0)
 putchar(c);
 }
 
-/* :200 */
-/* 241: */
-#line 5812 "./common.web"
 
 void
 seea(int n,char*s)
@@ -9850,9 +8580,6 @@ seea(int n,char*s)
 printf("Arg %i = \"%s\"\n",n,s);
 }
 
-/* :241 */
-/* 244: */
-#line 5920 "./common.web"
 
 outer_char*
 get_arg FCN((result,s,ldelim,rdelim))
@@ -9922,9 +8649,6 @@ longjmp(top_of_get_arg,4);
 }
 }
 
-/* :244 */
-/* 281: */
-#line 7384 "./common.web"
 
 SRTN
 spurious FCN((pa1))
@@ -9935,9 +8659,6 @@ multi_chars(' ',STRLEN(SPURIOUS_MSG)+2+pa1-pa_begin);
 puts("^");
 }
 
-/* :281 */
-/* 349: */
-#line 9226 "./common.web"
 
 
 SRTN
@@ -10001,5 +8722,4 @@ BCHECK(1,"quote1");
 *pmp= mp;
 }
 
-/* :349 */
 
