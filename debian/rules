@@ -59,6 +59,7 @@ clean:
 	-rm -f Web/idxmerge Web/idxmerge.c Web/custom.h Web/config.h \
 		Manual/fweb.info* Manual/fweb*.html
 	rm -rf Manual/fweb/
+	rm -f Web/fweave.mds Web/fweave.ndx
 	dh_clean
 
 install: DH_OPTIONS=
